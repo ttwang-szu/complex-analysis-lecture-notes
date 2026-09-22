@@ -1,0 +1,1001 @@
+\documentclass[notheorems]{beamer}
+% \documentclass{beamer}
+
+\mode<presentation>
+{
+  % \usetheme{default}
+  \usetheme{Antibes}
+  \setbeamertemplate{footline}[frame number]{}
+  \setbeamertemplate{navigation symbols}{}
+}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ragged2e}
+\usepackage{yhmath}
+\usepackage{tikz}
+\usepackage{centernot}
+\usepackage{mleftright}
+\let\left\mleft
+\let\right\mright
+
+
+% % \usepackage[utf8]{inputenc}
+% \usepackage{pgfplots}
+% % \DeclareUnicodeCharacter{2212}{−}
+% % \usepgfplotslibrary{groupplots,dateplot}
+% \usetikzlibrary{patterns,shapes.arrows}
+% \pgfplotsset{compat=newest}
+
+\justifying\let\raggedright\justifying
+
+\makeatletter
+\newenvironment<>{proofs}[1][\proofname]{
+    \par
+    \def\insertproofname{#1\@addpunct{.}}
+    \usebeamertemplate{proof begin}#2}
+  {\usebeamertemplate{proof end}}
+
+  \newenvironment<>{solution}[1][Solution.]{
+    \par
+    \def\insertproofname{#1\@addpunct{.}}
+    \usebeamertemplate{proof begin}#2}
+  {\usebeamertemplate{proof end}}
+
+  \newtheorem*{definition}{Definition}
+  \newtheorem{example}{Example}[section]
+  \newtheorem{theorem}{Theorem}[section]
+  \newtheorem{property}{Property}[section]
+\makeatother
+
+\setbeamertemplate{theorems}[numbered]
+% \setbeamertemplate{definition}[nonumbered]
+
+\setbeamertemplate{section in toc}[sections numbered]
+\setbeamertemplate{subsection in toc}[subsections numbered]
+% \setbeamertemplate{subsubsection in toc}[subsubsections numbered]
+
+\numberwithin{equation}{section}
+\numberwithin{equation}{subsection}
+
+\usefonttheme[onlymath]{serif}
+\providecommand{\Arg}{\operatorname{Arg}}
+\providecommand{\Ln}{\operatorname{Ln}}
+\providecommand{\Arcsin}{\operatorname{Arcsin}}
+\providecommand{\Arccos}{\operatorname{Arccos}}
+\providecommand{\Arctan}{\operatorname{Arctan}}
+\providecommand{\Arcsinh}{\operatorname{Arcsinh}}
+\providecommand{\Arccosh}{\operatorname{Arccosh}}
+\providecommand{\Arctanh}{\operatorname{Arctanh}}
+\DeclareMathOperator{\dif}{d \!}
+\providecommand{\Res}{\operatorname{Res}}
+
+% \providecommand{\abs}[1]{\lvert#1\rvert}
+% \providecommand{\abs}[1]{\left\lvert#1\right\rvert}
+% \providecommand{\norm}[1]{\lVert#1\rVert}
+
+\title{Chapter 5: Residues}
+\author{Taotao Wang, Associate Professor}
+\institute{College of Electronics and Information Engineering, Shenzhen University}
+\date{\today}
+
+\begin{document}
+
+\everymath{\displaystyle}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+\section{Isolated Singularities}
+
+\begin{frame}
+	\frametitle{Outline}
+	\tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item \textbf{Concept of Isolated Singularities}
+	\end{enumerate}
+	\begin{definition}
+		If $f(z)$ is not analytic at $z_0$, but analytic everywhere in the deleted neighborhood $0<|z-z_0|<\delta$, $z_0$ is called an isolated singularity of $f(z)$.
+	\end{definition}
+	\begin{example}<2->
+		$z=0$ is an isolated singularity of $e^\frac{1}{z}$ and $\frac{\sin z}{z}$.\\
+		$z=-1$ is an isolated singularity of $\frac{1}{z+1}$.
+	\end{example}
+	\begin{block}{Note}<2->
+		Isolated singularities must be singularities,\\
+		but singularities are not necessarily isolated singularities.
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Determine the characteristics of the singularities at $z=0$ of $f(z)=\frac{z^2}{\sin\frac{1}{z}}$.
+	\end{example}
+	\begin{solution}<2->
+		The singularities are $z=0,z=\frac{1}{k\pi}\ (k=\pm 1,\pm 2,\cdots)$.\\
+		Because $\lim_{k\to\infty}\frac{1}{k\pi}=0$, there are always singularities in a deleted neighborhood of $z=0$ no matter how small the deleted neighborhood is, $z=0$ is not an isolated singularity.
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{block}{Classification of isolated singularities}
+		According to the Laurent series of $f(z)$ in the deleted neighborhood of its isolated singularity, isolated singularities can be divided into the following three categories:\\
+		\begin{minipage}{0.42\linewidth}
+			\begin{enumerate}
+				\item Removable singularities
+			\end{enumerate}
+		\end{minipage}\begin{minipage}{0.18\linewidth}
+			\begin{enumerate}
+				\setcounter{enumi}{1}
+				\item Poles
+			\end{enumerate}
+		\end{minipage}\begin{minipage}{0.39\linewidth}
+			\begin{enumerate}
+				\setcounter{enumi}{2}
+				\item Essential singularities
+			\end{enumerate}
+		\end{minipage}\\
+		\ \\
+		\begin{enumerate}
+			\item Removable singularities
+			\begin{enumerate}[1)]
+				\item Definition\\
+				If there is no negative power term of $z-z_0$ in the Laurent series, the isolated singularity $z_0$ is called the removable singularity of $f(z)$.
+			\end{enumerate}
+		\end{enumerate}
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\begin{block}{Note}
+		\begin{enumerate}
+			\item If $z_0$ is an isolated singularity of $f(z)$,\\
+			$f(z)=c_0+c_1(z-z_0)+\cdots+c_n(z-z_0)^n+\cdots.\ (0<|z-z_0|<\delta)$\\
+			The sum function of this power series must be an analytic function at $z_0$.
+			\item Whether $f(z)$ is defined in $z_0$ or not,\\
+			let $f(z_0)=c_0$, then $f(z)$ is analytic at $z_0$.\\
+			$c_0=f(z_0)=\lim_{z\to z_0}f(z),\quad\quad f(z)=\begin{cases}
+				f(z) & z\neq z_0, \\
+				c_0  & z=z_0.
+			\end{cases}$
+		\end{enumerate}
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\begin{block}{Classification of isolated singularities}
+		\begin{enumerate}
+			\item []
+			\begin{enumerate}[1)]
+				\setcounter{enumii}{1}
+				\item Determine the removable singularity
+				\begin{enumerate}[i]
+					\item using definition\\
+					If there is no negative power term of $z-z_0$ in the Laurent series, the isolated singularity $z_0$ is called the removable singularity of $f(z)$.
+					\item using limit $\lim_{z\to z_0}f(z)$\\
+					If the limit exists and is finite, $z_0$ is called the removable singularity of $f(z)$.
+				\end{enumerate}
+			\end{enumerate}
+		\end{enumerate}
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		$\frac{\sin z}{z}=1-\frac{1}{3!}z^2+\frac{1}{5!}z^4+\cdots$ has no negative power term,\\
+		$z=0$ is called the removable singularity of $f(z)$.\\
+		If we add the definition: when $z=0$, $\frac{\sin z}{z}=1$,\\
+		then $\frac{\sin z}{z}$ is analytic at $z=0$.
+	\end{example}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Prove that $z=0$ is a removable singularity of $\frac{e^z-1}{z}$.
+	\end{example}
+	\begin{proof}<2->
+		$\begin{aligned}
+			\frac{e^z-1}{z} & =\frac{1}{z}\left(1+z+\frac{1}{2!}z^2+\cdots+\frac{1}{n!}z^n+\cdots-1\right)       \\
+			& =\begin{aligned}[t]
+				\color{red}\boxed{\color{black}1+\frac{1}{2!}z+\cdots+\frac{1}{n!}z^{n-1}+\cdots} \\
+				\text{\color{red}no negative power term}
+			\end{aligned},\quad(0<|z|<+\infty)
+		\end{aligned}$\\
+		so $z=0$ is a removable singularity of $\frac{e^z-1}{z}$.\\
+		\medskip
+		Another proof: Because $\lim_{z\to z_0}\frac{e^z-1}{z}=\lim_{z\to z_0}e^z=1$,\\
+		$z=0$ is a removable singularity of $\frac{e^z-1}{z}$.
+	\end{proof}
+\end{frame}
+
+\begin{frame}
+	\begin{block}{Classification of isolated singularities}
+		\begin{enumerate}
+			\setcounter{enumi}{1}
+			\item Poles
+			\begin{enumerate}[1)]
+				\item Definition\\
+				If there are only a finite number of negative power terms of $z-z_0$ in Laurent series, the highest power of $(z-z_0)^{-1}$ is $(z-z_0)^{-m}$,
+				$\begin{aligned}
+					f(z)= & c_{-m}(z-z_0)^{-m}+\cdots+c_{-2}(z-z_0)^{-2}+c_{-1}(z-z_0)^{-1} \\
+					& +c_0+c_1(z-z_0)+\cdots,\quad(m>1,c_{-m}\neq 0)
+				\end{aligned}$\\
+				or \colorbox{cyan}{$f(z)=\frac{1}{(z-z_0)^m}g(z)$}.\\
+				Then the isolated singularity $z_0$ is called a pole of order $m$ of $f(z)$.
+			\end{enumerate}
+		\end{enumerate}
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\begin{block}{Note}
+		\begin{enumerate}
+			\item $g(z)=c_{-m}+c_{-m+1}(z-z_0)+c_{-m+2}(z-z_0)^2+\cdots$
+			\begin{enumerate}[1)]
+				\item $g(z)$ is an analytic function in $|z-z_0|<\delta$
+				\item $g(z_0)\neq 0$
+			\end{enumerate}
+			\item If $z_0$ is a pole of $f(z)$, $\lim_{z\to z_0}f(z)=\infty$.
+		\end{enumerate}
+	\end{block}
+	\begin{example}
+		For $f(z)=\frac{3z+2}{z^2(z+2)}$,\\
+		$z=0$ is a pole of order $2$ and $z=-2$ is a pole of order $1$.
+	\end{example}
+\end{frame}
+
+\begin{frame}
+	\begin{block}{Classification of isolated singularities}
+		\begin{enumerate}
+			\item []
+			\begin{enumerate}[1)]
+				\setcounter{enumii}{1}
+				\item Determine the pole
+				\begin{enumerate}[i]
+					\item Determine by definition\\
+					If there are only a finite number of negative power terms of $z-z_0$ in Laurent series, the isolated singularity $z_0$ is called the removable singularity of $f(z)$.\\
+					If there is no negative power term of $z-z_0$ in the Laurent series, the isolated singularity $z_0$ is called the removable singularity of $f(z)$.
+					\item Determine by the equivalence form of the definition\\
+					$f(z)=\frac{g(z)}{(z-z_0)^m}$ holds in deleted neighborhood of $z_0$, where $g(z)$ is analytic in deleted neighborhood of $z_0$ and $g(z_0)\neq 0$.
+					\item Determine by computing limit $\lim_{z\to z_0}f(z)=\infty$
+				\end{enumerate}
+			\end{enumerate}
+		\end{enumerate}
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\begin{block}{Question}
+		Find the singularities of $\frac{1}{z^3-z^2-z+1}$. If they are poles, point out their orders.
+	\end{block}
+	\begin{solution}<2->
+		Because $\frac{1}{z^3-z^2-z+1}=\frac{1}{(z+1)(z-1)^2}$,\\
+		$z=-1$ is a pole of order $1$ and $z=1$ is a pole of order $2$.
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{block}{Classification of isolated singularities}
+		\begin{enumerate}
+			\setcounter{enumi}{2}
+			\item Essential singularities\\
+			If there are infinite negative power terms of $z-z_0$ in Laurent series, the isolated singularity $z_0$ is called an essential singularity of $f(z)$.\\
+			For example,\\
+			$e^\frac{1}{z}=\begin{aligned}[t]
+				\color{red}\boxed{\color{black}1+z^{-1}+\frac{1}{2!}z^{-2}+\cdots+\frac{1}{n!}z^{-n}+\cdots} \\
+				\color{red}\text{infinite negative power terms}
+			\end{aligned},\ (0<|z|<\infty)$\\
+			so $z=0$ is an essential singularity and $\lim_{z\to 0}e^\frac{1}{z}$ does not exist.\\
+			Note: $\lim_{z\to z_0}f(z)$ does not exist and is not $\infty$ in the neighborhood of the essential singularities.
+		\end{enumerate}
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		\begin{tabular}{|p{2.7cm}|p{3cm}|p{2.5cm}|}
+			\hline
+			Isolated Singularities  & Characteristics of Laurent series                                                              & $\lim_{z\to z_0}f(z)$  \\
+			\hline\hline
+			Removable Singularities & no negative power term                                                                         & exist and finite       \\
+			\hline
+			Poles of Order $m$      & a finite number of negative power terms, the highest power of $(z-z_0)^{-1}$ is $(z-z_0)^{-m}$ & $\infty$               \\
+			\hline
+			Essential Singularities & infinite negative power terms                                                                  & not exist and infinite \\
+			\hline
+		\end{tabular}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{1}
+		\item \textbf{Zeros and Poles}
+		\begin{enumerate}
+			\item Definition of Zeros
+		\end{enumerate}
+	\end{enumerate}
+	\begin{definition}
+		Suppose that a function $f(z)$ that is not constantly equal to zero, if it can be expressed as $f(z)=(z-z_0)^m\varphi(z)$, where $\varphi(z)$ is analytic at $z_0$, $\varphi(z)\neq 0$ and $m$ is a positive integer, then $z_0$ is called a zero of order $m$ of $f(z)$.
+	\end{definition}
+	\begin{example}
+		For $f(z)=z(z-1)^3$,\\
+		$z=0$ is a zero of order $1$ and $z=1$ is a zero of order $3$.
+	\end{example}
+	\begin{block}{Note}
+		The zeros of an analytic function that is not constantly equal to zero are isolated.
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		\begin{enumerate}
+			\setcounter{enumii}{1}
+			\item Determine the Zeros\\
+			If $f(z)$ is analytic at $z_0$, then the necessary and sufficient condition for $z_0$ to be the zero of order $m$ of $f(z)$ is\\
+			$f^{(n)}(z_0)=0,(n=0,1,2,\cdots,m-1)\quad, f^{(m)}(z_0)\neq 0$.
+		\end{enumerate}
+	\end{enumerate}
+	\begin{proofs}
+		\textbf{Necessity.} If $z_0$ is a zero of order $m$ of $f(z)$,\\
+		according to $f(z)=(z-z_0)^m\varphi(z)$,\\
+		expand $f(z)$ by Taylor's theorem:\\
+		$\varphi(z)=c_0+c_1(z-z_0)+c_2(z-z_0)^2+\cdots$,\\
+		where $c_0=\varphi(z_0)\neq 0$.
+	\end{proofs}
+\end{frame}
+
+\begin{frame}
+	\begin{proof}[\proofname\ (Cont.)]
+		Taylor expansion of $f(z)$ at $z_0$:\\
+		$f(z)=c_0(z-z_0)^m+c_1(z-z_0)^{m+1}+c_2(z-z_0)^{m+2}+\cdots$.\\
+		The coefficients of the first $m$ terms of the expansion are all zero, and the coefficient formula of the Taylor series shows that: $f^{(n)}(z_0)=0,\ (n=0,1,2,\cdots,m-1)$\\
+		and $\frac{f^{(m)}(z_0)}{m!}=c_0\neq 0$.\\
+		\textbf{Sufficiency.} Omitted.
+	\end{proof}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Find the order of zeros of the following functions.
+		\begin{minipage}{0.5\linewidth}
+			\begin{enumerate}
+				\item $f(z)=z^3-1$;
+			\end{enumerate}
+		\end{minipage}\begin{minipage}{0.5\linewidth}
+			\begin{enumerate}
+				\setcounter{enumi}{1}
+				\item $f(z)=\sin z$.
+			\end{enumerate}
+		\end{minipage}
+	\end{example}
+	\begin{solution}<2->
+		\begin{enumerate}
+			\item Because $f'(1)=\left.3z^2\right|_{z=1}=3\neq 0$,\\
+			$z=1$ is a zero of order $1$ of $f(z)$.
+			\item Because $f'(0)=\left.\cos z\right|_{z=0}=1\neq 0$,\\
+			$z=0$ is a zero of order $1$ of $f(z)$.
+		\end{enumerate}
+	\end{solution}
+	\begin{block}{Question}<3->
+		Find the order of zeros of $f(z)=z^5\left(z^2+1\right)^2$.
+	\end{block}
+	\begin{solution}<4->
+		$z=0$ is a zero of order $5$ and $z=\pm i$ are zeros of order $2$.
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		\begin{enumerate}
+			\setcounter{enumii}{2}
+			\item Relationship between the zeros and poles\\
+			If $z_0$ is a pole of order $m$ of $f(z)$, then $z_0$ is a zero of order $m$ of $\frac{1}{f(z)}$. And vice versa.
+		\end{enumerate}
+	\end{enumerate}
+	\begin{proofs}
+		If $z_0$ is a pole of order $m$ of $f(z)$,\\
+		$f(z)=\frac{1}{(z-z_0)^m}g(z)\quad(g(z_0)\neq 0)$.\\
+		When $z\neq z_0$, $\frac{1}{f(z)}=(z-z_0)^m\frac{1}{g(z)}=(z-z_0)^mh(z)$,\\
+		$h(z)$ is analytic at $z_0$ and $h(z_0)\neq 0$.
+	\end{proofs}
+\end{frame}
+
+\begin{frame}
+	\begin{proof}[\proofname\ (Cont.)]
+		Because $\lim_{z\to z_0}\frac{1}{f(z)}=0$, let $\frac{1}{f(z_0)}=0$,\\
+		then $z_0$ is a zero of order $m$ of $\frac{1}{f(z)}$.\\
+		Conversely, if $z_0$ is a zero of order $m$ of $\frac{1}{f(z)}$,\\
+		$\begin{aligned}[b]
+			& \text{then } \frac{1}{f(z)}=(z-z_0)^m\varphi(z).                        \\
+			& \text{When } z\neq z_0\text{, }f(z)=\frac{1}{(z-z_0)^m}\Psi(z)\text{, }
+		\end{aligned}$
+		$\begin{aligned}[b]
+			& \color{cyan}\text{analytic and }\varphi(z)\neq 0 \\
+			& \colorbox{cyan}{$\Psi(z)=\frac{1}{\varphi(z)}$}
+		\end{aligned}$\\
+		So $z_0$ is a pole of order $m$ of $f(z)$.
+	\end{proof}
+	\begin{block}{Note}
+		This theorem provides a simple method to determine the poles of functions.
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Find the singularities of $\frac{1}{\sin z}$.\\
+		If they are poles, indicate their orders.
+	\end{example}
+	\begin{solution}<2->
+		The singularities of the function are the points at which $\sin z=0$.\\
+		These singularities are $z=k\pi\ (k=0,\pm 1,\pm 2,\cdots)$, which are isolated singularities.\\
+		Because $\left.(\sin z)'\right|_{z=k\pi}=\left.\cos z\right|_{z=k\pi}=(-1)^k\neq 0$,\\
+		$z=k\pi$ are zeros of order $1$ of $\sin z$,\\
+		that is $z=k\pi$ are singularities of order $1$ of $\frac{1}{\sin z}$.
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Is $z=0$ a pole of order $2$ of $\frac{e^z-1}{z^2}$?
+	\end{example}
+	\begin{solution}<2->
+		$\begin{aligned}[b]
+			\frac{e^z-1}{z^2} & =\frac{1}{z^2}\left(\sum_{n=0}^{\infty}\frac{z^n}{n!}-1\right) \\
+			& =\frac{1}{z}+\frac{1}{2!}+\frac{z}{3!}+\cdots=\frac{1}{z}
+		\end{aligned}$%
+		$\begin{aligned}[b]
+			& \color{cyan}\text{analytic and }\varphi(z)\neq 0 \\
+			& \colorbox{cyan}{$\varphi(z)$}
+		\end{aligned}$\\
+		So $z=0$ is not a pole of order $2$, but a pole of order $1$.
+	\end{solution}
+	\begin{block}{Question}<3->
+		Find the order of the pole at $z=0$ of $\frac{\sinh z}{z^3}$.\\
+		\color{red}Note: Conclusions cannot be drawn from the obvious form of the function.
+	\end{block}
+\end{frame}
+
+
+\begin{frame}
+	\begin{example}
+		If point $z_0$ is a zero of order $m_1$ of function ${f_1}(z)$ and $z_0$ is a zero of order $m_2$ of function  ${f_2}(z)$, please discuss characteristics of function $f(z) = {{{f_1}(z)} \over {{f_2}(z)}}$ at point $z_0$.
+		
+		
+	\end{example}
+	\begin{solution}<2->
+		Since ${{f_1}(z) = (z - {z_0})^{m_1}{g_1}\left( z \right)}$, and ${{f_2}(z) = (z - {z_0})^{m_2}{g_2}\left( z \right)}$, we have 
+		$$f(z) = {{{{(z - {z_0})}^{{m_1}}}{g_1}\left( z \right)} \over {{{(z - {z_0})}^{{m_2}}}{g_2}\left( z \right)}} = {(z - {z_0})^{{m_1} - {m_2}}}g(z),$$
+		where $g(z) = {{{g_1}\left( z \right)} \over {{g_2}\left( z \right)}}$ is analytic at $z_0$ and $g({z_0}) \ne 0$.
+		
+
+		 
+
+	\end{solution}
+
+\end{frame}
+
+\begin{frame}
+\begin{solution}[Solution\ (Cont.)]
+\begin{enumerate}
+\item 1) When $m_1  = m_2$,  since $\mathop {\lim }\limits_{z \to {z_0}} f(z) = \mathop {\lim }\limits_{z \to {z_0}} g(z) = g({z_0})$, $z_0$ is a removable singularity of $f(z)$. 
+
+\item 	2) When $m_1 > m_2$,  since $\mathop {\lim }\limits_{z \to {z_0}} f(z) = \mathop {\lim }\limits_{z \to {z_0}} {(z - {z_0})^{{m_1} - {m_2}}}g(z) = 0$, $z_0$ is a removable singularity of $f(z)$. 
+	
+\item 	3) When $m_1 < m_2$, since $f(z) = {1 \over {{{(z - {z_0})}^{{m_2} - {m_1}}}}}g(z)$, $z_0$ is a pole of order $m_2 - m_1$ of $f(z)$
+	
+\end{enumerate}
+
+\end{solution}
+\end{frame}
+
+%\begin{frame}
+%  \begin{enumerate}
+%    \setcounter{enumi}{2}
+%    \item \textbf{Characteristics of Point at Infinity}
+%          \begin{enumerate}[1)]
+%            \item Definition\\
+%                  If $f(z)$ is analytic in deleted neighborhood $R<|z|<+\infty$ of $z=\infty$, the point $\infty$ is called the isolated singularity of $f(z)$.
+%                  \begin{center}
+%                    \begin{tikzpicture}[scale=1.5]
+%                      \fill [cyan] (-1,-1) rectangle (1,1);
+%                      \node [circle,fill=white,minimum size=60] (C) at (0,0){};
+%                      \draw [->] (-1.2,0) -- (1.2,0) node [right] {$x$};
+%                      \draw [->] (0,-1.2) -- (0,1.2) node [right] {$y$};
+%                      \node [below left] at (0,0) {$O$};
+%                      \draw [->] (0,0) -- node [below right] (R) {$R$} (C.north east);
+%                    \end{tikzpicture}
+%                  \end{center}
+%          \end{enumerate}
+%  \end{enumerate}
+%\end{frame}
+%
+%\begin{frame}
+%  \begin{enumerate}
+%    \item []
+%          Suppose a transformation $t=\frac{1}{z}$, then $f(z)=f\left(\frac{1}{t}\right)=\varphi(t)$.\\
+%          $\begin{aligned}
+%               & z=\infty                       &  & \xrightarrow{map} &  & t=0                                        \\
+%               & \text{Expanding the $z$-plane} &  & \xrightarrow{map} &  & \text{Expanding the $t$-plane}             \\
+%               & \{z_n\}\ (z_n\to\infty)        &  & \xrightarrow{map} &  & \left(t_n=\frac{1}{z_n}\right)\ (t_n\to 0) \\
+%               & R<|z|<+\infty                  &  & \xrightarrow{map} &  & 0<|t|<\frac{1}{R}
+%            \end{aligned}$
+%  \end{enumerate}
+%\end{frame}
+%
+%\begin{frame}
+%  \begin{enumerate}
+%    \item []
+%          Conclusions:\\
+%          Study of $f(z)$ in deleted neighborhood $R<|z|<+\infty$ $\Longrightarrow$\\
+%          \quad\quad Study of $\varphi(z)$ in deleted neighborhood $0<|t|<\frac{1}{R}$\\
+%          Because $\varphi(z)$ is analytic in deleted neighborhood $0<|t|<\frac{1}{R}$, $t=0$ is an isolated singularity of $\varphi(z)$.\\
+%          If $t=0$ is the removable singularity or pole of order $m$ or essential singularity of $\varphi(z)$, then $z=\infty$ is called the removable singularity or pole of order $m$ or essential singularity of $f(z)$.
+%  \end{enumerate}
+%\end{frame}
+%
+%\begin{frame}
+%  \begin{enumerate}
+%    \item []
+%          \begin{enumerate}[1)]
+%            \setcounter{enumii}{1}
+%            \item Methods of Determination
+%          \end{enumerate}
+%  \end{enumerate}
+%  \begin{block}{Methods of Determination}
+%    \begin{enumerate}
+%      \item Determine by definition\\
+%            In Laurent series of $f(z)$ in $R<|z|<+\infty$:\\
+%            \begin{enumerate}[a]
+%              \item If there is no positive power term
+%              \item If there is a finite number of positive power terms, the highest power is $z^m$
+%              \item If there are infinite positive power terms
+%            \end{enumerate}
+%            then $z=\infty$ is
+%            \begin{enumerate}[a]
+%              \item a removable singularity
+%              \item a pole of order of $m$
+%              \item an essential singularity
+%            \end{enumerate}
+%    \end{enumerate}
+%  \end{block}
+%\end{frame}
+%
+%\begin{frame}
+%  \begin{example}
+%    \begin{enumerate}
+%      \item Laurent series of $f(z)=\frac{z}{z+1}$ in annulus $1<|z|<+\infty$ is\\
+%            $f(z)=\frac{1}{1+\frac{1}{z}}=1-\frac{1}{z}+\frac{1}{z^2}-\cdots+(-1)^n\frac{1}{z^n}+\cdots$,\\
+%            so $z=\infty$ is a removable singularity of $f(z)$.
+%      \item $f(z)=z+\frac{1}{z}$ has a positive power term and the highest power is $z$, so $z=\infty$ is a pole of order $1$ of $f(z)$.
+%      \item Laurent series of $f(z)=\sin z$ is\\
+%            $f(z)=\sin z=z-\frac{z^3}{3!}+\frac{z^5}{5!}-\cdots+\frac{z^{2n+1}}{(2n+1)!}+\cdots$,\\
+%            so $z=\infty$ is an essential singularity of $f(z)$.
+%    \end{enumerate}
+%  \end{example}
+%\end{frame}
+%
+%\begin{frame}
+%  \begin{block}{Question}
+%    Find the singularities and types of singularities of $f(z)=z+e^\frac{1}{z}$.
+%  \end{block}
+%  \begin{solution}<2->
+%    $z=\infty$ is a pole of order $1$ and $z=0$ is an essential singularity.
+%  \end{solution}
+%\end{frame}
+%
+%\begin{frame}
+%  \begin{block}{Methods of Determination}
+%    \begin{enumerate}
+%      \setcounter{enumi}{1}
+%      \item Determine by limit\\
+%            For $\lim_{z\to\infty}f(z)$
+%            \begin{enumerate}[a]
+%              \item If it exists and is finite
+%              \item If it is infinite
+%              \item If it does not exist and is finite
+%            \end{enumerate}
+%            then $z=\infty$ is
+%            \begin{enumerate}[a]
+%              \item a removable singularity
+%              \item a pole of order of $m$
+%              \item an essential singularity
+%            \end{enumerate}
+%    \end{enumerate}
+%  \end{block}
+%\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Find the singularities of $f(z)=\frac{\left(z^2-1\right)(z-2)^3}{(\sin\pi z)^3}$.\\
+		If they are poles, indicate their orders.
+	\end{example}
+	\begin{solution}<2->
+		$f(z)$ is analytic everywhere except at $z=0,\pm 1,\pm 2,\cdots$.\\
+		Because $(\sin\pi z)'=\cos\pi z$ is not zero at $z=0,\pm 1,\pm 2,\cdots$,\\
+		they are zeros of order $1$ of $\sin\pi z$,\\
+		they are poles of order $3$ of $f(z)$ except $1,-1,2$.
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{solution}[Solution\ (Cont.)]
+		Because $z^2-1=(z-1)(z+1)$, $1$ and $-1$ are zeros of order $1$,\\
+		$1$ and $-1$ are poles of order $2$ of $f(z)$.\\
+		When $z=2$, $\begin{aligned}[t]
+			\lim_{z\to 2}f(z) & =\lim_{z\to 2}\frac{\left(z^2-1\right)(z-2)^3}{(\sin\pi z)^3} \\
+			& =\frac{3}{\pi^3},
+		\end{aligned}$\\
+		so $z=2$ is a removable singularity of $f(z)$.
+	\end{solution}
+\end{frame}
+
+%\begin{frame}
+%  \begin{solution}[Solution\ (Cont.)]
+%    When $z=\infty$, $f\left(\frac{1}{\zeta}\right)=\frac{\left(1-\zeta^2\right)(1-2\zeta)^3}{\zeta^2\sin^3\frac{\pi}{\zeta}}$.\\
+%    Because $\zeta_n=\frac{1}{n}$ is a singularity of $f\left(\frac{1}{\zeta}\right)$,\\
+%    when $n\to\infty$, $\zeta_n\to 0$.\\
+%    $z=0$ is not a removable singularity of $f\left(\frac{1}{\zeta}\right)$,\\
+%    $z=\infty$ is not a removable singularity of $f(z)$.
+%  \end{solution}
+%\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{3}
+		\item \textbf{Summary and Thinking}\\
+		Understand the concept and classification of isolated singularities; Master the characteristics of removable singularities, poles and essential singularities; Be familiar with the relationship between zeros and poles.
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{block}{Question}
+		Find the types of the isolated singularities of $f(z)=\frac{1}{z^3\left(e^{z^3}-1\right)}$.
+	\end{block}
+	\begin{solution}<2->
+		$z=0$ is a zero of order $6$ of $z^3\left(e^{z^3}-1\right)$,\\
+		which means that $z=0$ is a pole order $6$ of $f(z)$.
+	\end{solution}
+\end{frame}
+
+\section{Residues}
+
+\begin{frame}
+	\frametitle{Outline}
+	\tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item \textbf{Motivation}\\
+		Suppose that $z_0$ is an isolated singularity of function $f(z)$, a deleted neighborhood $z_0$ is $0<|z-z_0|<R$, and $C$ is an any positive simple closed curve surrounding $z_0$ in this deleted neighborhood of $z_0$. 
+		\begin{figure}
+			\begin{center}
+				\begin{tikzpicture}
+					\filldraw[color=blue, fill=cyan](0,0) circle (1);
+					\draw [yellow] plot[smooth cycle] coordinates{(-0.6,0.6) (0.55,0.55) (0.45,-0.45) (-0.4,-0.4)};
+					\node [circle,fill=red,scale=0.2] (z_0) at (0,0) {};
+					\node [right] at (z_0) {$z_0$};
+					\node [left] at (-0.4,-0.4) {$C$};
+				\end{tikzpicture}
+			\end{center}
+		\end{figure}
+		The Laurent series of $f(z)$ in $0<|z-z_0|<R$ is written as \\
+		$\begin{aligned}
+			f(z)= & \cdots+c_{-n}(z-z_0)^{-n}+\cdots+c_{-1}(z-z_0)^{-1}+\cdots+c_0 \\
+			& +c_1(z-z_0)+c_n(z-z_0)^n+\cdots
+		\end{aligned}$
+\\	We want to find $\oint_Cf(z) = ?$
+	\end{enumerate}
+\end{frame}
+
+
+
+
+\begin{frame}
+	
+	\begin{enumerate}
+		\item []
+		\resizebox*{\linewidth}{!}{$\begin{aligned}
+				\oint_Cf(z)dz= & \cdots+\begin{aligned}[t]
+					c_{-n}\color{cyan}\underline{{\color{black}\oint_C(z-z_0)^{-n}\dif z}} \\
+					\color{red}=0
+				\end{aligned}+\cdots+\begin{aligned}[t]
+					c_{-1}\color{cyan}\underline{{\color{black}\oint_C(z-z_0)^{-1}\dif z}} \\
+					\color{red}=2\pi i
+				\end{aligned}+\cdots       \\
+						    & \color{cyan}\text{(Higher-order Derivatives)\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;  (Cauchy's integral formula)}    \\
+				& +\begin{aligned}[t]
+					c_0\color{cyan}\underline{{\color{black}\oint_C\dif z}} \\
+					\color{red}=0
+				\end{aligned}+\begin{aligned}[t]
+					c_1\color{cyan}\underline{{\color{black}\oint_C(z-z_0)\dif z}} \\
+					\color{red}=0
+				\end{aligned}+\cdots+\begin{aligned}[t]
+					c_n\color{cyan}\underline{{\color{black}\oint_C(z-z_0)^n\dif z}} \\
+					\color{red}=0
+				\end{aligned}+\cdots \\
+				& \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; \color{cyan}\text{(Cauchy's Theorem)}                                                         \\
+				=            & 2\pi i\colorbox{cyan}{$c_{-1}$},
+			\end{aligned}$}\\
+		which is the coefficient of the negative power term $c_{-1}(z-z_0)^{-1}$ in the Laurent series.\\
+		That is, $\begin{aligned}[t]
+			c_{-1}=\frac{1}{2\pi i}\oint_Cf(z)\dif z= & \colorbox{cyan}{$\Res\big[f(z),z_0\big]$}     \\
+			& \text{\color{cyan}residue of $f(z)$ at $z_0$}
+		\end{aligned}$
+	\end{enumerate}
+	
+\end{frame}
+
+
+
+
+\begin{frame}
+  \begin{definition}
+    If $z_0$ is an isolated singularity of $f(z)$, the integral of $f(z)$ along  any simple closed curve $C$ that is surrounding  $z_0$  and in a deleted neighborhood of $z_0$ divided by $2\pi i$, i.e., $\frac{1}{2\pi i}\oint_Cf(z)\dif z$, is called the residue of $f(z)$ at $z_0$. We denote it by $\Res\big[f(z),z_0\big]$. (The residue of $f(z)$ at $z_0$ is the coefficient of the negative power term  $c_{-1}(z-z_0)^{-1}$ in the Laurent series of $f(z)$ expanded in the annulus centered on $z_0$)
+  \end{definition}
+\end{frame}
+
+\begin{frame}
+  \begin{enumerate}
+    \setcounter{enumi}{1}
+    \item Compute Integral Using Residue
+          \begin{enumerate}[1)]
+            \item Residue Theorem
+          \end{enumerate}
+  \end{enumerate}
+  \begin{theorem}
+    $f(z)$ is analytic everywhere except for a finite number of singularities $z_1,z_2,\cdots,z_n$ in domain $D$, and $C$ is a positive closed curve enclosing the singularities in $D$, then
+    \[\oint_Cf(z)\dif z=2\pi i\sum_{k=1}^{n}\Res\big[f(z),z_k\big].\]
+    Note:\\
+    1. $f(z)$ is analytic on $C$;\\
+    2. The residue theorem transforms the integral along a closed curve $C$ into the residues of the integrand function at isolated singularities inside $C$.
+  \end{theorem}
+\end{frame}
+
+\begin{frame}
+  \begin{proof}
+    $\oint_{C}f(z)\dif z=\oint_{C_1}f(z)\dif z+\oint_{C_2}f(z)\dif z+\cdots+\oint_{C_n}f(z)\dif z$\\
+    Divide both sides by $2\pi i$,\\
+    $\begin{aligned}[b]
+          & \frac{1}{2\pi i}\oint_{C_1}f(z)\dif z+\frac{1}{2\pi i}\oint_{C_2}f(z)\dif z+\cdots+\frac{1}{2\pi i}\oint_{C_n}f(z)\dif z \\
+        = & \Res\big[f(z),z_1\big]+\Res\big[f(z),z_2\big]+\cdots+\Res\big[f(z),z_n\big]                                              \\
+        = & \sum_{k=1}^{n}\Res\big[f(z),z_k\big]
+      \end{aligned}$
+  \end{proof}
+\end{frame}
+
+\begin{frame}
+  \begin{enumerate}
+    \item []
+          \begin{enumerate}[1)]
+            \setcounter{enumii}{1}
+            \item Calculation Method of Residues
+          \end{enumerate}
+  \end{enumerate}
+  \begin{block}{Calculation Method of Residues}
+    \begin{enumerate}
+      \item If $z_0$ is a removable singularity of $f(z)$, then $\Res\big[f(z),z_0\big]=0$.
+      \item If $z_0$ is an essential singularity of $f(z)$, then $c_{-1}$ can be obtained from the Laurent series of $f(z)$.
+      \item If $z_0$ is a pole of $f(z)$, the calculation rules are given as follows:
+            \begin{enumerate}[1)]
+              \item If $z_0$ is a pole of order $1$ of $f(z)$, then
+                    \[\Res\big[f(z),z_0\big]=\lim_{z\to z_0}(z-z_0)f(z).\]
+            \end{enumerate}
+    \end{enumerate}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \begin{block}{Calculation Method of Residues}
+    \begin{enumerate}
+      \item []
+            \begin{enumerate}[1)]
+              \setcounter{enumii}{1}
+              \item If $z_0$ is a pole of order $m$ of $f(z)$, then
+                    \[\Res\big[f(z),z_0\big]=\frac{1}{(m-1)!}\lim_{z\to z_0}\frac{\dif^{m-1}}{\dif z^{m-1}}\big[(z-z_0)^mf(z)\big].\]
+                    \textbf{Proof.}\\
+                    $\begin{aligned}
+                        f(z)= & c_{-m}(z-z_0)^{-m}+\cdots+c_{-2}(z-z_0)^{-2} \\
+                              & +c_{-1}(z-z_0)^{-1}+c_0+c_1(z-z_0)+\cdots
+                      \end{aligned}$\\
+                    $\begin{aligned}
+                        (z-z_0)^mf(z)= & c_{-m}+c_{-m+1}(z-z_0)+\cdots+c_{-1}(z-z_0)^{m-1} \\
+                                       & +c_0(z-z_0)^m+c_1(z-z_0)^{m+1}+\cdots
+                      \end{aligned}$\\
+            \end{enumerate}
+    \end{enumerate}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \begin{block}{Calculation Method of Residues}
+    \begin{enumerate}
+      \item []
+            \begin{enumerate}
+              \item []
+                    Take the $m-1$ order derivative of both sides,\\
+                    $\begin{aligned}
+                          & \frac{\dif^{m-1}}{\dif z^{m-1}}\big[(z-z_0)^mf(z)\big]             \\
+                        = & (m-1)!c_{-1}+(\text{positive power terms of $z-z_0$}),
+                      \end{aligned}$\\
+                    $\lim_{z\to z_0}\frac{\dif^{m-1}}{\dif z^{m-1}}\big[(z-z_0)^mf(z)\big]=(m-1)!c_{-1}$.\\
+                    So $\Res\big[f(z),z_0\big]=\frac{1}{(m-1)!}\lim_{z\to z_0}\frac{\dif^{m-1}}{\dif z^{m-1}}\big[(z-z_0)^mf(z)\big]$.\qed
+            \end{enumerate}
+    \end{enumerate}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \begin{block}{Calculation Method of Residues}
+    \begin{enumerate}
+      \item []
+            \begin{enumerate}[1)]
+              \setcounter{enumii}{2}
+              \item Let $f(z)=\frac{P(z)}{Q(z)}$, $P(z)$ and $Q(z)$ are analytic at $z_0$.\\
+                    If $P(z_0)\neq 0$, $Q(z_0)=0$ and $Q'(z_0)\neq 0$,\\
+                    then $z_0$ is a pole of order $1$ of $f(z)$ and $\Res\big[f(z),z_0\big]=\frac{P(z_0)}{Q'(z_0)}$.\\
+                    \textbf{Proof.}\\
+                    Because $Q(z_0)=0$ and $Q'(z_0)\neq 0$,\\
+                    $z_0$ is a zero of order $1$ of $Q(z)$\\
+                    and a pole of order $1$ of $\frac{1}{Q(z)}$.
+            \end{enumerate}
+    \end{enumerate}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \begin{block}{Calculation Method of Residues}
+    \begin{enumerate}
+      \item []
+            \begin{enumerate}
+              \item []
+                    Therefore $\frac{1}{Q(z)}=\frac{1}{z-z_0}\cdot\varphi(z)$,
+                    where $\varphi(z)$ is analytic at $z_0$ and $\varphi(z_0)\neq 0$.\\
+                    We now have $ f(z)=\frac{1}{z-z_0}\cdot  \colorbox{cyan}{$P(z)\varphi(z)$}$.\\
+                    Since $P(z_0)\varphi(z_0)\neq 0$ and it is analytic at $z_0$,
+                    $z_0$ is a pole of order $1$ of $f(z)$.\\
+                    $\begin{aligned}
+                        \Res\big[f(z),z_0\big] & =\lim_{z\to z_0}(z-z_0)f(z)=\lim_{z\to z_0}\frac{P(z)}{\frac{Q(z)-Q(z_0)}{z-z_0}} \\
+                                               & =\frac{P(z_0)}{Q'(z_0)}.
+                      \end{aligned}$
+            \end{enumerate}
+    \end{enumerate}
+  \end{block}
+\end{frame}
+
+
+
+
+\begin{frame}
+  \begin{enumerate}
+    \setcounter{enumi}{2}
+    \item \textbf{Example}
+  \end{enumerate}
+  \begin{example}
+    Find the residue of $f(z)=\frac{e^z}{z^n}$ at $z=0$.
+  \end{example}
+  \begin{solution}<2->
+    Because $z=0$ is a pole of order $n$ of $f(z)$,\\
+    $\begin{aligned}
+        \Res\left[\frac{e^z}{z^n},0\right] & =\frac{1}{(n-1)!}\lim_{z\to 0}\frac{\dif^{n-1}}{\dif z^{n-1}}\left(z^n\cdot\frac{e^z}{z^n}\right) \\
+                                           & =\frac{1}{(n-1)!}.
+      \end{aligned}$
+  \end{solution}
+\end{frame}
+
+\begin{frame}
+  \begin{example}
+    Find the residue of $f(z)=\frac{P(z)}{Q(z)}=\frac{z-\sin z}{z^6}$ at $z=0$.
+  \end{example}
+  \begin{solution}<2->
+    Because $P(0)=P'(0)=P''(0)=0$ and $P'''(0)\neq 0$,\\
+    $z=0$ is a zero of order $3$ of $z-\sin z$,\\
+    $z=0$ is a pole of order $3$ of $f(z)$.\\
+    According to rule 3 of [Calculation Method of Residues],\\
+    $\Res\big[f(z),0\big]=\frac{1}{(3-1)!}\lim_{z\to 0}\frac{\dif^2}{\dif z^2}\left[z^3\cdot\frac{z-\sin z}{z^6}\right]$.
+  \end{solution}
+\end{frame}
+
+\begin{frame}
+  \begin{solution}[Solution\ (Cont.)]
+    It is more convenient to use Laurent's expansion to find $c_{-1}$:
+    $\begin{aligned}
+        \frac{z-\sin z}{z^6} & =\frac{1}{z^6}\left[z-\left(z-\frac{z^3}{3!}+\frac{z^5}{5!}-\cdots\right)\right] \\
+                             & =\frac{z^{-3}}{3!}-\frac{z^{-1}}{5!}+\cdots,
+      \end{aligned}$\\
+    $\Res\big[f(z),0\big]=c_{-1}=-\frac{1}{5!}$.
+  \end{solution}
+\end{frame}
+
+\begin{frame}
+  \begin{block}{Note}
+    \begin{enumerate}
+      \item Calculation rules should be applied flexibly in practice.  If $z_0$ is a pole of order $m$ and $m$ is large, the derivative in rule 2) is difficult to calculate. For this case, the residues may can be calculated by directly expanding the Laurent series and finding $c_{-1}$.\\
+      \item When applying rule 2), it is generally not necessary to make $m$ higher than the actual order of the pole. However, sometimes it makes the calculation easier when taking $m$ higher than the actual order of the pole. For example, if we take $m=6$ in Example 2.2, we have
+            \[\Res\big[f(z),0\big]=\frac{1}{(6-1)!}\lim_{z\to 0}\frac{\dif^5}{\dif z^5}\left[z^6\cdot\frac{z-\sin z}{z^6}\right]=-\frac{1}{5!}.\]
+    \end{enumerate}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \begin{example}
+    Find the residue of $f(z)=\frac{e^z-1}{z^5}$ at $z=0$.
+  \end{example}
+  \begin{solution}<2->
+    Here, $z=0$ is a pole of order $4$ of $f(z)$.\\
+    The Laurent series of $f(z)$ in $0<|z|<+\infty$ is\\
+    $\begin{aligned}
+        \frac{e^z-1}{z^5} & =\frac{1}{z^5}\left(1+z+\frac{z^2}{2!}+\frac{z^3}{3!}+\frac{z^4}{4!}+\frac{z^5}{5!}+\frac{z^6}{6!}+\cdots-1\right) \\
+                          & =\frac{1}{z^4}+\frac{1}{2!z^3}+\frac{1}{3!z^2}+\frac{1}{4!z}+\frac{1}{5!}+\frac{z}{6!}+\cdots,
+      \end{aligned}$\\
+    $\Res\big[f(z),0\big]=c_{-1}=\frac{1}{4!}=\frac{1}{24}$.
+  \end{solution}
+\end{frame}
+
+\begin{frame}
+  \begin{example}
+    Compute the integral $\oint_C\frac{e^z}{z(z-1)^2}\dif z$, where $C$ is circle $|z|=2$ taken counterclockwise.
+  \end{example}
+  \begin{solution}<2->
+    Because $z=0$ is a pole of order $1$, $z=1$ is a pole of order $2$,\\
+    $\begin{aligned}
+        \Res\big[f(z),0\big] & =\lim_{z\to 0}\frac{\dif}{\dif z}z\cdot\frac{e^z}{z(z-1)^2} \\
+                             & =\lim_{z\to 0}\frac{e^z}{z(z-1)^2}=1,
+      \end{aligned}$\\
+    $\begin{aligned}
+        \Res\big[f(z),1\big] & =\frac{1}{(2-1)!}\lim_{z\to 1}\frac{\dif}{\dif z}\left[(z-1)^2\frac{e^z}{z(z-1)^2}\right]        \\
+                             & =\lim_{z\to 1}\frac{\dif}{\dif z}\left(\frac{e^z}{z}\right)=\lim_{z\to 1}\frac{e^z(z-1)}{z^2}=0.
+      \end{aligned}$
+  \end{solution}
+\end{frame}
+
+\begin{frame}
+  \begin{solution}[Solution\ (Cont.)]
+    So $\begin{aligned}[t]
+          & \oint_C\frac{e^z}{z(z-1)^2}\dif z                           \\
+        = & 2\pi i\Big\{\Res\big[f(z),0\big]+\Res\big[f(z),1\big]\Big\} \\
+        = & 2\pi i(1+0)                                                 \\
+        = & 2\pi i.
+      \end{aligned}$
+  \end{solution}
+\end{frame}
+
+%\begin{frame}
+%  \begin{example}
+%    Compute the integral $\oint_C\frac{z}{z^4-1}\dif z$, where $C$ is circle $|z|=2$ taken counterclockwise.
+%  \end{example}
+%  \begin{solution}<2->
+%    $\frac{z}{z^4-1}$, outside of $|z|=2$, has no singularities except $\infty$.
+%  \end{solution}
+%\end{frame}
+
+\begin{frame}
+  \begin{enumerate}
+    \setcounter{enumi}{3}
+    \item \textbf{Summary and Thinking}\\
+          In this section, we learned the concept and calculation of residues and the residue theorem. We should focus on the general method of calculating residues, especially the method of calculating residues at poles, and using residue theorem to calculate complex integrals.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}
+  \begin{block}{Question}
+    Compute the integral $\oint_C\frac{\sin^2z}{z^2(z-1)}\dif z$, where $C$ is circle $|z|=2$ taken counterclockwise.
+  \end{block}
+  \begin{block}{Answer}<2->
+    $\sin^21$.
+  \end{block}
+\end{frame}
+
+\end{document}

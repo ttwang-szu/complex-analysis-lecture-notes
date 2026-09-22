@@ -1,0 +1,184 @@
+\documentclass[UTF8,11pt]{ctexart}
+
+\usepackage[a4paper,margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+
+\definecolor{courseblue}{RGB}{43,49,139}
+\hypersetup{colorlinks=true,linkcolor=courseblue,urlcolor=courseblue}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.35em}
+\setlist{itemsep=0.25em,topsep=0.35em}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{复变函数补充阅读}
+\rhead{01}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Arg}{\operatorname{Arg}}
+
+\title{\textcolor{courseblue}{补充阅读 01：模算术与角度的模 $2\pi$ 运算}}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\vspace{-2.2em}
+
+\section{为什么角度需要模 $2\pi$ 运算}
+
+在复平面中，一个非零复数可以写成
+\[
+z=r(\cos\theta+i\sin\theta)=re^{i\theta},\qquad r>0.
+\]
+由于正弦和余弦以 $2\pi$ 为周期，角度 $\theta$ 与
+\[
+\theta+2k\pi,\qquad k\in\Z,
+\]
+表示同一个方向。因此，讨论方向时，相差 $2\pi$ 整数倍的角度应当视为等价。模 $2\pi$ 运算正是用来表达这种周期性。
+
+例如，$17\pi/12$ 与 $-7\pi/12$ 相差 $2\pi$：
+\[
+\frac{17\pi}{12}-\left(-\frac{7\pi}{12}\right)=2\pi.
+\]
+它们作为实数并不相等，但表示同一个方向。
+
+\section{同余的定义}
+
+对于任意实数 $\theta_1,\theta_2$，定义
+\[
+\theta_1\equiv\theta_2\pmod{2\pi}
+\quad\Longleftrightarrow\quad
+\theta_1-\theta_2=2k\pi\quad(k\in\Z).
+\]
+读作“$\theta_1$ 与 $\theta_2$ 模 $2\pi$ 同余”。它表示两个角度相差整周，因而具有相同的终边。
+
+这里必须区分普通等号与同余号。例如，
+\[
+\frac{17\pi}{12}\ne-\frac{7\pi}{12},
+\qquad
+\frac{17\pi}{12}\equiv-\frac{7\pi}{12}\pmod{2\pi}.
+\]
+
+模 $2\pi$ 同余是一种等价关系：它具有自反性、对称性和传递性。所有彼此同余的角度组成一个等价类
+\[
+[\theta]=\{\theta+2k\pi:k\in\Z\}.
+\]
+
+\section{“求余数”为什么要先规定区间}
+
+“对 $2\pi$ 求模”可以直观地理解为用 $2\pi$ 作除数取余数。不过，对实数角度而言，余数的取值区间必须预先规定，否则同一个方向可以选出不同的代表值。
+
+如果规定余数位于 $[0,2\pi)$，那么对任意 $\theta\in\mathbb{R}$，存在唯一的 $k\in\Z$ 和 $r\in[0,2\pi)$，使得
+\[
+\theta=2k\pi+r.
+\]
+这是计算机和初等模运算中常见的选取方式。
+
+复变函数中为了得到幅角主值，通常改用区间
+\[
+(-\pi,\pi].
+\]
+于是对任意 $\theta\in\mathbb{R}$，存在唯一的 $k\in\Z$ 和 $r\in(-\pi,\pi]$，使得
+\[
+\theta=2k\pi+r.
+\]
+在本课程中，记号
+\[
+r=\theta\bmod 2\pi,
+\qquad -\pi<r\leq\pi,
+\]
+特指从区间 $(-\pi,\pi]$ 中选出的唯一代表值。
+
+需要特别留意端点约定：$-\pi$ 不属于该区间，而 $\pi$ 属于该区间，因此
+\[
+(-\pi)\bmod 2\pi=\pi,
+\qquad
+3\pi\bmod 2\pi=\pi.
+\]
+
+\section{与幅角主值的关系}
+
+本课程约定，$\Arg z$ 表示 $z$ 的所有幅角，$\arg z$ 表示幅角主值。若 $\theta$ 是非零复数 $z$ 的任意一个幅角，则
+\[
+\Arg z=\{\theta+2k\pi:k\in\Z\},
+\qquad
+\arg z=\theta\bmod 2\pi,
+\]
+其中第二个式子的结果取在 $(-\pi,\pi]$ 内。
+
+复数乘除法中的幅角主值不一定满足普通等式，但满足模 $2\pi$ 同余关系：
+\[
+\arg(z_1z_2)\equiv\arg z_1+\arg z_2\pmod{2\pi},
+\]
+\[
+\arg\left(\frac{z_1}{z_2}\right)
+\equiv\arg z_1-\arg z_2\pmod{2\pi},
+\qquad z_2\ne0.
+\]
+计算时可以先进行角度的加减，再把结果调整到 $(-\pi,\pi]$。
+
+\section{例子}
+
+\subsection*{例 1：正角度超过 $\pi$}
+\[
+\frac{17\pi}{12}=2\pi-\frac{7\pi}{12}.
+\]
+因为 $-7\pi/12\in(-\pi,\pi]$，所以
+\[
+\frac{17\pi}{12}\bmod 2\pi=-\frac{7\pi}{12}.
+\]
+
+\subsection*{例 2：负角度小于 $-\pi$}
+\[
+-\frac{13\pi}{6}=-2\pi-\frac{\pi}{6}.
+\]
+因此
+\[
+-\frac{13\pi}{6}\bmod 2\pi=-\frac{\pi}{6}.
+\]
+
+\subsection*{例 3：复数乘法中的幅角主值}
+
+设 $\arg z_1=3\pi/4$，$\arg z_2=2\pi/3$，则
+\[
+\arg z_1+\arg z_2=\frac{17\pi}{12}.
+\]
+将结果调整到 $(-\pi,\pi]$，得到
+\[
+\arg(z_1z_2)=-\frac{7\pi}{12}.
+\]
+这里不能直接写成
+\(
+\arg(z_1z_2)=\arg z_1+\arg z_2
+\)，因为等号右侧不在幅角主值的取值区间内。
+
+\section{自测}
+
+把下列角度调整到区间 $(-\pi,\pi]$：
+\begin{enumerate}
+  \item $23\pi/8$；
+  \item $-11\pi/6$；
+  \item $5\pi$；
+  \item 若 $\arg z_1=-3\pi/4$，$\arg z_2=-2\pi/3$，求 $\arg(z_1z_2)$。
+\end{enumerate}
+
+\subsection*{参考答案}
+\[
+\frac{23\pi}{8}\bmod2\pi=\frac{7\pi}{8},
+\qquad
+-\frac{11\pi}{6}\bmod2\pi=\frac{\pi}{6},
+\]
+\[
+5\pi\bmod2\pi=\pi,
+\qquad
+\arg(z_1z_2)=\frac{7\pi}{12}.
+\]
+
+\end{document}

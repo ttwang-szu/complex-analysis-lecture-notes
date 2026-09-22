@@ -1,0 +1,28 @@
+# LaTeX build files
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.nav
+*.out
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+*.xdv
+
+# Bibliography and index build files
+*.bbl
+*.bcf
+*.blg
+*.idx
+*.ilg
+*.ind
+*.run.xml
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+
+# Local source archives
+*.zip
