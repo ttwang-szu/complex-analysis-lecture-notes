@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Joukowski 映射演示</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>
+.below{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:12px;align-items:start}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" aria-label="演示目录">
+    <a href="index.html">← 全部演示</a>
+    <a href="01-multiplication.html">1 乘法</a><a href="02-roots.html">2 方根</a><a href="03-z-squared.html">3 w = z²</a><a href="04-argument.html">4 幅角</a><a href="05-joukowski.html" aria-current="page">5 Joukowski</a><a href="06-riemann-sphere.html">6 复球面</a><a href="07-limit-paths.html">7 极限路径</a><a href="08-limit-epsilon-delta.html">8 ε–δ</a><a href="09-curve-bounded.html">9 曲线上有界</a>
+  </nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 1 章 §1.4 复变函数与映射 · 例：w = z + 1/z 下圆 |z| = 2 的像</p>
+    <h1>Joukowski 映射 w = z + 1/z</h1>
+    <p class="lede">以原点为圆心的圆被映成椭圆，焦点总在 <span class="mr">±2</span>；半径为 1 时椭圆压扁成线段 <span class="mr">[−2, 2]</span>。把圆心稍微挪开，让圆经过 <span class="m">z</span> = 1，像就变成机翼的剖面，这就是空气动力学里的 Joukowski 翼型。</p>
+  </header>
+
+  <div class="row" style="margin-bottom:10px">
+    <div class="seg" role="radiogroup" aria-label="演示内容">
+      <input type="radio" name="mode" id="m-circle" value="circle" checked><label for="m-circle">同心圆 → 椭圆</label>
+      <input type="radio" name="mode" id="m-foil" value="foil"><label for="m-foil">偏心圆 → 翼型</label>
+    </div>
+    <button class="btn primary" id="play" type="button">▶ 沿圆走一圈</button>
+  </div>
+
+  <div class="planes">
+    <div class="stage"><span class="tag">z 平面</span><canvas id="zp" tabindex="0" aria-label="z 平面"></canvas></div>
+    <div class="stage"><span class="tag">w 平面（w = z + 1/z）</span><canvas id="wp" tabindex="0" aria-label="w 平面"></canvas></div>
+  </div>
+  <p class="hint" id="hint" style="margin-top:6px"></p>
+
+  <div class="below">
+    <div class="card" id="ctl"></div>
+    <div class="card" id="explain" aria-live="polite"></div>
+    <div class="card" id="probe" aria-live="polite"></div>
+  </div>
+</div>
+<script src="assets/plane.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,TAU,EPS,$,niceReal,angleText,cplxHTML,trimNum,MATH_FONT}=CF;
+const S={mode:'circle',r:2,phi:PI/5,c:{x:-0.1,y:0.12},showInv:true,net:false,trace:null};
+let anim=null;
+const f=z=>{const d=z.x*z.x+z.y*z.y;if(d<1e-12)return{x:NaN,y:NaN};return{x:z.x+z.x/d,y:z.y-z.y/d};};
+function csqrt(a){const r=C.abs(a),t=Math.atan2(a.y,a.x);return C.polar(Math.sqrt(r),t/2);}
+const lin=(a,b,n)=>Array.from({length:n+1},(_,i)=>a+(b-a)*i/n);
+const R0=()=>C.dist({x:1,y:0},S.c);
+const zPoint=()=>S.mode==='circle'?C.polar(S.r,S.phi):C.add(S.c,C.polar(R0(),S.phi));
+const circlePts=()=>S.mode==='circle'?lin(0,TAU,360).map(t=>C.polar(S.r,t)):lin(0,TAU,720).map(t=>C.add(S.c,C.polar(R0(),t)));
+function stop(){if(anim){anim.stop();anim=null;}S.trace=null;}
+
+const ZP=new CF.Plane($('#zp'),{range:2.6,maxVh:0.6,render:drawZ,names:['x','y']});
+const WP=new CF.Plane($('#wp'),{range:3.4,maxVh:0.6,render:drawW,names:['u','v']});
+ZP.addHandle({get:zPoint,set:p=>{stop();
+  if(S.mode==='circle'){S.r=Math.max(0.2,Math.min(2.5,C.abs(p)));S.phi=Math.atan2(p.y,p.x);syncR();}
+  else S.phi=Math.atan2(p.y-S.c.y,p.x-S.c.x);
+  update();}});
+ZP.addHandle({enabled:()=>S.mode==='foil',get:()=>S.c,set:p=>{stop();S.c={x:Math.max(-0.45,Math.min(0.2,p.x)),y:Math.max(-0.5,Math.min(0.5,p.y))};syncFoil();update();}});
+WP.addHandle({enabled:()=>S.mode==='circle',get:()=>f(zPoint()),set:w=>{stop();
+  const s=csqrt(C.sub(C.sq(w),{x:4,y:0}));const a=C.scale(C.add(w,s),.5),b=C.scale(C.sub(w,s),.5),z0=zPoint();
+  const z=C.dist(a,z0)<C.dist(b,z0)?a:b;S.r=Math.max(0.2,Math.min(2.5,C.abs(z)));S.phi=Math.atan2(z.y,z.x);syncR();update();}});
+
+function drawZ(P){
+  const V=P.V,O={x:0,y:0};
+  P.grid({step:0.5,labStep:1});
+  if(S.net){
+    [0.4,0.6,0.8,1.25,1.6,2.2].forEach(r=>P.circle(O,r,V.z2,1,null,.35));
+    for(let k=0;k<12;k++){const a=k*PI/6;P.line(C.polar(0.05,a),C.polar(3,a),V.violet,1,null,.35);}
+  }
+  P.dot({x:1,y:0},V.muted,4);P.dot({x:-1,y:0},V.muted,4);
+  P.wlabel({x:1,y:0},'1',V.muted,{dx:8,dy:12,font:'13px '+MATH_FONT});P.wlabel({x:-1,y:0},'−1',V.muted,{dx:-10,dy:12,font:'13px '+MATH_FONT});
+  if(S.mode==='circle'){
+    if(S.showInv&&Math.abs(S.r-1)>1e-3)P.circle(O,1/S.r,V.z1,1.75,[6,5],.6);
+    P.circle(O,S.r,V.z1,2.5);
+    P.arrow(O,zPoint(),V.z1,1.5,{alpha:.6});
+  }else{
+    P.path(circlePts(),V.z1,2.5,{close:true,fill:V.fill1});
+    P.line(S.c,{x:1,y:0},V.z1,1.25,[4,4],.7);
+    P.dot(S.c,V.z2,7,true);P.wlabel(S.c,'圆心',V.z2,{dx:0,dy:-16,font:'600 13px '+CF.SANS_FONT});
+  }
+  if(S.trace)P.path(S.trace.z,V.violet,3.5);
+  const z=zPoint();P.dot(z,V.w,8,ZP.drag||document.activeElement===ZP.cv);P.endLabel(z,'z',V.w,18);
+}
+function drawW(P){
+  const V=P.V;
+  P.grid({step:0.5,labStep:1,unit:false});
+  P.dot({x:2,y:0},V.muted,4);P.dot({x:-2,y:0},V.muted,4);
+  P.wlabel({x:2,y:0},'2',V.muted,{dx:8,dy:12,font:'13px '+MATH_FONT});P.wlabel({x:-2,y:0},'−2',V.muted,{dx:-10,dy:12,font:'13px '+MATH_FONT});
+  if(S.net){
+    [0.4,0.6,0.8,1.25,1.6,2.2].forEach(r=>P.path(lin(0,TAU,240).map(t=>f(C.polar(r,t))),V.z2,1,{alpha:.35}));
+    for(let k=0;k<12;k++){const a=k*PI/6;P.path(lin(0.05,3,200).map(r=>f(C.polar(r,a))),V.violet,1,{alpha:.35});}
+  }
+  const img=circlePts().map(f);
+  if(S.mode==='circle'){
+    if(Math.abs(S.r-1)<1e-3)P.path([{x:-2,y:0},{x:2,y:0}],V.w,4);
+    else P.path(img,V.w,2.5,{close:true,fill:V.fill2});
+  }else{
+    P.path(img,V.w,2.5,{close:true,fill:V.fill2});
+    P.wlabel({x:2,y:0},'尖尾',V.w,{dx:10,dy:-14,align:'left',font:'600 13px '+CF.SANS_FONT});
+  }
+  if(S.trace)P.path(S.trace.w,V.violet,3.5);
+  const w=f(zPoint());if(isFinite(w.x)){P.dot(w,V.w,8,WP.drag||document.activeElement===WP.cv);P.endLabel(w,'w',V.w,18);}
+}
+
+/* ---------- 面板 ---------- */
+let rCtl=null;
+function syncR(){if(rCtl){rCtl.el.value=S.r;$('#r-out').textContent=niceReal(S.r);}}
+function syncFoil(){const a=$('#eps'),b=$('#del');if(a){a.value=-S.c.x;$('#eps-out').textContent=trimNum(-S.c.x,2);}if(b){b.value=S.c.y;$('#del-out').textContent=trimNum(S.c.y,2);}}
+function ctlHTML(){
+  if(S.mode==='circle')return`<h2>圆 |z| = r</h2>
+    <div class="slider"><label for="r">半径 <span class="m">r</span></label><input type="range" id="r" min="0.2" max="2.5" step="0.05" value="${S.r}"><output id="r-out" for="r"></output></div>
+    <div class="row"><button class="btn" id="r2" type="button">r = 2（课件例题）</button><button class="btn" id="r1" type="button">r = 1</button><button class="btn" id="rh" type="button">r = 1/2</button></div>
+    <label class="check"><input type="checkbox" id="inv" ${S.showInv?'checked':''}> 同时画出 |z| = 1/r（虚线）</label>
+    <label class="check"><input type="checkbox" id="net" ${S.net?'checked':''}> 画出极坐标网及其像</label>`;
+  return`<h2>偏心圆（经过 z = 1）</h2>
+    <div class="slider"><label for="eps">厚度 ε</label><input type="range" id="eps" min="0" max="0.3" step="0.01" value="${-S.c.x}"><output id="eps-out" for="eps"></output></div>
+    <div class="slider"><label for="del">弯度 δ</label><input type="range" id="del" min="-0.3" max="0.4" step="0.01" value="${S.c.y}"><output id="del-out" for="del"></output></div>
+    <p class="hint">圆心 c = −ε + iδ，半径取 |1 − c|，所以圆一定经过 z = 1。也可以直接拖动橙色的圆心。</p>
+    <div class="row"><button class="btn" id="f0" type="button">ε = 0, δ = 0（退化为线段）</button><button class="btn" id="f1" type="button">对称翼型</button><button class="btn" id="f2" type="button">弯曲翼型</button></div>
+    <label class="check"><input type="checkbox" id="net" ${S.net?'checked':''}> 画出极坐标网及其像</label>`;
+}
+function bindCtl(){
+  const net=$('#net');net.addEventListener('change',e=>{S.net=e.target.checked;redraw();});
+  if(S.mode==='circle'){
+    rCtl=CF.bindRange('#r',v=>niceReal(v),v=>{stop();S.r=v;renderText();redraw();});rCtl.set(S.r);
+    const set=(id,v)=>$(id).addEventListener('click',()=>{rCtl.set(v);});set('#r2',2);set('#r1',1);set('#rh',0.5);
+    $('#inv').addEventListener('change',e=>{S.showInv=e.target.checked;redraw();});
+  }else{
+    rCtl=null;
+    CF.bindRange('#eps',v=>trimNum(v,2),v=>{stop();S.c={x:-v,y:S.c.y};renderText();redraw();});
+    CF.bindRange('#del',v=>trimNum(v,2),v=>{stop();S.c={x:S.c.x,y:v};renderText();redraw();});
+    syncFoil();
+    const set=(id,c)=>$(id).addEventListener('click',()=>{stop();S.c=c;syncFoil();update();});
+    set('#f0',{x:0,y:0});set('#f1',{x:-0.12,y:0});set('#f2',{x:-0.1,y:0.15});
+  }
+}
+const sqp=t=>/[\/√]/.test(t)?'('+t+')':t;
+function explainHTML(){
+  if(S.mode==='circle'){
+    const r=S.r,a=r+1/r,b=Math.abs(r-1/r);
+    return`<h2>为什么是椭圆</h2>
+    <p class="fml"><i>z</i> = <i>r</i>(cos φ + <i>i</i> sin φ) ⟹ <i>u</i> = (<i>r</i> + 1/<i>r</i>) cos φ,　<i>v</i> = (<i>r</i> − 1/<i>r</i>) sin φ</p>
+    <div class="why">${Math.abs(r-1)<1e-3?`<p>r = 1：v = 0，u = 2 cos φ ∈ [−2, 2]</p><p class="note">单位圆被压扁成线段 [−2, 2]，圆周上的每个点（除 ±1 外）都与它的共轭点映到同一处。</p>`:
+      `<p>u²/${sqp(niceReal(a))}² + v²/${sqp(niceReal(b))}² = 1</p><p>半长轴 a = r + 1/r = ${niceReal(a)}，半短轴 b = |r − 1/r| = ${niceReal(b)}</p>
+      <p>a² − b² = 4，焦点永远是 ±2</p>
+      <p class="note">${Math.abs(r-2)<1e-3?'这正是课件例题：|z| = 2 的像是 u²/(5/2)² + v²/(3/2)² = 1。':'把 r 换成 1/r，a、b 都不变：|z| = r 和 |z| = 1/r 的像是同一个椭圆（方向相反）。'}</p>`}</div>`;
+  }
+  return`<h2>翼型从哪来</h2>
+    <div class="why"><p>w′ = 1 − 1/z²，在 z = ±1 处为 0</p>
+    <p class="note">圆经过 z = 1 时，那里的角被“折”成 0°，于是像在 w = 2 处出现尖锐的后缘；圆稍微大一点、盖住 z = −1 附近，就形成圆润的前缘。改变 δ 让翼型弯曲，改变 ε 让它变厚。这里只需看出“圆 → 翼型”的几何现象，导数与保角性在后面几章讲。</p></div>`;
+}
+function probeHTML(){
+  const z=zPoint(),w=f(z);
+  return`<h2>红点</h2><table class="rt"><tbody>
+    <tr><td><i>z</i></td><td>${cplxHTML(z)}</td><td>|z| = ${niceReal(C.abs(z))}</td></tr>
+    <tr><td><i>w</i></td><td>${isFinite(w.x)?cplxHTML(w):'∞'}</td><td>${isFinite(w.x)?'|w| = '+niceReal(C.abs(w)):''}</td></tr></tbody></table>
+    <div class="why"><p class="note">${S.mode==='circle'?'拖动右边的 w，左边的 z 会跟着动（取两个原像中离当前点更近的那个）。':'拖动左边红点沿圆周移动，右边对应点沿翼型轮廓移动。'}</p></div>`;
+}
+const HINT={circle:'拖动左边红点：沿径向改变 r，沿圆周改变位置。右边的 w 也可以拖。',foil:'拖动橙色圆心改变翼型形状，拖动红点沿圆周移动。'};
+function renderText(){$('#explain').innerHTML=explainHTML();$('#probe').innerHTML=probeHTML();}
+function redraw(){ZP.draw();WP.draw();}
+function update(){renderText();redraw();}
+function setMode(m){stop();S.mode=m;$('#ctl').innerHTML=ctlHTML();bindCtl();$('#hint').textContent=HINT[m];update();}
+
+$('#play').addEventListener('click',()=>{
+  stop();const phi0=S.phi;S.trace={z:[],w:[]};
+  anim=CF.animate(4500,t=>{S.phi=phi0+TAU*t;const z=zPoint();S.trace.z.push(z);S.trace.w.push(f(z));$('#probe').innerHTML=probeHTML();redraw();},()=>{anim=null;});
+});
+CF.bindSeg('mode',setMode);
+[ZP,WP].forEach(P=>{P.cv.addEventListener('focus',()=>P.draw());P.cv.addEventListener('blur',()=>P.draw());});
+ZP.cv.addEventListener('keydown',e=>{
+  const d={ArrowLeft:[1,0],ArrowRight:[-1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[e.key];if(!d)return;e.preventDefault();stop();
+  S.phi+=d[0]*PI/24;if(S.mode==='circle'&&d[1]){S.r=Math.max(0.2,Math.min(2.5,S.r+d[1]*0.05));syncR();}update();
+});
+ZP.resize();WP.resize();
+{const m=CF.hash.get('mode'),r=parseFloat(CF.hash.get('r'));if(r>=0.2&&r<=2.5)S.r=r;if(m==='foil'){CF.setSeg('mode','foil');setMode('foil');}else setMode('circle');}
+})();
+</script>
+</body>
+</html>

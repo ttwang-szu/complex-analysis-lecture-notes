@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 离线版本：不加载任何网络资源，字体使用系统自带字体（微软雅黑、Cambria Math、Consolas 等）。 -->
+<script>if(/(^#|&)embed/.test(location.hash)){document.documentElement.classList.add('embed');addEventListener('keydown',e=>{if(e.key==='Escape'){try{parent.postMessage('close-demo','*');}catch(_){}}});}</script>
+<style>
+html.embed .nav,html.embed .top{display:none}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+.legend{background:var(--surface)}
+.status span{background:var(--surface)}
+</style>
+<title>复数乘法几何演示</title>
+<style>
+:root{
+  --bg:#F3F6F5; --surface:#FFFFFF; --ink:#17252A; --muted:#5A6B70; --line:#D2DDDA;
+  --grid:#E3EBE8; --grid-strong:#C5D3CF; --axis:#6C7F85; --chip:#E9EFED; --chip-hover:#DDE6E3;
+  --z1:#2356C4; --z2:#BF760B; --w:#C02F4A; --target:#1C8666; --bad:#B4372F;
+  --math:"STIX Two Text","Cambria Math","Times New Roman",serif;
+  --sans:"PingFang SC","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1416; --surface:#142022; --ink:#E1EBE9; --muted:#93A6AA; --line:#28383B;
+    --grid:#1A272A; --grid-strong:#2D3F43; --axis:#80969A; --chip:#1B292C; --chip-hover:#233538;
+    --z1:#78A2F6; --z2:#F1B244; --w:#F56C84; --target:#4DCBA0; --bad:#F0877E;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1416; --surface:#142022; --ink:#E1EBE9; --muted:#93A6AA; --line:#28383B;
+  --grid:#1A272A; --grid-strong:#2D3F43; --axis:#80969A; --chip:#1B292C; --chip-hover:#233538;
+  --z1:#78A2F6; --z2:#F1B244; --w:#F56C84; --target:#4DCBA0; --bad:#F0877E;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6}
+.wrap{max-width:1440px;margin:0 auto;padding-inline:20px;padding-block:14px 40px}
+.nav{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:13px;margin-bottom:10px}
+.nav a{text-decoration:none;color:var(--muted)}
+.nav a:hover,.nav a:focus-visible{color:var(--ink);text-decoration:underline}
+.nav a[aria-current="page"]{color:var(--ink);font-weight:700}
+.top{display:grid;gap:4px;margin-bottom:16px;max-width:72ch}
+.eyebrow{margin:0;color:var(--muted);font-size:13px;letter-spacing:.04em}
+h1{margin:0;font-size:26px;line-height:1.25;font-weight:700;text-wrap:balance}
+.lede{margin:0;color:var(--ink)}
+.m{font-family:var(--math);font-style:italic;font-size:1.08em}
+.mr{font-family:var(--math);font-size:1.08em}
+.c1{color:var(--z1)} .c2{color:var(--z2)} .cw{color:var(--w)} .ct{color:var(--target)}
+
+.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(320px,1fr);gap:18px;align-items:start}
+.stage-col{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);display:grid;gap:6px}
+.stage{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+canvas{display:block;width:100%;touch-action:none;cursor:default}
+canvas:focus-visible{outline:3px solid var(--z1);outline-offset:-3px}
+.legend{position:absolute;top:10px;left:12px;display:flex;flex-wrap:wrap;gap:4px 14px;font-family:var(--math);font-size:16px;pointer-events:none;background:color-mix(in srgb,var(--surface) 82%,transparent);padding:2px 8px;border-radius:6px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend b{display:inline-block;width:18px;height:3px;border-radius:2px}
+.status{position:absolute;left:12px;right:12px;bottom:10px;min-height:1.6em;font-size:15px;pointer-events:none}
+.status span{background:color-mix(in srgb,var(--surface) 88%,transparent);padding:3px 8px;border-radius:6px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.hint{margin:0;color:var(--muted);font-size:12.5px}
+
+.panel{display:grid;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:10px}
+.card h2{margin:0;font-size:14px;font-weight:700;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+.seg{display:inline-flex;background:var(--chip);border-radius:8px;padding:3px;gap:2px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{padding:6px 12px;border-radius:6px;cursor:pointer;font-size:14px;white-space:nowrap}
+.seg input:checked+label{background:var(--ink);color:var(--bg)}
+.seg input:focus-visible+label{outline:2px solid var(--z1);outline-offset:1px}
+
+button,select,input[type=text]{font:inherit;color:inherit}
+.btn{border:1px solid var(--line);background:var(--chip);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:14px;line-height:1.4}
+.btn:hover{background:var(--chip-hover)}
+.btn:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--z1);outline-offset:1px}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:500;padding:7px 16px}
+.btn.primary:hover{opacity:.9}
+select{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 8px;font-size:14px}
+
+table.rt{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.rt th{font-weight:500;color:var(--muted);font-size:12.5px;text-align:left;padding:0 6px 4px 0}
+.rt td{padding:5px 6px 5px 0;border-top:1px solid var(--line);font-family:var(--math);font-size:16px;vertical-align:baseline}
+.rt td.k{font-style:italic;white-space:nowrap}
+.rt td small{font-family:var(--mono);font-size:11.5px;color:var(--muted);font-style:normal}
+.why{display:grid;gap:6px;background:var(--chip);border-radius:8px;padding:10px 12px}
+.why p{margin:0;font-family:var(--math);font-size:16px;line-height:1.5}
+.why .note{font-family:var(--sans);font-size:13px;color:var(--muted)}
+.why .flag{font-family:var(--sans);font-size:13.5px;color:var(--w);font-weight:500}
+
+.inputs{display:grid;grid-template-columns:auto 1fr 1fr;gap:8px 10px;align-items:center}
+.inputs .lab{font-family:var(--math);font-style:italic;font-size:17px}
+.fld{display:grid;gap:2px}
+.fld span{font-size:12px;color:var(--muted)}
+.fld input{width:100%;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:7px;padding:5px 8px;font-family:var(--math);font-size:16px}
+.fld input[aria-invalid="true"]{border-color:var(--bad)}
+.err{margin:0;color:var(--bad);font-size:12.5px}
+
+.presets{display:flex;flex-wrap:wrap;gap:8px}
+.presets .btn{display:grid;text-align:left;gap:0;padding:6px 10px}
+.presets .btn .mr{font-size:15px}
+.presets .btn small{color:var(--muted);font-size:12px}
+
+.q{margin:0}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opts .btn{text-align:left;font-family:var(--math);font-size:16px;padding:8px 10px}
+.opts .btn[aria-pressed="true"].ok{border-color:var(--target);box-shadow:inset 0 0 0 1px var(--target)}
+.opts .btn[aria-pressed="true"].no{border-color:var(--bad);box-shadow:inset 0 0 0 1px var(--bad)}
+.fb{margin:0;font-size:14px;min-height:1.6em}
+.fb.ok{color:var(--target)} .fb.no{color:var(--bad)}
+.check{display:inline-flex;gap:6px;align-items:center;font-size:14px;cursor:pointer}
+.check input{accent-color:var(--ink);width:16px;height:16px}
+
+@media (max-width:900px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .stage-col{position:static}
+}
+@media (max-width:420px){
+  .opts{grid-template-columns:1fr}
+  h1{font-size:22px}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav class="nav" aria-label="演示目录">
+    <a href="index.html">← 全部演示</a>
+    <a href="01-multiplication.html" aria-current="page">1 乘法</a><a href="02-roots.html">2 方根</a><a href="03-z-squared.html">3 w = z²</a><a href="04-argument.html">4 幅角</a><a href="05-joukowski.html">5 Joukowski</a><a href="06-riemann-sphere.html">6 复球面</a><a href="07-limit-paths.html">7 极限路径</a><a href="08-limit-epsilon-delta.html">8 ε–δ</a><a href="09-curve-bounded.html">9 曲线上有界</a>
+  </nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 1 章 §1.2 复数的运算 · 式 (1.2.3)–(1.2.7) · 图 1.4</p>
+    <h1>复数乘法的几何意义</h1>
+    <p class="lede"><span class="m c1">z₁</span> 乘以 <span class="m c2">z₂</span>，就是把 <span class="m c1">z₁</span> 的向量<strong>伸缩 <span class="mr">|</span><span class="m">z₂</span><span class="mr">|</span> 倍</strong>，再<strong>逆时针旋转 <span class="mr">arg</span> <span class="m">z₂</span></strong>。拖动蓝点和橙点，或按“播放分解”。</p>
+  </header>
+
+  <main class="layout">
+    <section class="stage-col">
+      <div class="stage" id="stage">
+        <canvas id="plane" tabindex="0" aria-label="复平面。可以拖动 z1 和 z2 两个点"></canvas>
+        <div class="legend" aria-hidden="true">
+          <span><b style="background:var(--z1)"></b><i>z</i>₁</span>
+          <span><b style="background:var(--z2)"></b><i>z</i>₂</span>
+          <span><b style="background:var(--w)"></b><span id="legW"><i>z</i>₁<i>z</i>₂</span></span>
+        </div>
+        <div class="status" id="status" aria-live="polite"></div>
+      </div>
+      <p class="hint">键盘操作：点一下画布，按 1 / 2 选择 <span class="m">z₁</span> / <span class="m">z₂</span>，方向键移动，空格键播放。</p>
+    </section>
+
+    <aside class="panel">
+      <div class="card">
+        <div class="row">
+          <div class="seg" role="radiogroup" aria-label="运算">
+            <input type="radio" name="op" id="op-mul" value="mul" checked><label for="op-mul">乘法 <span class="m">z₁z₂</span></label>
+            <input type="radio" name="op" id="op-div" value="div"><label for="op-div">除法 <span class="m">z₁</span><span class="mr">/</span><span class="m">z₂</span></label>
+          </div>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="play" type="button">▶ 播放分解</button>
+          <label for="order" class="hint" style="font-size:13px">顺序</label>
+          <select id="order">
+            <option value="scale">先伸缩，再旋转</option>
+            <option value="rotate">先旋转，再伸缩</option>
+            <option value="together">同时进行</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card" id="readout" aria-live="polite"></div>
+
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <h2>输入数值</h2>
+          <div class="seg" role="radiogroup" aria-label="输入形式">
+            <input type="radio" name="inmode" id="in-rect" value="rect" checked><label for="in-rect">直角坐标</label>
+            <input type="radio" name="inmode" id="in-polar" value="polar"><label for="in-polar">极坐标</label>
+          </div>
+        </div>
+        <div class="inputs">
+          <span class="lab c1">z₁</span>
+          <label class="fld"><span id="l1a">实部 x</span><input type="text" id="z1a" inputmode="text" autocomplete="off" spellcheck="false"></label>
+          <label class="fld"><span id="l1b">虚部 y</span><input type="text" id="z1b" inputmode="text" autocomplete="off" spellcheck="false"></label>
+          <span class="lab c2">z₂</span>
+          <label class="fld"><span id="l2a">实部 x</span><input type="text" id="z2a" inputmode="text" autocomplete="off" spellcheck="false"></label>
+          <label class="fld"><span id="l2b">虚部 y</span><input type="text" id="z2b" inputmode="text" autocomplete="off" spellcheck="false"></label>
+        </div>
+        <p class="err" id="inerr" hidden></p>
+        <p class="hint" style="font-size:12.5px">可以输入 <span class="mr">1.5</span>、<span class="mr">√3</span>、<span class="mr">sqrt(2)/2</span>、<span class="mr">−5π/6</span>、<span class="mr">pi/4</span>，按回车确认。</p>
+      </div>
+
+      <div class="card">
+        <h2>课件中的例子</h2>
+        <div class="presets" id="presets"></div>
+      </div>
+
+      <div class="card">
+        <h2>课堂练习</h2>
+        <p class="q">下列哪个表达式把 <span class="m">z</span> 的模放大 <span class="mr">√2</span> 倍，并把它的向量逆时针旋转 <span class="mr">π/4</span>？（此处 <span class="m">z</span> 即蓝点 <span class="m c1">z₁</span>，绿色虚线圈是目标位置。）</p>
+        <div class="opts" id="opts"></div>
+        <p class="fb" id="fb"></p>
+        <div class="row"><button class="btn" id="exEnd" type="button" hidden>结束练习</button></div>
+      </div>
+
+      <div class="card">
+        <h2>显示</h2>
+        <div class="row">
+          <label for="range" class="hint" style="font-size:13px">视野</label>
+          <select id="range"><option value="2">±2</option><option value="4" selected>±4</option><option value="8">±8</option></select>
+          <label for="snap" class="hint" style="font-size:13px">吸附</label>
+          <select id="snap">
+            <option value="none">不吸附</option>
+            <option value="grid">直角网格</option>
+            <option value="polar">极坐标（π/12）</option>
+          </select>
+        </div>
+        <label class="check"><input type="checkbox" id="decomp" checked> 显示分解：中间向量与旋转弧</label>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const cv=$('#plane'), ctx=cv.getContext('2d');
+const PI=Math.PI, TAU=2*PI, EPS=1e-9;
+const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const S={z1:{x:2,y:1},z2:{x:1,y:1},op:'mul',order:'scale',range:4,snap:'none',decomp:true,mode:'rect',ex:null,anim:null,sel:1,drag:0,done:false};
+
+/* ---------- complex helpers ---------- */
+const C={
+  mul:(a,b)=>({x:a.x*b.x-a.y*b.y,y:a.x*b.y+a.y*b.x}),
+  div:(a,b)=>{const d=b.x*b.x+b.y*b.y;return{x:(a.x*b.x+a.y*b.y)/d,y:(a.y*b.x-a.x*b.y)/d};},
+  abs:a=>Math.hypot(a.x,a.y),
+  arg:a=>{let t=Math.atan2(Math.abs(a.y)<1e-12?0:a.y,a.x);if(t<=-PI+1e-12)t=PI;return t;},
+  polar:(r,t)=>({x:r*Math.cos(t),y:r*Math.sin(t)})
+};
+function principal(t){let r=t-TAU*Math.floor((t+PI)/TAU);if(Math.abs(r+PI)<1e-9)r=PI;return r;}
+function derived(){
+  const r1=C.abs(S.z1),r2=C.abs(S.z2),t1=C.arg(S.z1),t2=C.arg(S.z2),mul=S.op==='mul';
+  const ok=mul||r2>EPS;
+  const w=ok?(mul?C.mul(S.z1,S.z2):C.div(S.z1,S.z2)):null;
+  return{r1,r2,t1,t2,mul,ok,w,k:mul?r2:(ok?1/r2:NaN),phi:mul?t2:-t2};
+}
+
+/* ---------- number formatting ---------- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b];}return a;}
+function trimNum(x,d=3){let s=x.toFixed(d);if(s.includes('.'))s=s.replace(/\.?0+$/,'');if(s==='-0')s='0';return s.replace('-','−');}
+function niceReal(x){
+  if(Math.abs(x)<1e-9)return'0';
+  const sg=x<0?'−':'',a=Math.abs(x);
+  for(let k=1;k<=6;k++){
+    const M=(a*k)**2,Mr=Math.round(M);
+    if(Mr>0&&Mr<=300&&Math.abs(M-Mr)<1e-7*Math.max(1,M)){
+      let out=1,inn=Mr;
+      for(let f=2;f*f<=inn;f++){while(inn%(f*f)===0){inn/=f*f;out*=f;}}
+      const g=gcd(out,k);out/=g;const den=k/g;
+      const num=inn===1?String(out):(out===1?'':out)+'√'+inn;
+      return sg+num+(den>1?'/'+den:'');
+    }
+  }
+  return sg+trimNum(a);
+}
+function nicePi(t){
+  if(Math.abs(t)<1e-9)return'0';
+  for(const d of[1,2,3,4,6,12]){
+    const k=t*d/PI,kr=Math.round(k);
+    if(Math.abs(k-kr)<1e-7){
+      const g=gcd(kr,d),n=kr/g,dd=d/g,an=Math.abs(n);
+      return(n<0?'−':'')+(an===1?'':an)+'π'+(dd>1?'/'+dd:'');
+    }
+  }
+  return trimNum(t);
+}
+function isNicePi(t){return /π/.test(nicePi(t))||Math.abs(t)<1e-9;}
+function angleText(t){return isNicePi(t)?nicePi(t):trimNum(t)+' rad';}
+function degText(t){return trimNum(t*180/PI,1)+'°';}
+function cplxText(z){
+  const x=Math.abs(z.x)<1e-9?0:z.x,y=Math.abs(z.y)<1e-9?0:z.y;
+  if(y===0)return niceReal(x);
+  let ys=niceReal(Math.abs(y));
+  ys=ys==='1'?'i':(ys.includes('/')?'('+ys+')i':ys+'i');
+  if(x===0)return(y<0?'−':'')+ys;
+  return niceReal(x)+(y<0?' − ':' + ')+ys;
+}
+const cplxHTML=z=>cplxText(z).replace(/i$/,'<i>i</i>');
+const paren=s=>s.startsWith('−')?'('+s+')':s;
+
+/* ---------- expression parser for inputs ---------- */
+function parseExpr(src){
+  const s=String(src).replace(/−/g,'-').replace(/[×·]/g,'*').trim();
+  if(!s)throw 0;
+  const toks=s.match(/\d*\.\d+|\d+|[a-zA-Z]+|π|√|[-+*/^()]|\S/g);
+  let i=0;const peek=()=>toks[i],next=()=>toks[i++];
+  const startsPrimary=t=>t!==undefined&&(/^[\d.]/.test(t)||/^[a-zA-Z]/.test(t)||t==='π'||t==='√'||t==='(');
+  function expr(){let v=term();while(peek()==='+'||peek()==='-'){const o=next(),r=term();v=o==='+'?v+r:v-r;}return v;}
+  function term(){let v=unary();for(;;){const t=peek();if(t==='*'||t==='/'){next();const r=unary();v=t==='*'?v*r:v/r;}else if(startsPrimary(t)){v*=power();}else break;}return v;}
+  function unary(){const t=peek();if(t==='-'){next();return-unary();}if(t==='+'){next();return unary();}return power();}
+  function power(){const b=primary();if(peek()==='^'){next();return Math.pow(b,unary());}return b;}
+  function primary(){
+    const t=next();if(t===undefined)throw 0;
+    if(/^[\d.]/.test(t)){const v=parseFloat(t);if(!isFinite(v))throw 0;return v;}
+    if(t==='π')return PI;
+    if(t==='√')return Math.sqrt(power());
+    if(t==='('){const v=expr();if(next()!==')')throw 0;return v;}
+    const id=t.toLowerCase();
+    if(id==='pi')return PI;
+    const F={sqrt:Math.sqrt,sin:Math.sin,cos:Math.cos,tan:Math.tan};
+    if(F[id]){if(next()!=='(')throw 0;const v=expr();if(next()!==')')throw 0;return F[id](v);}
+    throw 0;
+  }
+  const v=expr();if(i<toks.length||!isFinite(v))throw 0;return v;
+}
+
+/* ---------- canvas geometry ---------- */
+let W=0,H=0,dpr=1,ppu=1,cx=0,cy=0,V={};
+const toS=p=>({X:cx+p.x*ppu,Y:cy-p.y*ppu});
+const toW=(X,Y)=>({x:(X-cx)/ppu,y:(cy-Y)/ppu});
+function readVars(){
+  const cs=getComputedStyle(document.documentElement),g=n=>cs.getPropertyValue(n).trim();
+  V={surface:g('--surface'),ink:g('--ink'),muted:g('--muted'),grid:g('--grid'),gridS:g('--grid-strong'),axis:g('--axis'),z1:g('--z1'),z2:g('--z2'),w:g('--w'),target:g('--target')};
+}
+function resize(){
+  const box=cv.parentElement.getBoundingClientRect();
+  W=box.width;H=Math.round(Math.min(W,Math.max(320,window.innerHeight*0.8)));
+  dpr=window.devicePixelRatio||1;
+  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cv.style.height=H+'px';
+  draw();
+}
+const MATH_FONT='"STIX Two Text","Cambria Math","Times New Roman",serif';
+const MONO_FONT='"IBM Plex Mono",ui-monospace,Consolas,monospace';
+
+function line(A,B,color,lw,dash){ctx.save();ctx.strokeStyle=color;ctx.lineWidth=lw;if(dash)ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(A.X,A.Y);ctx.lineTo(B.X,B.Y);ctx.stroke();ctx.restore();}
+function arrow(p0,p1,color,lw,o={}){
+  const A=toS(p0),B=toS(p1),dx=B.X-A.X,dy=B.Y-A.Y,L=Math.hypot(dx,dy);
+  if(L<1.5)return;
+  ctx.save();ctx.globalAlpha=o.alpha??1;ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=lw;ctx.lineCap='round';
+  const ux=dx/L,uy=dy/L,h=Math.min(11+lw*1.6,L*0.45);
+  if(o.dash)ctx.setLineDash(o.dash);
+  ctx.beginPath();ctx.moveTo(A.X,A.Y);
+  if(o.noHead)ctx.lineTo(B.X,B.Y);else ctx.lineTo(B.X-ux*h*0.7,B.Y-uy*h*0.7);
+  ctx.stroke();ctx.setLineDash([]);
+  if(!o.noHead){
+    ctx.beginPath();ctx.moveTo(B.X,B.Y);
+    ctx.lineTo(B.X-ux*h-uy*h*0.42,B.Y-uy*h+ux*h*0.42);
+    ctx.lineTo(B.X-ux*h+uy*h*0.42,B.Y-uy*h-ux*h*0.42);
+    ctx.closePath();ctx.fill();
+  }
+  ctx.restore();
+}
+function arcS(rpx,a0,a1,color,o={}){
+  if(Math.abs(a1-a0)<1e-4||rpx<3)return;
+  ctx.save();ctx.globalAlpha=o.alpha??1;ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=o.lw||1.75;
+  if(o.dash)ctx.setLineDash(o.dash);
+  ctx.beginPath();ctx.arc(cx,cy,rpx,-a0,-a1,a1>a0);ctx.stroke();ctx.setLineDash([]);
+  if(o.head&&Math.abs(a1-a0)*rpx>14){
+    const s=Math.sign(a1-a0),X=cx+rpx*Math.cos(a1),Y=cy-rpx*Math.sin(a1);
+    const tx=-Math.sin(a1)*s,ty=-Math.cos(a1)*s,nx=-ty,ny=tx,h=10;
+    ctx.beginPath();ctx.moveTo(X,Y);
+    ctx.lineTo(X-tx*h+nx*h*0.42,Y-ty*h+ny*h*0.42);
+    ctx.lineTo(X-tx*h-nx*h*0.42,Y-ty*h-ny*h*0.42);
+    ctx.closePath();ctx.fill();
+  }
+  ctx.restore();
+}
+function label(txt,X,Y,color,font,align){
+  ctx.save();ctx.font=font;ctx.textAlign=align||'center';ctx.textBaseline='middle';
+  ctx.lineJoin='round';ctx.lineWidth=5;ctx.strokeStyle=V.surface;ctx.strokeText(txt,X,Y);
+  ctx.fillStyle=color;ctx.fillText(txt,X,Y);ctx.restore();
+}
+function endLabel(p,txt,color,size){
+  const P=toS(p),L=Math.hypot(p.x,p.y);
+  let ux=L>EPS?p.x/L:0.7,uy=L>EPS?-p.y/L:-0.7;
+  label(txt,P.X+ux*20,P.Y+uy*20,color,'italic 600 '+(size||18)+'px '+MATH_FONT,'center');
+}
+function dot(p,color,r,ring){
+  const P=toS(p);ctx.save();
+  if(ring){ctx.beginPath();ctx.arc(P.X,P.Y,r+5,0,TAU);ctx.strokeStyle=color;ctx.globalAlpha=.35;ctx.lineWidth=2;ctx.stroke();ctx.globalAlpha=1;}
+  ctx.beginPath();ctx.arc(P.X,P.Y,r,0,TAU);ctx.fillStyle=color;ctx.fill();
+  ctx.lineWidth=2.5;ctx.strokeStyle=V.surface;ctx.stroke();ctx.restore();
+}
+function angleLabel(rpx,a,txt,color){label(txt,cx+rpx*Math.cos(a),cy-rpx*Math.sin(a),color,'italic 600 15px '+MATH_FONT);}
+
+function drawGrid(){
+  const step=S.range<=2?0.5:1,labStep=S.range<=4?1:2;
+  const xm=(W/2)/ppu,ym=(H/2)/ppu;
+  ctx.lineWidth=1;
+  for(let x=Math.ceil(-xm/step)*step;x<=xm;x+=step){
+    const X=Math.round(cx+x*ppu)+.5;ctx.strokeStyle=Math.abs(x-Math.round(x))<1e-9?V.gridS:V.grid;
+    ctx.beginPath();ctx.moveTo(X,0);ctx.lineTo(X,H);ctx.stroke();
+  }
+  for(let y=Math.ceil(-ym/step)*step;y<=ym;y+=step){
+    const Y=Math.round(cy-y*ppu)+.5;ctx.strokeStyle=Math.abs(y-Math.round(y))<1e-9?V.gridS:V.grid;
+    ctx.beginPath();ctx.moveTo(0,Y);ctx.lineTo(W,Y);ctx.stroke();
+  }
+  ctx.strokeStyle=V.axis;ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(0,cy);ctx.lineTo(W,cy);ctx.moveTo(cx,0);ctx.lineTo(cx,H);ctx.stroke();
+  ctx.save();ctx.fillStyle=V.muted;ctx.font='12px '+MONO_FONT;ctx.textAlign='center';ctx.textBaseline='top';
+  for(let x=Math.ceil(-xm/labStep)*labStep;x<=xm;x+=labStep){if(x===0)continue;ctx.fillText(String(x).replace('-','−'),cx+x*ppu,cy+5);}
+  ctx.textAlign='right';ctx.textBaseline='middle';
+  for(let y=Math.ceil(-ym/labStep)*labStep;y<=ym;y+=labStep){if(y===0)continue;const t=y===1?'i':y===-1?'−i':String(y).replace('-','−')+'i';ctx.fillText(t,cx-6,cy-y*ppu);}
+  ctx.textAlign='right';ctx.textBaseline='top';ctx.fillText('0',cx-5,cy+5);
+  ctx.font='italic 15px '+MATH_FONT;ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText('Re',W-8,cy-4);
+  ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText('Im',cx+8,H>400?48:40);
+  ctx.restore();
+  ctx.save();ctx.strokeStyle=V.gridS;ctx.setLineDash([3,5]);ctx.lineWidth=1.25;ctx.beginPath();ctx.arc(cx,cy,ppu,0,TAU);ctx.stroke();ctx.restore();
+}
+
+function ease(u){return u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;}
+function vecAt(t,d){
+  let sc,rot;
+  if(S.order==='together'&&d.k>1e-6){const u=ease(t);sc=Math.exp(Math.log(d.k)*u);rot=d.phi*u;}
+  else{
+    const u1=ease(Math.min(1,t*2)),u2=ease(Math.max(0,t*2-1));
+    if(S.order==='rotate'){rot=d.phi*u1;sc=1+(d.k-1)*u2;}else{sc=1+(d.k-1)*u1;rot=d.phi*u2;}
+    if(S.order==='together'){const u=ease(t);sc=1+(d.k-1)*u;rot=d.phi*u;}
+  }
+  return C.mul(S.z1,C.polar(sc,rot));
+}
+const wName=()=>S.op==='mul'?'z₁z₂':'z₁/z₂';
+
+function draw(){
+  if(!W)return;
+  readVars();
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle=V.surface;ctx.fillRect(0,0,W,H);
+  ppu=Math.min(W,H)/(2*S.range+0.8);cx=W/2;cy=H/2;
+  drawGrid();
+  const d=derived(),O={x:0,y:0};
+  const target=S.ex?C.mul(S.z1,{x:1,y:1}):null;
+  if(target){
+    const T=toS(target);
+    arrow(O,target,V.target,1.5,{dash:[4,5],alpha:.7,noHead:true});
+    ctx.save();ctx.strokeStyle=V.target;ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.beginPath();ctx.arc(T.X,T.Y,13,0,TAU);ctx.stroke();ctx.restore();
+    label('目标',T.X+18,T.Y-16,V.target,'600 13px '+getComputedStyle(document.body).fontFamily,'left');
+  }
+  const canDecomp=d.ok&&d.r1>EPS&&d.r2>EPS;
+  if(S.anim&&canDecomp){
+    const t=S.anim.t;
+    arrow(O,d.w,V.w,2,{dash:[5,6],alpha:.35,noHead:true});
+    arrow(O,S.z2,V.z2,2.5);arrow(O,S.z1,V.z1,2.5);
+    if(S.order!=='together'&&t>0.5){
+      const mid=S.order==='scale'?{x:S.z1.x*d.k,y:S.z1.y*d.k}:C.mul(S.z1,C.polar(1,d.phi));
+      arrow(O,mid,V.w,1.5,{dash:[5,5],alpha:.5,noHead:true});
+    }
+    ctx.save();ctx.strokeStyle=V.w;ctx.globalAlpha=.55;ctx.lineWidth=2;ctx.beginPath();
+    const n=Math.max(2,Math.round(90*t));
+    for(let j=0;j<=n;j++){const P=toS(vecAt(t*j/n,d));j?ctx.lineTo(P.X,P.Y):ctx.moveTo(P.X,P.Y);}
+    ctx.stroke();ctx.restore();
+    const v=vecAt(t,d);
+    arrow(O,v,V.w,3.5);
+    dot(S.z2,V.z2,7);dot(S.z1,V.z1,7);dot(v,V.w,5);
+    endLabel(S.z1,'z₁',V.z1);endLabel(S.z2,'z₂',V.z2);
+    return;
+  }
+  if(S.decomp&&canDecomp){
+    const p={x:S.z1.x*d.k,y:S.z1.y*d.k},a1=Math.atan2(S.z1.y,S.z1.x),rw=C.abs(d.w)*ppu;
+    arrow(O,p,V.w,1.5,{dash:[5,5],alpha:.55,noHead:true});
+    if(Math.abs(d.k-1)>1e-3){const P=toS(p);ctx.save();ctx.globalAlpha=.7;ctx.fillStyle=V.w;ctx.beginPath();ctx.arc(P.X,P.Y,3.5,0,TAU);ctx.fill();ctx.restore();
+      const L=Math.hypot(p.x,p.y),ux=p.x/L,uy=-p.y/L;
+      label(S.op==='mul'?'|z₂|·z₁':'z₁/|z₂|',P.X-uy*16+ux*4,P.Y+ux*16+uy*4,V.muted,'italic 14px '+MATH_FONT,ux>=0?'left':'right');}
+    arcS(rw,a1,a1+d.phi,V.z2,{dash:[5,4],lw:2,head:true,alpha:.9});
+    if(Math.abs(d.phi)*rw>24)angleLabel(rw+16,a1+d.phi/2,S.op==='mul'?'θ₂':'−θ₂',V.z2);
+    arcS(30,0,d.t1,V.z1,{lw:2});
+    if(Math.abs(d.t1)*30>14)angleLabel(44,d.t1/2,'θ₁',V.z1);
+    arcS(58,0,d.t2,V.z2,{lw:2});
+    if(Math.abs(d.t2)*58>14)angleLabel(72,d.t2/2,'θ₂',V.z2);
+  }
+  arrow(O,S.z2,V.z2,2.5);arrow(O,S.z1,V.z1,2.5);
+  if(d.ok&&C.abs(d.w)>EPS)arrow(O,d.w,V.w,3.5);
+  const act=S.drag||(document.activeElement===cv?S.sel:0);
+  dot(S.z2,V.z2,8,act===2);dot(S.z1,V.z1,8,act===1);
+  if(d.ok)dot(d.w,V.w,5);
+  endLabel(S.z1,'z₁',V.z1);endLabel(S.z2,'z₂',V.z2);
+  if(d.ok)endLabel(d.w,wName(),V.w,19);
+}
+
+/* ---------- panel ---------- */
+function statusHTML(){
+  const d=derived();
+  if(!d.ok)return'<span>除数 <i>z</i>₂ = 0，除法无意义。</span>';
+  const kTxt=niceReal(d.r2),dir=d.phi>=0?'逆时针':'顺时针',ang=angleText(Math.abs(d.phi));
+  const sc=S.op==='mul'?`模 × |z₂| = ×${kTxt}`:`模 ÷ |z₂| = ÷${kTxt}`;
+  const ro=`${dir}旋转 ${S.op==='mul'?'arg z₂':'−arg z₂'}（${ang}）`;
+  if(S.anim){
+    const t=S.anim.t;
+    if(S.order==='together')return`<span>伸缩与旋转同时进行：${sc}，${ro}。轨迹是一段对数螺线。</span>`;
+    const first=S.order==='scale'?`① 伸缩：${sc}`:`① 旋转：${ro}`,second=S.order==='scale'?`② 旋转：${ro}`:`② 伸缩：${sc}`;
+    return`<span>${t<0.5?first:second}</span>`;
+  }
+  if(S.done)return`<span>完成：${wName()} = ${cplxText(d.w)}。换一种顺序播放，结果相同。</span>`;
+  return'';
+}
+function renderReadout(){
+  const d=derived(),w=d.w;
+  const row=(name,cls,z,r,t)=>{
+    const zero=r<EPS;
+    return`<tr><td class="k ${cls}">${name}</td><td>${cplxHTML(z)}</td><td>${niceReal(r)}${/√|\//.test(niceReal(r))?` <small>≈${trimNum(r)}</small>`:''}</td><td>${zero?'<span style="font-family:var(--sans);font-size:13px;color:var(--muted)">无定义</span>':angleText(t)+` <small>${degText(t)}</small>`}</td></tr>`;
+  };
+  let h=`<table class="rt"><thead><tr><th></th><th>代数形式</th><th>模</th><th>幅角主值 arg</th></tr></thead><tbody>`;
+  h+=row('z₁','c1',S.z1,d.r1,d.t1)+row('z₂','c2',S.z2,d.r2,d.t2);
+  if(d.ok)h+=row(wName(),'cw',w,C.abs(w),C.arg(w));
+  h+='</tbody></table>';
+  if(!d.ok){h+='<div class="why"><p class="flag">z₂ = 0 时不能做除法。</p></div>';$('#readout').innerHTML=h;return;}
+  const rw=C.abs(w),op=d.mul?'×':'÷';
+  let why=`<p>|${wName()}| = ${d.mul?'|z₁|·|z₂|':'|z₁| / |z₂|'} = ${niceReal(d.r1)} ${op} ${niceReal(d.r2)} = ${niceReal(rw)}</p>`;
+  if(d.r1<EPS||d.r2<EPS){
+    why+=`<p class="note">有一个因子为 0，乘积为 0，幅角无定义。</p>`;
+  }else{
+    const raw=d.t1+d.phi,pr=principal(raw);
+    why+=`<p>θ₁ ${d.mul?'+':'−'} θ₂ = ${angleText(d.t1)} ${d.mul?'+':'−'} ${paren(angleText(d.t2))} = ${angleText(raw)}</p>`;
+    if(Math.abs(pr-raw)>1e-9){
+      why+=`<p class="flag">超出 (−π, π]，${raw>PI?'减去':'加上'} 2π：arg ${wName()} = ${angleText(pr)}</p><p class="note">这就是式 (1.2.7) 中“按模 2π”的含义：幅角${d.mul?"相加":"相减"}之后，需要再取主值。</p>`;
+    }else{
+      why+=`<p class="note">结果落在 (−π, π] 内，直接就是主值 arg ${wName()}。</p>`;
+    }
+  }
+  $('#readout').innerHTML=h+`<div class="why">${why}</div>`;
+}
+const F={z1a:$('#z1a'),z1b:$('#z1b'),z2a:$('#z2a'),z2b:$('#z2b')};
+function fillFields(){
+  for(const n of[1,2]){
+    const z=S['z'+n],a=F['z'+n+'a'],b=F['z'+n+'b'];
+    let va,vb;
+    if(S.mode==='rect'){va=niceReal(z.x);vb=niceReal(z.y);}
+    else{const r=C.abs(z);va=niceReal(r);vb=r<EPS?'0':nicePi(C.arg(z));}
+    if(document.activeElement!==a){a.value=va;a.removeAttribute('aria-invalid');}
+    if(document.activeElement!==b){b.value=vb;b.removeAttribute('aria-invalid');}
+  }
+  const r=S.mode==='rect';
+  $('#l1a').textContent=$('#l2a').textContent=r?'实部 x':'模 r';
+  $('#l1b').textContent=$('#l2b').textContent=r?'虚部 y':'幅角 θ';
+}
+function renderEx(){
+  const fb=$('#fb');
+  document.querySelectorAll('#opts .btn').forEach(b=>{const on=S.ex&&S.ex.choice===b.dataset.k;b.setAttribute('aria-pressed',on?'true':'false');b.classList.remove('ok','no');if(on)b.classList.add(b.dataset.k==='D'?'ok':'no');});
+  $('#exEnd').hidden=!S.ex;
+  if(!S.ex){fb.textContent='点一个选项，观察红色向量是否落到目标位置。';fb.className='fb';return;}
+  const d=derived();
+  const T=C.mul(S.z1,{x:1,y:1}),hit=d.ok&&S.op==='mul'&&Math.hypot(d.w.x-T.x,d.w.y-T.y)<1e-6;
+  const dir=d.t2>=0?'逆时针':'顺时针',desc=`模 ×${niceReal(d.r2)}，${dir}旋转 ${angleText(Math.abs(d.t2))}`;
+  const pre=S.ex.choice?`选 ${S.ex.choice}：`:'当前 z₂：';
+  if(hit){fb.textContent=`${pre}正确。${desc}，正好落在目标上。`;fb.className='fb ok';}
+  else{fb.textContent=`${pre}不对。它让${desc}；要求是模 ×√2、逆时针旋转 π/4。`;fb.className='fb no';}
+}
+function render(){
+  renderReadout();fillFields();renderEx();
+  $('#status').innerHTML=statusHTML();
+  $('#legW').innerHTML=S.op==='mul'?'<i>z</i>₁<i>z</i>₂':'<i>z</i>₁/<i>z</i>₂';
+  draw();
+}
+
+/* ---------- animation ---------- */
+let raf=0;
+function stopAnim(){if(raf)cancelAnimationFrame(raf);raf=0;S.anim=null;}
+function play(){
+  const d=derived();
+  stopAnim();S.done=false;
+  if(!d.ok||d.r1<EPS||d.r2<EPS){render();return;}
+  const dur=reduceMotion?1:(S.order==='together'?2600:3400);
+  S.anim={t:0};const t0=performance.now();
+  const step=now=>{
+    const t=Math.min(1,(now-t0)/dur);S.anim.t=t;
+    $('#status').innerHTML=statusHTML();draw();
+    if(t<1)raf=requestAnimationFrame(step);else{raf=0;S.anim=null;S.done=true;render();}
+  };
+  raf=requestAnimationFrame(step);
+}
+
+/* ---------- interaction ---------- */
+function snapPoint(p){
+  const xm=(W/2)/ppu-0.1,ym=(H/2)/ppu-0.1;
+  let x=Math.max(-xm,Math.min(xm,p.x)),y=Math.max(-ym,Math.min(ym,p.y));
+  if(S.snap==='grid'){const s=S.range<=2?0.25:0.5;x=Math.round(x/s)*s;y=Math.round(y/s)*s;}
+  else if(S.snap==='polar'){let r=Math.round(Math.hypot(x,y)/0.25)*0.25;const t=Math.round(Math.atan2(y,x)/(PI/12))*(PI/12);if(r<0.25)r=0.25;const q=C.polar(r,t);x=q.x;y=q.y;}
+  const cl=v=>Math.abs(v)<1e-12?0:v;
+  return{x:cl(x),y:cl(y)};
+}
+function userMoved(){S.done=false;if(S.ex)S.ex.choice=null;}
+function hit(X,Y,pad){
+  let best=0,bd=1e9;
+  for(const n of[1,2]){const P=toS(S['z'+n]),dd=Math.hypot(P.X-X,P.Y-Y);if(dd<bd){bd=dd;best=n;}}
+  return bd<=pad?best:0;
+}
+function evPos(e){const r=cv.getBoundingClientRect();return{X:e.clientX-r.left,Y:e.clientY-r.top};}
+cv.addEventListener('pointerdown',e=>{
+  const {X,Y}=evPos(e),n=hit(X,Y,e.pointerType==='mouse'?16:28);
+  if(!n)return;
+  stopAnim();S.drag=n;S.sel=n;cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing';e.preventDefault();
+});
+cv.addEventListener('pointermove',e=>{
+  const {X,Y}=evPos(e);
+  if(S.drag){S['z'+S.drag]=snapPoint(toW(X,Y));userMoved();render();}
+  else cv.style.cursor=hit(X,Y,16)?'grab':'default';
+});
+const endDrag=()=>{if(S.drag){S.drag=0;cv.style.cursor='grab';render();}};
+cv.addEventListener('pointerup',endDrag);cv.addEventListener('pointercancel',endDrag);
+cv.addEventListener('focus',draw);cv.addEventListener('blur',draw);
+cv.addEventListener('keydown',e=>{
+  if(e.key==='1'||e.key==='2'){S.sel=+e.key;draw();return;}
+  if(e.key===' '||e.key==='Enter'){e.preventDefault();play();return;}
+  const dirs={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,1],ArrowDown:[0,-1]};
+  if(!dirs[e.key])return;
+  e.preventDefault();stopAnim();
+  const z=S['z'+S.sel],[dx,dy]=dirs[e.key];
+  if(S.snap==='polar'){const r=C.abs(z),t=Math.atan2(z.y,z.x);S['z'+S.sel]=snapPoint(C.polar(Math.max(0.25,r+dy*0.25),t-dx*PI/12));}
+  else{const s=S.snap==='grid'?(S.range<=2?0.25:0.5):(e.shiftKey?0.5:0.1);S['z'+S.sel]=snapPoint({x:z.x+dx*s,y:z.y+dy*s});}
+  userMoved();render();
+});
+
+function commitField(n){
+  const a=F['z'+n+'a'],b=F['z'+n+'b'];let va,vb,bad=false;
+  try{va=parseExpr(a.value);a.removeAttribute('aria-invalid');}catch(_){a.setAttribute('aria-invalid','true');bad=true;}
+  try{vb=parseExpr(b.value);b.removeAttribute('aria-invalid');}catch(_){b.setAttribute('aria-invalid','true');bad=true;}
+  const err=$('#inerr');
+  if(bad){err.textContent='有一项无法识别。请写成 1.5、√3、sqrt(2)/2、−5π/6 这样的形式。';err.hidden=false;return;}
+  if(S.mode==='polar'&&va<0){a.setAttribute('aria-invalid','true');err.textContent='模 r 不能为负数。';err.hidden=false;return;}
+  err.hidden=true;stopAnim();
+  S['z'+n]=S.mode==='rect'?{x:va,y:vb}:C.polar(va,vb);
+  const q=S['z'+n];if(Math.abs(q.x)<1e-12)q.x=0;if(Math.abs(q.y)<1e-12)q.y=0;
+  userMoved();render();
+}
+for(const n of[1,2])for(const s of['a','b']){
+  const el=F['z'+n+s];
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();commitField(n);}});
+  el.addEventListener('change',()=>commitField(n));
+  el.addEventListener('blur',()=>setTimeout(fillFields,0));
+}
+
+document.querySelectorAll('input[name=op]').forEach(r=>r.addEventListener('change',()=>{S.op=r.value;stopAnim();S.done=false;render();}));
+document.querySelectorAll('input[name=inmode]').forEach(r=>r.addEventListener('change',()=>{S.mode=r.value;$('#inerr').hidden=true;fillFields();}));
+$('#play').addEventListener('click',play);
+$('#order').addEventListener('change',e=>{S.order=e.target.value;play();});
+$('#range').addEventListener('change',e=>{S.range=+e.target.value;draw();});
+$('#snap').addEventListener('change',e=>{S.snap=e.target.value;});
+$('#decomp').addEventListener('change',e=>{S.decomp=e.target.checked;draw();});
+function setOp(op){S.op=op;$('#op-'+op).checked=true;}
+
+const r3=Math.sqrt(3),h2=Math.SQRT1_2;
+const PRESETS=[
+  {t:'× (1 + i)',s:'模 ×√2，转 π/4',f(){setOp('mul');S.z2={x:1,y:1};}},
+  {t:'× i',s:'只旋转 π/2',f(){setOp('mul');S.z2={x:0,y:1};}},
+  {t:'× (−1)',s:'只旋转 π',f(){setOp('mul');S.z2={x:-1,y:0};}},
+  {t:'(−1) · i',s:'幅角和 3π/2，要取主值',f(){setOp('mul');S.z1={x:-1,y:0};S.z2={x:0,y:1};}},
+  {t:'× e^{iπ/3}',s:'例 2.2 等边三角形',f(){setOp('mul');S.z1={x:2,y:0};S.z2={x:.5,y:r3/2};}},
+  {t:'÷ (1 − √3 i)',s:'填空题：模与幅角怎么变',f(){setOp('div');S.z2={x:1,y:-r3};}},
+];
+const pw=$('#presets');
+PRESETS.forEach(p=>{const b=document.createElement('button');b.type='button';b.className='btn';
+  b.innerHTML=`<span class="mr">${p.t.replace(/i(?=[\s)]|$)/g,'<i>i</i>').replace('e^{iπ/3}','e<sup><i>i</i>π/3</sup>')}</span><small>${p.s}</small>`;
+  b.addEventListener('click',()=>{stopAnim();S.ex=null;p.f();render();play();});pw.appendChild(b);});
+
+const OPTS=[
+  {k:'A',h:'<i>z</i>√2 e<sup>−<i>i</i>π/4</sup>',z:{x:1,y:-1}},
+  {k:'B',h:'(<i>z</i>/√2) e<sup>−<i>i</i>π/4</sup>',z:{x:.5,y:-.5}},
+  {k:'C',h:'(<i>z</i>/√2) e<sup><i>i</i>π/4</sup>',z:{x:.5,y:.5}},
+  {k:'D',h:'<i>z</i>√2 e<sup><i>i</i>π/4</sup>',z:{x:1,y:1}},
+];
+const ow=$('#opts');
+OPTS.forEach(o=>{const b=document.createElement('button');b.type='button';b.className='btn';b.dataset.k=o.k;b.setAttribute('aria-pressed','false');
+  b.innerHTML=`<span style="font-family:var(--sans);font-size:14px;font-weight:700">${o.k}.</span> ${o.h}`;
+  b.addEventListener('click',()=>{stopAnim();setOp('mul');S.z2={...o.z};S.ex={choice:o.k};render();play();});ow.appendChild(b);});
+$('#exEnd').addEventListener('click',()=>{S.ex=null;render();});
+
+/* ---------- boot ---------- */
+new ResizeObserver(()=>{const w=cv.parentElement.getBoundingClientRect().width;if(Math.abs(w-W)>0.5)resize();}).observe(cv.parentElement);
+window.addEventListener('resize',resize);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+render();resize();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(draw);
+})();
+</script>
+</body>
+</html>

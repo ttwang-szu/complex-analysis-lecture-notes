@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>极限 ε–δ 演示</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>
+.below{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:12px;align-items:start}
+.verdict{margin:0;font-size:15px;font-weight:600}
+.verdict.ok{color:var(--target)} .verdict.no{color:var(--w)}
+.defn{font-family:var(--math);font-size:17px;text-align:center;margin:0;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" aria-label="演示目录">
+    <a href="index.html">← 全部演示</a>
+    <a href="01-multiplication.html">1 乘法</a><a href="02-roots.html">2 方根</a><a href="03-z-squared.html">3 w = z²</a><a href="04-argument.html">4 幅角</a><a href="05-joukowski.html">5 Joukowski</a><a href="06-riemann-sphere.html">6 复球面</a><a href="07-limit-paths.html">7 极限路径</a><a href="08-limit-epsilon-delta.html" aria-current="page">8 ε–δ</a><a href="09-curve-bounded.html">9 曲线上有界</a>
+  </nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 1 章 §1.5 极限与连续性 · 极限的定义 · 图 1.20</p>
+    <h1>极限的 ε–δ 定义</h1>
+    <p class="lede">任给 A 的 ε 邻域（绿色），都能找到 z₀ 的去心 δ 邻域（蓝色），使其中每个点的像 f(z) 都落进 ε 邻域。像点落在里面标绿色，落在外面标红色。</p>
+  </header>
+
+  <div class="row" style="margin-bottom:10px">
+    <label for="fn" class="hint" style="font-size:13px">函数</label>
+    <select id="fn" style="font-family:var(--math);font-size:16px"></select>
+    <button class="btn primary" id="shrink" type="button">▶ ε 逐渐变小</button>
+    <button class="btn" id="approach" type="button">▶ z 趋于 z₀</button>
+  </div>
+
+  <div class="planes">
+    <div class="stage"><span class="tag">z 平面：z₀ 的去心 δ 邻域</span><canvas id="zp" tabindex="0" aria-label="z 平面"></canvas><div class="status" id="status" aria-live="polite"></div></div>
+    <div class="stage"><span class="tag">w 平面：A 的 ε 邻域</span><canvas id="wp" tabindex="0" aria-label="w 平面"></canvas></div>
+  </div>
+  <p class="hint" style="margin-top:6px">拖动左边红点 z，看 f(z) 在右边的位置；对极限存在的函数，也可以拖动 z₀。</p>
+
+  <div class="below">
+    <div class="card">
+      <h2>定义</h2>
+      <p class="defn">∀ ε &gt; 0，∃ δ &gt; 0，使得<br>0 &lt; |z − z₀| &lt; δ　⟹　|f(z) − A| &lt; ε</p>
+      <div class="slider"><label for="eps">ε</label><input type="range" id="eps" min="0.03" max="1" step="0.01" value="0.6"><output id="eps-out" for="eps"></output></div>
+      <div class="slider"><label for="del">δ</label><input type="range" id="del" min="0.01" max="1" step="0.01" value="0.3"><output id="del-out" for="del"></output></div>
+      <label class="check"><input type="checkbox" id="auto" checked> δ 自动取 δ(ε)（极限存在时）</label>
+      <label class="check"><input type="checkbox" id="showB"> 假设还有另一个极限 B（性质 5.1：唯一性）</label>
+    </div>
+    <div class="card" id="readout" aria-live="polite"></div>
+    <div class="card" id="probe" aria-live="polite"></div>
+  </div>
+</div>
+<script src="assets/plane.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,TAU,EPS,$,niceReal,trimNum,cplxHTML,cplxText,MATH_FONT,SANS_FONT}=CF;
+const r4=v=>trimNum(v,3);
+/* 每个函数：f、默认 z₀、是否有极限、δ(ε) 及其公式 */
+const FNS=[
+  {label:'f(z) = z²',f:C.sq,z0:{x:1,y:0.5},lim:true,
+   delta:(e,z0)=>{const m=C.abs(z0);return Math.sqrt(m*m+e)-m;},
+   why:'|z² − z₀²| = |z − z₀|·|z + z₀| &lt; δ(δ + 2|z₀|)，令它等于 ε：δ = √(|z₀|² + ε) − |z₀|'},
+  {label:'f(z) = 2z + 1',f:z=>({x:2*z.x+1,y:2*z.y}),z0:{x:0.5,y:0.5},lim:true,
+   delta:e=>e/2,why:'|f(z) − A| = 2|z − z₀| &lt; 2δ，取 δ = ε/2'},
+  {label:'f(z) = 1/z',f:C.inv,z0:{x:1,y:0},lim:true,
+   delta:(e,z0)=>{const m=C.abs(z0);return e*m*m/(1+e*m);},
+   why:'|1/z − 1/z₀| = |z − z₀| / (|z||z₀|) &lt; δ / ((|z₀| − δ)|z₀|)，令它等于 ε：δ = ε|z₀|² / (1 + ε|z₀|)'},
+  {label:'f(z) = Re z / |z|（课件例题）',f:z=>({x:z.x/C.abs(z),y:0}),z0:{x:0,y:0},lim:false,A:{x:1,y:0},
+   why:'在任何去心圆盘里，f 都取遍 [−1, 1] 中的值（正实轴上为 1，虚轴上为 0），不可能都落进 A = 1 的 ε 邻域。'},
+  {label:'f(z) = z̄ / z',f:z=>C.div(C.conj(z),z),z0:{x:0,y:0},lim:false,A:{x:1,y:0},
+   why:'z = re^{iθ} 时 f(z) = e^{−2iθ}，只与方向有关：任何去心圆盘的像都是整个单位圆，不可能都落进 A = 1 的 ε 邻域。'},
+];
+const S={fn:0,z0:{x:1,y:0.5},eps:0.6,del:0.3,auto:true,z:{x:1.15,y:0.6},trail:null,showB:false,bOff:{x:0.6,y:0.3}};
+let anim=null;
+const F=()=>FNS[S.fn];
+const A=()=>F().lim?F().f(S.z0):F().A;
+const B=()=>C.add(A(),S.bOff);
+const rB=()=>C.abs(S.bOff)/2;
+function epsFromB(){if(!S.showB)return;S.eps=rB();$('#eps').value=S.eps;$('#eps-out').textContent=r4(S.eps);syncDelta();}
+function stop(){if(anim){anim.stop();anim=null;}S.trail=null;$('#status').innerHTML='';}
+function syncDelta(){if(S.auto&&F().lim){S.del=Math.max(0.005,F().delta(S.eps,S.z0));}const el=$('#del');el.value=Math.min(1,S.del);$('#del-out').textContent=r4(S.del);}
+
+/* 去心 δ 邻域内的采样点 */
+function samples(){
+  const pts=[],R=16,M=90;
+  for(let k=1;k<=R;k++){const r=S.del*(k/R)*0.999;for(let j=0;j<M;j++){pts.push(C.add(S.z0,C.polar(r,TAU*j/M+k*0.13)));}}
+  [0.02,0.05,0.1].forEach(q=>{for(let j=0;j<M;j++)pts.push(C.add(S.z0,C.polar(S.del*q,TAU*j/M)));});
+  return pts;
+}
+function check(){
+  const a=A(),b=B(),f=F().f;let worst=0,out=0,inB=0,maxAbs=0;const pts=samples();
+  const imgs=pts.map(p=>{const w=f(p),d=C.dist(w,a);if(isFinite(d)){worst=Math.max(worst,d);maxAbs=Math.max(maxAbs,C.abs(w));if(d>=S.eps)out++;if(S.showB&&C.dist(w,b)<rB())inB++;}return{w,d};});
+  return{pts,imgs,worst,out,inB,maxAbs,n:pts.length};
+}
+
+const ZP=new CF.Plane($('#zp'),{range:1.2,maxVh:0.6,render:drawZ,names:['x','y']});
+const WP=new CF.Plane($('#wp'),{range:1.5,maxVh:0.6,render:drawW,names:['u','v']});
+ZP.addHandle({get:()=>S.z,set:p=>{stop();if(C.dist(p,S.z0)<1e-4)return;S.z=p;update();}});
+ZP.addHandle({enabled:()=>F().lim,get:()=>S.z0,set:p=>{stop();if(S.fn===2&&C.abs(p)<0.4)return;const d=C.sub(S.z,S.z0);S.z0=C.clean(p);S.z=C.add(S.z0,d);syncDelta();update();}});
+WP.addHandle({enabled:()=>S.showB,get:()=>B(),set:p=>{stop();let d=C.sub(p,A());if(C.abs(d)<0.12)d=C.scale(d,0.12/Math.max(C.abs(d),1e-9));S.bOff=d;epsFromB();update();}});
+function views(){ZP.center=S.z0;const a=A();WP.center=F().lim?a:{x:0,y:0};}
+
+let cache=null;
+function drawZ(P){
+  const V=P.V;P.grid({step:0.25,labStep:0.5,unit:false});
+  cache=check();
+  P.circle(S.z0,S.del,V.z1,2,[6,4]);
+  const c=P.ctx,Z=P.toS(S.z0);c.save();c.beginPath();c.arc(Z.X,Z.Y,S.del*P.ppu,0,TAU);c.fillStyle=V.fill1;c.fill();c.restore();
+  cache.pts.forEach((p,i)=>{if(i%3)return;const Q=P.toS(p);c.fillStyle=cache.imgs[i].d<S.eps?V.target:V.w;c.fillRect(Q.X-1,Q.Y-1,2,2);});
+  P.line(S.z0,C.add(S.z0,C.polar(S.del,-PI/4)),V.z1,1.5);
+  P.wlabel(C.add(S.z0,C.polar(S.del/2,-PI/4)),'δ',V.z1,{dx:10,dy:8,size:17});
+  if(S.trail)P.path(S.trail.z,V.violet,2.5);
+  /* 去心：z₀ 画成空心圆 */
+  c.save();c.beginPath();c.arc(Z.X,Z.Y,6,0,TAU);c.fillStyle=V.surface;c.fill();c.lineWidth=2.5;c.strokeStyle=V.ink;c.stroke();c.restore();
+  P.wlabel(S.z0,'z₀',V.ink,{dx:-16,dy:-14,size:17});
+  const inside=C.dist(S.z,S.z0)<S.del;
+  P.dot(S.z,V.w,7,ZP.drag);P.wlabel(S.z,'z',V.w,{dx:14,dy:-12,size:17});
+}
+function drawW(P){
+  const V=P.V,a=A();P.grid({step:0.25,labStep:0.5,unit:F().lim?false:true});
+  const c=P.ctx,Q0=P.toS(a);
+  c.save();c.beginPath();c.arc(Q0.X,Q0.Y,S.eps*P.ppu,0,TAU);c.fillStyle='rgba(28,134,102,.14)';c.fill();c.restore();
+  P.circle(a,S.eps,V.target,2.5,[6,4]);
+  if(cache)cache.imgs.forEach(im=>{if(!isFinite(im.w.x))return;const Q=P.toS(im.w);c.fillStyle=im.d<S.eps?V.target:V.w;c.fillRect(Q.X-1.25,Q.Y-1.25,2.5,2.5);});
+  P.line(a,C.add(a,C.polar(S.eps,-PI/4)),V.target,1.5);
+  P.wlabel(C.add(a,C.polar(S.eps/2,-PI/4)),'ε',V.target,{dx:10,dy:8,size:17});
+  if(S.showB){const b=B(),QB=P.toS(b);c.save();c.beginPath();c.arc(QB.X,QB.Y,rB()*P.ppu,0,TAU);c.fillStyle='rgba(191,118,11,.14)';c.fill();c.restore();
+    P.circle(b,rB(),V.z2,2.5,[6,4]);P.line(a,b,V.z2,1.25,[3,4]);P.dot(b,V.z2,7,WP.drag);P.wlabel(b,'B',V.z2,{dx:14,dy:-14,size:18});}
+  if(S.trail)P.path(S.trail.w,V.violet,2.5);
+  P.dot(a,V.ink,5);P.wlabel(a,'A',V.ink,{dx:-14,dy:-14,size:17});
+  const w=F().f(S.z);if(isFinite(w.x)){P.dot(w,V.w,7);P.wlabel(w,'f(z)',V.w,{dx:22,dy:-14,size:16});}
+}
+
+function readoutHTML(){
+  const fn=F(),ok=cache&&cache.out===0,a=A();
+  let h=`<h2>${fn.lim?'极限存在':'极限不存在'}：lim<sub>z→${fn.lim?cplxText(S.z0):'0'}</sub> ${fn.label.replace(/（.*）/,'').replace('f(z) = ','')} ${fn.lim?'= '+cplxHTML(a):''}</h2>`;
+  h+=`<table class="rt"><tbody>
+    <tr><td>ε</td><td>${r4(S.eps)}</td></tr>
+    <tr><td>δ</td><td>${r4(S.del)}${fn.lim&&S.auto?'　<small>= δ(ε)</small>':''}</td></tr>
+    <tr><td>max |f(z) − A|</td><td>${cache?r4(cache.worst):'—'}　<small>在去心 δ 邻域内</small></td></tr>
+    ${fn.lim&&cache?`<tr><td>max |f(z)|</td><td>${r4(cache.maxAbs)} ${cache.maxAbs<=C.abs(a)+S.eps+1e-9?'&lt;':'&gt;'} |A| + ε = ${r4(C.abs(a)+S.eps)}　<small>局部有界（性质 5.2）</small></td></tr>`:''}</tbody></table>`;
+  h+=`<p class="verdict ${ok?'ok':'no'}">${ok?'✓ 去心 δ 邻域的像全部落在 ε 邻域内':'✗ 有像点落在 ε 邻域外（红色）'}</p>`;
+  if(S.showB&&cache)h+=`<div class="why"><p>ε = |A − B|/2 = ${r4(rB())}：两个圆互不相交</p><p>B 的圆里的像点：${cache.inB} 个</p><p class="note">${cache.inB===0&&cache.out===0?'f(z) 被 A 的圆“收走”了，进不了 B 的圆，所以 B 不可能也是极限：极限唯一。':'把 δ 取成 δ(ε)，像点就全部进入 A 的圆。'}</p></div>`;
+  h+=`<div class="why"><p class="note">${fn.why}</p>${fn.lim?'':'<p class="note">试试：把 δ 调得很小，红色的像点依然存在。</p>'}</div>`;
+  return h;
+}
+function probeHTML(){
+  const a=A(),w=F().f(S.z),dz=C.dist(S.z,S.z0),dw=C.dist(w,a);
+  return`<h2>红点</h2><table class="rt"><tbody>
+    <tr><td><i>z</i></td><td>${cplxHTML(S.z)}</td><td>|z − z₀| = ${r4(dz)} ${dz<S.del?'&lt;':'≥'} δ</td></tr>
+    <tr><td>f(z)</td><td>${isFinite(w.x)?cplxHTML(w):'—'}</td><td>|f(z) − A| = ${r4(dw)} ${dw<S.eps?'&lt;':'≥'} ε</td></tr></tbody></table>`;
+}
+function update(){views();ZP.draw();WP.draw();$('#readout').innerHTML=readoutHTML();$('#probe').innerHTML=probeHTML();}
+
+function loadFn(i){
+  stop();S.fn=i;const fn=F();S.z0={...fn.z0};S.eps=0.6;$('#eps').value=0.6;$('#eps-out').textContent=r4(0.6);
+  if(!fn.lim)S.del=0.5;syncDelta();S.z=C.add(S.z0,C.polar(S.del*0.7,PI/5));
+  $('#auto').disabled=!fn.lim;$('#showB').disabled=!fn.lim;if(!fn.lim){S.showB=false;$('#showB').checked=false;}epsFromB();update();
+}
+const sel=$('#fn');FNS.forEach((f,i)=>{const o=document.createElement('option');o.value=i;o.textContent=f.label;sel.appendChild(o);});
+sel.addEventListener('change',()=>loadFn(+sel.value));
+$('#eps').addEventListener('input',e=>{stop();S.eps=+e.target.value;$('#eps-out').textContent=r4(S.eps);syncDelta();update();});
+$('#del').addEventListener('input',e=>{stop();S.del=+e.target.value;S.auto=false;$('#auto').checked=false;$('#del-out').textContent=r4(S.del);update();});
+$('#auto').addEventListener('change',e=>{S.auto=e.target.checked;syncDelta();update();});
+$('#showB').addEventListener('change',e=>{stop();S.showB=e.target.checked;if(S.showB){S.auto=true;$('#auto').checked=true;}epsFromB();update();});
+$('#shrink').addEventListener('click',()=>{
+  stop();const e0=Math.max(S.eps,0.6),fn=F(),d0=S.del;
+  $('#status').innerHTML=`<span>${fn.lim?'ε 变小时，δ 跟着变小，像点始终留在 ε 邻域内。':'ε 和 δ 一起变小，红色像点始终存在。'}</span>`;
+  anim=CF.animate(5000,t=>{S.eps=e0*Math.pow(0.05/e0,CF.ease(t));$('#eps').value=S.eps;$('#eps-out').textContent=r4(S.eps);
+    if(fn.lim&&S.auto)syncDelta();else{S.del=d0*S.eps/e0;$('#del').value=S.del;$('#del-out').textContent=r4(S.del);}
+    if(C.dist(S.z,S.z0)>=S.del)S.z=C.add(S.z0,C.polar(S.del*0.7,PI/5));update();},()=>{anim=null;});
+});
+$('#approach').addEventListener('click',()=>{
+  stop();const f=F().f,r0=Math.max(C.dist(S.z,S.z0),S.del*0.9),t0=Math.atan2(S.z.y-S.z0.y,S.z.x-S.z0.x);
+  S.trail={z:[],w:[]};$('#status').innerHTML='<span>z 沿螺旋线趋于 z₀，看 f(z) 是否趋于 A。</span>';
+  anim=CF.animate(5000,t=>{const s=1-0.98*CF.ease(t);S.z=C.add(S.z0,C.polar(r0*s,t0+6*PI*t));S.trail.z.push(S.z);S.trail.w.push(f(S.z));update();},()=>{anim=null;});
+});
+{const h=CF.hash,i=parseInt(h.get('fn'),10);if(i>=0&&i<FNS.length)sel.value=String(i);}
+{const h=CF.hash;if(h.get('b')==='1'){S.showB=true;$('#showB').checked=true;}}
+ZP.resize();WP.resize();loadFn(+sel.value);
+{const e=parseFloat(CF.hash.get('eps'));if(e>=0.03&&e<=1&&!S.showB){S.eps=e;$('#eps').value=e;$('#eps-out').textContent=r4(e);syncDelta();S.z=C.add(S.z0,C.polar(S.del*0.7,PI/5));update();}}
+})();
+</script>
+</body>
+</html>

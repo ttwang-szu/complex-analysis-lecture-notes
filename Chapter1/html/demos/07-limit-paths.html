@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>极限与路径演示</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>
+.plist{display:grid;gap:6px}
+.pitem{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-family:var(--math);font-size:15.5px;padding:4px 8px;border-radius:8px;background:var(--chip)}
+.pitem b{width:14px;height:14px;border-radius:50%;display:inline-block}
+.pitem button{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:13px;padding:2px 6px;border-radius:6px}
+.pitem button:hover{background:var(--chip-hover);color:var(--ink)}
+.verdict{margin:0;font-size:14.5px;font-weight:500}
+.verdict.no{color:var(--w)} .verdict.yes{color:var(--target)}
+.scale{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+.scale i{display:inline-block;height:10px;flex:1;border-radius:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" aria-label="演示目录">
+    <a href="index.html">← 全部演示</a>
+    <a href="01-multiplication.html">1 乘法</a><a href="02-roots.html">2 方根</a><a href="03-z-squared.html">3 w = z²</a><a href="04-argument.html">4 幅角</a><a href="05-joukowski.html">5 Joukowski</a><a href="06-riemann-sphere.html">6 复球面</a><a href="07-limit-paths.html" aria-current="page">7 极限路径</a><a href="08-limit-epsilon-delta.html">8 ε–δ</a><a href="09-curve-bounded.html">9 曲线上有界</a>
+  </nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 1 章 §1.5 极限与连续性 · 图 1.20</p>
+    <h1>极限与趋近的路径</h1>
+    <p class="lede"><span class="m">z</span> → 0 的极限存在，要求沿<strong>任何</strong>路径趋近都得到同一个值。颜色表示函数值：蓝色为负，红色为正。让几个点沿不同路径同时走向原点，看它们的函数值是否趋于同一个数。</p>
+  </header>
+
+  <main class="layout">
+    <section class="stage-col">
+      <div class="stage">
+        <canvas id="plane" tabindex="0" aria-label="函数值热图与趋近路径"></canvas>
+        <div class="status" id="status" aria-live="polite"></div>
+      </div>
+      <div class="scale" id="scale" aria-hidden="true"></div>
+      <div class="stage">
+        <span class="tag">沿各路径的函数值（横轴：到原点的距离 |z|，越往右越接近 0）</span>
+        <canvas id="chart" aria-label="沿各路径的函数值曲线"></canvas>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="card">
+        <h2>函数</h2>
+        <select id="fn" aria-label="选择函数" style="font-family:var(--math);font-size:16px"></select>
+        <p class="hint" id="fnNote"></p>
+        <button class="btn primary" id="play" type="button">▶ 一起走向原点</button>
+      </div>
+
+      <div class="card">
+        <h2>路径</h2>
+        <div class="plist" id="plist"></div>
+        <div class="presets">
+          <button class="btn" type="button" data-add="ray:0">正实轴</button>
+          <button class="btn" type="button" data-add="ray:90">虚轴</button>
+          <button class="btn" type="button" data-add="ray:45">直线 y = x</button>
+          <button class="btn" type="button" data-add="ray:150">射线 150°</button>
+          <button class="btn" type="button" data-add="para:1">抛物线 y = x²</button>
+        </div>
+        <p class="hint">拖动路径末端的圆点可以改变方向（射线）或开口大小（抛物线 y = kx²）。最多 5 条。</p>
+      </div>
+
+      <div class="card" id="verdict" aria-live="polite"></div>
+
+      <div class="card">
+        <h2>ε–δ 定义</h2>
+        <label class="check"><input type="checkbox" id="epsOn"> 在图上标出 |f(z) − A| &lt; ε 的区域</label>
+        <div class="slider"><label for="eps">ε</label><input type="range" id="eps" min="0.02" max="0.5" step="0.01" value="0.15"><output id="eps-out" for="eps"></output></div>
+        <p class="hint" id="epsNote"></p>
+      </div>
+    </aside>
+  </main>
+</div>
+<script src="assets/plane.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,TAU,EPS,$,trimNum,MATH_FONT,SANS_FONT}=CF;
+const FNS=[
+  {id:'re',label:'f(z) = Re z / |z|',f:(x,y)=>x/Math.hypot(x,y),amp:1,A:null,note:'课件例题：沿正实轴得 1，沿虚轴得 0，极限不存在。',paths:['ray:0','ray:90']},
+  {id:'xy',label:'f(z) = xy / (x² + y²)',f:(x,y)=>x*y/(x*x+y*y),amp:0.5,A:null,note:'课件例题：沿 y = x 得 1/2，沿虚轴得 0，所以在原点不连续。',paths:['ray:45','ray:90']},
+  {id:'par',label:'f(z) = x²y / (x⁴ + y²)',f:(x,y)=>x*x*y/(x**4+y*y),amp:0.5,A:null,note:'沿任何直线趋近都得 0，但沿抛物线 y = x² 得 1/2：只检查直线是不够的。',paths:['ray:0','ray:45','ray:120','para:1']},
+  {id:'ok',label:'f(z) = xy² / (x² + y²)',f:(x,y)=>x*y*y/(x*x+y*y),amp:0.5,A:0,note:'对照：|f(z)| ≤ |x| ≤ |z|，极限存在且等于 0。取 δ = ε 即可。',paths:['ray:0','ray:45','ray:120','para:2']},
+];
+const COLORS=['z2','violet','target','ink','muted'];
+const S={fn:0,paths:[],t:1,eps:0.15,epsOn:false,anim:null};
+let anim=null,heat=null,heatKey='';
+const fn=()=>FNS[S.fn];
+const RMAX=0.9;
+
+function mkPath(spec){const[t,v]=spec.split(':');return t==='ray'?{type:'ray',phi:+v*PI/180}:{type:'para',k:+v};}
+/* 路径上 s ∈ (0,1] 对应的点（s = 1 为起点，s → 0 趋于原点） */
+function pointAt(p,s){
+  if(p.type==='ray')return C.polar(RMAX*s,p.phi);
+  const x=paraX(p)*s;return{x,y:p.k*x*x};
+}
+function paraX(p){return Math.min(0.8,Math.sqrt(0.85/Math.max(Math.abs(p.k),1e-9)));}
+function pathName(p){
+  if(p.type==='ray'){const d=Math.round(p.phi*180/PI);const m={0:'正实轴',90:'正虚轴',180:'负实轴',270:'负虚轴',45:'y = x',135:'y = −x'}[((d%360)+360)%360];return m?(/^[a-z]/.test(m)?`沿 ${m}`:`沿${m}`):`沿射线 arg z = ${d}°`;}
+  const k=trimNum(p.k,2);return`沿抛物线 y = ${k==='1'?'':k==='-1'?'−':k}x²`;
+}
+function limAlong(p){const z=pointAt(p,1e-7);return fn().f(z.x,z.y);}
+const handleAt=p=>{if(p.type==='ray')return C.polar(RMAX,p.phi);const x=paraX(p);return{x,y:p.k*x*x};};
+
+/* ---------- 颜色插值 ---------- */
+const cc=document.createElement('canvas').getContext('2d');
+function rgb(col){cc.fillStyle='#000';cc.fillStyle=col;const s=cc.fillStyle;if(s[0]==='#')return[parseInt(s.slice(1,3),16),parseInt(s.slice(3,5),16),parseInt(s.slice(5,7),16)];const m=s.match(/[\d.]+/g);return[+m[0],+m[1],+m[2]];}
+
+/* ---------- 热图（离屏缓存） ---------- */
+function buildHeat(P){
+  const V=P.V,key=[S.fn,P.W,P.H,P.range,V.surface,V.z1,V.w,S.epsOn,S.eps].join('|');
+  if(key===heatKey&&heat)return heat;
+  const sc=3,w=Math.ceil(P.W/sc),h=Math.ceil(P.H/sc),off=document.createElement('canvas');off.width=w;off.height=h;
+  const g=off.getContext('2d'),img=g.createImageData(w,h),d=img.data,F=fn(),bg=rgb(V.surface),neg=rgb(V.z1),pos=rgb(V.w),ok=rgb(V.target);
+  const A=bandCenter();
+  for(let j=0;j<h;j++)for(let i=0;i<w;i++){
+    const p=P.toW((i+.5)*sc,(j+.5)*sc);let v=F.f(p.x,p.y),col,a;
+    if(!isFinite(v))v=0;
+    if(S.epsOn){const inside=Math.abs(v-A)<S.eps;col=inside?ok:bg;a=inside?0.38:0;}
+    else{const u=Math.max(-1,Math.min(1,v/F.amp));col=u<0?neg:pos;a=Math.pow(Math.abs(u),0.8)*0.62;}
+    const o=(j*w+i)*4;d[o]=bg[0]+(col[0]-bg[0])*a;d[o+1]=bg[1]+(col[1]-bg[1])*a;d[o+2]=bg[2]+(col[2]-bg[2])*a;d[o+3]=255;
+  }
+  g.putImageData(img,0,0);heat=off;heatKey=key;return off;
+}
+function bandCenter(){const F=fn();if(F.A!==null)return F.A;return S.paths.length?limAlong(S.paths[0]):0;}
+
+/* ---------- 画布 ---------- */
+const P=new CF.Plane($('#plane'),{range:1,maxVh:0.56,aspect:0.85,render:draw});
+function draw(P){
+  const V=P.V,c=P.ctx,H=buildHeat(P);
+  c.save();c.imageSmoothingEnabled=true;c.drawImage(H,0,0,P.W,P.H);c.restore();
+  P.grid({step:0.25,labStep:0.5,unit:false});
+  if(S.epsOn&&fn().A!==null){const dlt=S.eps;P.circle({x:0,y:0},dlt,V.ink,2,[5,4]);P.wlabel({x:dlt*0.72,y:-dlt*0.72},'δ = ε',V.ink,{dx:12,dy:10,align:'left',font:'italic 600 14px '+MATH_FONT});}
+  S.paths.forEach((p,i)=>{
+    const col=V[COLORS[i%COLORS.length]],pts=[];for(let j=0;j<=160;j++)pts.push(pointAt(p,j/160));
+    P.path(pts,col,2.5,{alpha:.9});
+    P.dot(handleAt(p),col,6,P.drag&&P.drag.idx===i);
+    const z=pointAt(p,S.t);if(S.t<1)P.dot(z,col,7);
+  });
+  P.dot({x:0,y:0},V.ink,4);
+}
+function syncHandles(){P.handles=[];S.paths.forEach((p,i)=>P.addHandle({idx:i,get:()=>handleAt(p),set:q=>{stop();if(p.type==='ray')p.phi=Math.atan2(q.y,q.x);else{const x=Math.max(0.2,q.x);p.k=Math.max(-3,Math.min(3,q.y/(x*x)));}heatKey='';update();}}));}
+
+/* ---------- 曲线图 ---------- */
+const CH=new CF.Chart($('#chart'),{render:drawChart,aspect:0.42,maxVh:0.32,minH:170});
+function drawChart(G){
+  const V=G.V,F=fn(),a=F.amp*1.15;
+  G.setScale(1,0,-a,a);
+  const yt=[];const st=F.amp>=1?0.5:0.25;for(let v=-Math.floor(a/st)*st;v<=a+1e-9;v+=st)yt.push({v,t:trimNum(v,2),strong:Math.abs(v)<1e-9});
+  const xt=[1,0.75,0.5,0.25,0].map(v=>({v,t:trimNum(v,2)}));
+  if(S.epsOn){const A=bandCenter(),c=G.ctx;c.save();c.fillStyle=V.target;c.globalAlpha=.16;c.fillRect(G.pad.l,G.Y(A+S.eps),G.W-G.pad.l-G.pad.r,G.Y(A-S.eps)-G.Y(A+S.eps));c.restore();}
+  G.axes({yticks:yt,xticks:xt,xname:'|z| → 0'});
+  S.paths.forEach((p,i)=>{
+    const col=V[COLORS[i%COLORS.length]],pts=[];
+    for(let j=0;j<=200;j++){const s=1-j/200*(1-Math.max(S.t,0.0005));if(s<=0)break;const z=pointAt(p,s),r=C.abs(z);if(r<=1)pts.push({x:r,y:F.f(z.x,z.y)});}
+    G.series(pts,col,2.5);
+    const L=limAlong(p);G.hline(L,col,1.25,[4,4],.7);
+    const last=pts[pts.length-1];if(last)G.pdot(last.x,last.y,col,4.5);
+  });
+}
+
+/* ---------- 面板 ---------- */
+function renderList(){
+  const V=CF.vars();
+  $('#plist').innerHTML=S.paths.map((p,i)=>`<div class="pitem"><b style="background:${V[COLORS[i%COLORS.length]]}"></b><span>${pathName(p)} → ${trimNum(limAlong(p),3)}</span><button type="button" data-rm="${i}" aria-label="删除这条路径">删除</button></div>`).join('')||'<p class="hint">还没有路径。</p>';
+  document.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click',()=>{stop();S.paths.splice(+b.dataset.rm,1);syncHandles();heatKey='';update();}));
+}
+function renderVerdict(){
+  const F=fn(),L=S.paths.map(limAlong),same=L.length>1&&L.every(v=>Math.abs(v-L[0])<1e-3);
+  let h='<h2>结论</h2>';
+  if(L.length<2)h+='<p class="hint">至少选两条路径来比较。</p>';
+  else if(!same)h+=`<p class="verdict no">沿不同路径得到不同的值（${[...new Set(L.map(v=>trimNum(v,3)))].join('、')}），所以 lim<sub>z→0</sub> f(z) 不存在。</p>`;
+  else if(F.A===null)h+=`<p class="verdict">这几条路径的值都是 ${trimNum(L[0],3)}，但这还不能说明极限存在。${F.id==='par'?'加一条抛物线试试。':'换一条路径试试。'}</p>`;
+  else h+=`<p class="verdict yes">所有路径的值都趋于 0。事实上 |f(z)| ≤ |x| ≤ |z|，所以 lim<sub>z→0</sub> f(z) = 0。</p>`;
+  $('#verdict').innerHTML=h;
+  const A=bandCenter();
+  $('#epsNote').innerHTML=F.A!==null?`绿色区域是 |f(z) − 0| &lt; ε 的点。取 δ = ε，去心圆盘 0 &lt; |z| &lt; δ（虚线圆）整个落在绿色区域里，这正是极限定义的要求。`:
+    `以 A = ${trimNum(A,3)}（第一条路径的值）为候选极限。无论 δ 多小，原点附近的去心圆盘里总有不在绿色区域的点，所以找不到合适的 δ。`;
+}
+function update(){renderList();renderVerdict();P.draw();CH.draw();}
+function stop(){if(anim){anim.stop();anim=null;}S.t=1;$('#status').innerHTML='';}
+function loadFn(i){
+  stop();S.fn=i;S.paths=fn().paths.map(mkPath);syncHandles();heatKey='';$('#fnNote').textContent=fn().note;
+  const F=fn();$('#scale').innerHTML=S.epsOn?'':`<span>${trimNum(-F.amp,2)}</span><i style="background:linear-gradient(90deg,var(--z1),var(--surface),var(--w))"></i><span>${trimNum(F.amp,2)}</span>`;
+  update();
+}
+const sel=$('#fn');FNS.forEach((F,i)=>{const o=document.createElement('option');o.value=i;o.textContent=F.label;sel.appendChild(o);});
+sel.addEventListener('change',()=>loadFn(+sel.value));
+document.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>{if(S.paths.length>=5)return;stop();S.paths.push(mkPath(b.dataset.add));syncHandles();update();}));
+$('#play').addEventListener('click',()=>{
+  stop();$('#status').innerHTML='<span>各点沿自己的路径走向原点……</span>';
+  anim=CF.animate(4500,t=>{S.t=1-(1-0.004)*CF.ease(t);P.draw();CH.draw();},()=>{anim=null;
+    const L=S.paths.map(limAlong),same=L.length>1&&L.every(v=>Math.abs(v-L[0])<1e-3);
+    $('#status').innerHTML=`<span>${same?'各路径的值趋于同一个数 '+trimNum(L[0],3):'各路径趋于不同的值，极限不存在'}。</span>`;});
+});
+$('#epsOn').addEventListener('change',e=>{S.epsOn=e.target.checked;heatKey='';loadFnScale();update();});
+CF.bindRange('#eps',v=>trimNum(v,2),v=>{S.eps=v;heatKey='';if(P.W)update();});
+function loadFnScale(){const F=fn();$('#scale').innerHTML=S.epsOn?'':`<span>${trimNum(-F.amp,2)}</span><i style="background:linear-gradient(90deg,var(--z1),var(--surface),var(--w))"></i><span>${trimNum(F.amp,2)}</span>`;}
+CF.onTheme(()=>{heatKey='';renderList();});
+P.resize();CH.resize();
+{const f=parseInt(CF.hash.get('fn'),10);const i=f>=0&&f<FNS.length?f:0;sel.value=String(i);loadFn(i);}
+})();
+</script>
+</body>
+</html>

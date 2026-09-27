@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>复球面演示</title>
+<link rel="stylesheet" href="assets/demo.css">
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" aria-label="演示目录">
+    <a href="index.html">← 全部演示</a>
+    <a href="01-multiplication.html">1 乘法</a><a href="02-roots.html">2 方根</a><a href="03-z-squared.html">3 w = z²</a><a href="04-argument.html">4 幅角</a><a href="05-joukowski.html">5 Joukowski</a><a href="06-riemann-sphere.html" aria-current="page">6 复球面</a><a href="07-limit-paths.html">7 极限路径</a><a href="08-limit-epsilon-delta.html">8 ε–δ</a><a href="09-curve-bounded.html">9 曲线上有界</a>
+  </nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 1 章 §1.2 复球面与无穷远点 · §1.3 无穷远点的邻域 · 图 1.9</p>
+    <h1>复球面与球极投影</h1>
+    <p class="lede">球面在原点 <span class="m">O</span>（南极 <span class="m">S</span>）与复平面相切。从北极 <span class="m">N</span> 向平面上的点 <span class="m c1">z</span> 连线，与球面交于 <span class="m cw">P</span>。平面上的点离原点越远，<span class="m cw">P</span> 就越靠近 <span class="m">N</span>：所有方向的“无穷远”都汇聚到同一个点 <span class="m">N</span>，这就是扩充复平面里唯一的 <span class="mr">∞</span>。</p>
+  </header>
+
+  <main class="layout wide">
+    <section class="stage-col">
+      <div class="stage">
+        <canvas id="scene" tabindex="0" aria-label="三维复球面。拖动蓝点 z，拖动空白处旋转视角"></canvas>
+        <div class="status" id="status" aria-live="polite"></div>
+      </div>
+      <p class="hint">拖动平面上的蓝点 <span class="m">z</span>；拖动空白处旋转视角；滚轮缩放。</p>
+    </section>
+
+    <aside class="panel">
+      <div class="card">
+        <div class="seg" role="radiogroup" aria-label="演示内容">
+          <input type="radio" name="mode" id="m-point" value="point" checked><label for="m-point">一个点</label>
+          <input type="radio" name="mode" id="m-circle" value="circle"><label for="m-circle">圆</label>
+          <input type="radio" name="mode" id="m-line" value="line"><label for="m-line">直线</label>
+          <input type="radio" name="mode" id="m-nbhd" value="nbhd"><label for="m-nbhd">∞ 的邻域</label>
+        </div>
+        <div id="modeCtl"></div>
+        <div class="row">
+          <button class="btn primary" id="toInf" type="button">▶ 让 z 趋于 ∞</button>
+          <button class="btn" id="allDir" type="button">▶ 各个方向一起</button>
+        </div>
+      </div>
+
+      <div class="card" id="readout" aria-live="polite"></div>
+
+      <div class="card">
+        <h2>视角</h2>
+        <div class="row">
+          <button class="btn" id="vSide" type="button">侧视</button>
+          <button class="btn" id="vObl" type="button">斜视</button>
+          <button class="btn" id="vTop" type="button">俯视</button>
+          <label class="check"><input type="checkbox" id="spin"> 自动旋转</label>
+        </div>
+        <div class="slider"><label for="zoom">缩放</label><input type="range" id="zoom" min="0.6" max="2.5" step="0.05" value="1"><output id="zoom-out" for="zoom"></output></div>
+      </div>
+    </aside>
+  </main>
+</div>
+<script src="assets/plane.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,TAU,EPS,$,niceReal,trimNum,cplxHTML,MATH_FONT,SANS_FONT}=CF;
+const S={R:1.5,mode:'point',z:{x:1.2,y:0.6},yaw:-0.6,el:0.42,zoom:1,spin:false,rho:0.6,beta:PI/3,anim:null,many:null};
+const L=2.5;
+let anim=null;
+
+/* 球面直径 1：S = (0,0,0)，N = (0,0,1)。P = (x, y, |z|²)/(1 + |z|²) */
+const proj=z=>{const q=z.x*z.x+z.y*z.y;return[z.x/(1+q),z.y/(1+q),q/(1+q)];};
+const N3=[0,0,1];
+
+class Scene{
+  constructor(cv){
+    this.cv=cv;this.ctx=cv.getContext('2d');this.W=0;this.H=0;
+    new ResizeObserver(()=>{const w=cv.parentElement.getBoundingClientRect().width;if(Math.abs(w-this.W)>0.5)this.resize();}).observe(cv.parentElement);
+    window.addEventListener('resize',()=>this.resize());CF.onTheme(()=>this.draw());
+  }
+  resize(){const W=this.cv.parentElement.getBoundingClientRect().width;if(!W)return;this.W=W;this.H=Math.round(Math.min(W*0.72,Math.max(320,innerHeight*0.72)));this.dpr=devicePixelRatio||1;this.cv.width=Math.round(W*this.dpr);this.cv.height=Math.round(this.H*this.dpr);this.cv.style.height=this.H+'px';this.draw();}
+  setup(){
+    this.s=Math.min(this.W/(2*L+0.6),this.H/2.6)*S.zoom;this.cx=this.W/2;this.cy=this.H*0.66;
+    this.cy_=Math.cos(S.yaw);this.sy_=Math.sin(S.yaw);this.ce=Math.cos(S.el);this.se=Math.sin(S.el);
+  }
+  /* 世界坐标 → [屏幕X, 屏幕Y, 深度]（深度小 = 离观众近） */
+  P(p){const x1=p[0]*this.cy_-p[1]*this.sy_,y1=p[0]*this.sy_+p[1]*this.cy_,z1=p[2];
+    const y2=y1*this.ce-z1*this.se,z2=y1*this.se+z1*this.ce;return[this.cx+x1*this.s,this.cy-z2*this.s,y2];}
+  /* 屏幕点 → 平面 z = 0 上的点 */
+  unP(X,Y){const x1=(X-this.cx)/this.s,z2=(this.cy-Y)/this.s,y1=z2/this.se;return{x:x1*this.cy_+y1*this.sy_,y:-x1*this.sy_+y1*this.cy_};}
+  draw(){if(!this.W)return;this.V=CF.vars();const c=this.ctx;c.setTransform(this.dpr,0,0,this.dpr,0,0);c.fillStyle=this.V.surface;c.fillRect(0,0,this.W,this.H);this.setup();render(this);}
+  poly(pts3,color,lw,o={}){
+    const c=this.ctx;c.save();c.strokeStyle=color;c.lineWidth=lw||1.5;c.globalAlpha=o.alpha??1;if(o.dash)c.setLineDash(o.dash);c.lineJoin='round';
+    c.beginPath();let pen=false;for(const p of pts3){if(!p){pen=false;continue;}const q=this.P(p);pen?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]);pen=true;}
+    if(o.fill){c.closePath();c.fillStyle=o.fill;c.fill();}c.stroke();c.restore();
+  }
+  /* 球面上的曲线：前半球实线，后半球淡虚线 */
+  sphereCurve(pts3,color,lw,o={}){
+    const cd=this.P([0,0,0.5])[2],front=[],back=[];let prev=null;
+    pts3.forEach((p,i)=>{
+      const f=this.P(p)[2]<=cd+1e-9;
+      if(f){front.push(p);back.push(null);}else{back.push(p);front.push(null);}
+      if(i&&prev!==f){if(f)back[back.length-1]=p;else front[front.length-1]=p;}
+      prev=f;
+    });
+    this.poly(back,color,(lw||1.5)*0.8,{alpha:(o.alpha??1)*0.35,dash:[3,4]});
+    this.poly(front,color,lw,{alpha:o.alpha??1});
+  }
+  dot(p,color,r,ring){const c=this.ctx,q=this.P(p);c.save();if(ring){c.beginPath();c.arc(q[0],q[1],r+5,0,TAU);c.strokeStyle=color;c.globalAlpha=.35;c.lineWidth=2;c.stroke();c.globalAlpha=1;}c.beginPath();c.arc(q[0],q[1],r,0,TAU);c.fillStyle=color;c.fill();c.lineWidth=2.5;c.strokeStyle=this.V.surface;c.stroke();c.restore();}
+  label(txt,p,color,dx,dy,font,align){const c=this.ctx,q=this.P(p);c.save();c.font=font||('italic 600 17px '+MATH_FONT);c.textAlign=align||'center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=5;c.strokeStyle=this.V.surface;c.strokeText(txt,q[0]+(dx||0),q[1]+(dy||0));c.fillStyle=color;c.fillText(txt,q[0]+(dx||0),q[1]+(dy||0));c.restore();}
+}
+const G=new Scene($('#scene'));
+
+const lin=(a,b,n)=>Array.from({length:n+1},(_,i)=>a+(b-a)*i/n);
+const on0=z=>[z.x,z.y,0];
+function circleZ(){return lin(0,TAU,240).map(t=>C.add(S.z,C.polar(S.rho,t)));}
+function lineZ(far){const d=C.polar(1,S.beta);return lin(-PI/2+0.002,PI/2-0.002,far?800:200).map(s=>C.add(S.z,C.scale(d,far?Math.tan(s):s*2.8*L/PI)));}
+
+function render(g){
+  const V=g.V,c=g.ctx;
+  /* 平面网格 */
+  for(let v=-L;v<=L+1e-9;v+=0.5){const strong=Math.abs(v)<1e-9;g.poly([[v,-L,0],[v,L,0]],strong?V.axis:V.grid,strong?1.5:1);g.poly([[-L,v,0],[L,v,0]],strong?V.axis:V.grid,strong?1.5:1);}
+  g.poly(lin(0,TAU,160).map(t=>[Math.cos(t),Math.sin(t),0]),V.gridS,1.5,{dash:[4,5]});
+  g.label('|z| = 1',[0.72,-0.72,0],V.muted,0,0,'13px '+MATH_FONT);
+  g.label('Re',[L+0.15,0,0],V.muted,0,0,'italic 15px '+MATH_FONT);g.label('Im',[0,L+0.15,0],V.muted,0,0,'italic 15px '+MATH_FONT);
+  /* 平面上的对象（被球挡住的部分先画，球面半透明覆盖） */
+  if(S.mode==='circle')g.poly(circleZ().map(on0),V.z1,2.5);
+  if(S.mode==='line'){const pts=lineZ(false).filter(p=>Math.abs(p.x)<=L&&Math.abs(p.y)<=L);g.poly(pts.map(on0),V.z1,2.5);}
+  if(S.mode==='nbhd'){
+    /* 平面上：圆 |z| = R 的外部（在画出的方框内着色，实际一直延伸到 ∞） */
+    const sq=[[-L,-L,0],[L,-L,0],[L,L,0],[-L,L,0]].map(p=>g.P(p));
+    c.save();c.beginPath();sq.forEach((q,i)=>i?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));c.closePath();
+    lin(0,TAU,180).forEach((t,i)=>{const q=g.P([S.R*Math.cos(t),S.R*Math.sin(t),0]);i?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]);});c.closePath();
+    c.fillStyle=V.fill1;c.fill('evenodd');c.restore();
+    g.poly(lin(0,TAU,240).map(t=>[S.R*Math.cos(t),S.R*Math.sin(t),0]).map(p=>Math.abs(p[0])<=L&&Math.abs(p[1])<=L?p:null),V.z1,2.5,{dash:[7,5]});
+    if(S.R<L)g.label('|z| = R',[S.R*0.71,S.R*0.71,0],V.z1,10,-10,'italic 600 14px '+MATH_FONT,'left');
+    g.label('|z| > R',[-L*0.86,-L*0.86,0],V.z1,0,0,'italic 600 15px '+MATH_FONT);
+  }
+  if(S.many)S.many.forEach(m=>{g.poly([on0(m.z0),on0(m.zc)],V.z1,1.5,{alpha:.5});});
+  const z=S.z,P3=proj(z),inPlane=Math.abs(z.x)<=L+0.01&&Math.abs(z.y)<=L+0.01;
+  /* 北极到 z 的连线（经过 P） */
+  const pointMode=S.mode==='point'&&!S.many;
+  if(pointMode){
+    if(inPlane)g.poly([N3,on0(z)],V.muted,1.5,{dash:[6,5]});
+    else{const e=C.scale(z,L/Math.max(Math.abs(z.x),Math.abs(z.y)));g.poly([N3,[e.x,e.y,0]],V.muted,1.5,{dash:[6,5],alpha:.6});}
+  }
+  /* 球面：轮廓、经线、纬线 */
+  const ctr=g.P([0,0,.5]);c.save();c.beginPath();c.arc(ctr[0],ctr[1],0.5*g.s,0,TAU);c.fillStyle=V.surface;c.globalAlpha=.55;c.fill();c.globalAlpha=1;c.strokeStyle=V.axis;c.lineWidth=1.5;c.stroke();c.restore();
+  for(let k=0;k<12;k++){const a=k*PI/6;g.sphereCurve(lin(0,PI,60).map(t=>[0.5*Math.sin(t)*Math.cos(a),0.5*Math.sin(t)*Math.sin(a),0.5-0.5*Math.cos(t)]),V.gridS,1);}
+  [0.1,0.25,0.75,0.9].forEach(h=>{const rr=Math.sqrt(h*(1-h));g.sphereCurve(lin(0,TAU,120).map(t=>[rr*Math.cos(t),rr*Math.sin(t),h]),V.gridS,1);});
+  g.sphereCurve(lin(0,TAU,160).map(t=>[0.5*Math.cos(t),0.5*Math.sin(t),0.5]),V.target,2);
+  /* 像 */
+  if(S.mode==='circle')g.sphereCurve(circleZ().map(proj),V.w,2.8);
+  if(S.mode==='line')g.sphereCurve(lineZ(true).map(proj),V.w,2.8);
+  if(S.mode==='nbhd'){
+    /* 球面上：北极 N 周围的球冠 ζ > R²/(1+R²) */
+    const h0=S.R*S.R/(1+S.R*S.R),t0=Math.acos(1-2*h0);
+    for(let j=1;j<=10;j++){const h=h0+(1-h0)*j/11,rr=Math.sqrt(h*(1-h));g.sphereCurve(lin(0,TAU,120).map(t=>[rr*Math.cos(t),rr*Math.sin(t),h]),V.w,1.25,{alpha:.55});}
+    for(let k=0;k<12;k++){const a=k*PI/6;g.sphereCurve(lin(t0,PI,30).map(t=>[0.5*Math.sin(t)*Math.cos(a),0.5*Math.sin(t)*Math.sin(a),0.5-0.5*Math.cos(t)]),V.w,1.25,{alpha:.55});}
+    const r0=Math.sqrt(h0*(1-h0));g.sphereCurve(lin(0,TAU,200).map(t=>[r0*Math.cos(t),r0*Math.sin(t),h0]),V.w,3);
+    /* 从 N 经边界纬线到平面边界圆的两条投影线 */
+    [-0.9,2.2].forEach(a=>{const zb=C.polar(S.R,a);if(S.R<=L*1.4)g.poly([N3,on0(zb)],V.muted,1.25,{dash:[5,5],alpha:.8});});
+  }
+  if(S.many){S.many.forEach(m=>{g.sphereCurve(m.trail.map(proj),V.w,2);g.dot(proj(m.zc),V.w,4.5);if(Math.abs(m.zc.x)<=L&&Math.abs(m.zc.y)<=L)g.dot(on0(m.zc),V.z1,4.5);});}
+  /* 点 */
+  g.dot([0,0,0],V.ink,4);g.label('S = O',[0,0,0],V.ink,-22,14,'italic 600 14px '+MATH_FONT);
+  g.dot(N3,V.ink,5);g.label('N ↔ ∞',N3,V.ink,0,-16,'italic 600 15px '+MATH_FONT);
+  if(S.mode==='nbhd')g.label('∞ 的邻域（球冠）',N3,V.w,46,6,'600 13px '+SANS_FONT,'left');
+  if(!S.many&&S.mode!=='nbhd'){
+    if(pointMode){g.dot(P3,V.w,7);g.label('P',P3,V.w,14,-12);}
+    if(inPlane){g.dot(on0(z),V.z1,8,G.dragging==='z');g.label('z',on0(z),V.z1,14,-14);}
+    else{const e=C.scale(z,L/Math.max(Math.abs(z.x),Math.abs(z.y)));g.label('z → ∞',[e.x,e.y,0],V.z1,0,-14,'italic 600 15px '+MATH_FONT);}
+  }
+}
+
+/* ---------- 交互 ---------- */
+const cv=G.cv;
+const pos=e=>{const r=cv.getBoundingClientRect();return{X:e.clientX-r.left,Y:e.clientY-r.top};};
+let last=null;
+cv.addEventListener('pointerdown',e=>{
+  const{X,Y}=pos(e);stopAnim();
+  const q=G.P(on0(S.z)),pad=e.pointerType==='mouse'?16:28;
+  G.dragging=S.mode!=='nbhd'&&Math.hypot(q[0]-X,q[1]-Y)<=pad?'z':'view';last={X,Y};cv.setPointerCapture(e.pointerId);e.preventDefault();
+});
+cv.addEventListener('pointermove',e=>{
+  const{X,Y}=pos(e);
+  if(!G.dragging){const q=G.P(on0(S.z));cv.style.cursor=S.mode!=='nbhd'&&Math.hypot(q[0]-X,q[1]-Y)<=16?'grab':'move';return;}
+  if(G.dragging==='z'){const p=G.unP(X,Y);S.z={x:Math.max(-L,Math.min(L,p.x)),y:Math.max(-L,Math.min(L,p.y))};update();}
+  else{S.yaw+=(X-last.X)*0.008;S.el=Math.max(0.2,Math.min(1.45,S.el+(Y-last.Y)*0.006));last={X,Y};G.draw();}
+});
+const up=()=>{G.dragging=null;G.draw();};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+cv.addEventListener('wheel',e=>{e.preventDefault();zoomCtl.set(Math.max(0.6,Math.min(2.5,S.zoom*(e.deltaY<0?1.08:1/1.08))));},{passive:false});
+cv.addEventListener('keydown',e=>{const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[e.key];if(!d)return;e.preventDefault();stopAnim();S.z={x:Math.max(-L,Math.min(L,S.z.x+d[0]*0.1)),y:Math.max(-L,Math.min(L,S.z.y+d[1]*0.1))};update();});
+
+/* ---------- 读数 ---------- */
+function readout(){
+  if(S.mode==='nbhd'){
+    const R=S.R,h0=R*R/(1+R*R),ch=1/Math.sqrt(1+R*R);
+    $('#readout').innerHTML=`<h2>无穷远点的邻域</h2>
+      <p class="fml"><i>N<sub>R</sub></i>(∞) = { <i>z</i> : |<i>z</i>| &gt; <i>R</i> } ∪ {∞}</p>
+      <table class="rt"><tbody>
+        <tr><td><i>R</i></td><td>${S.anim?trimNum(R,1):niceReal(R)}</td></tr>
+        <tr><td>边界</td><td>圆 |<i>z</i>| = <i>R</i> ⟷ 高度 ζ = <i>R</i>²/(1+<i>R</i>²) = ${trimNum(h0)} 的纬线</td></tr>
+        <tr><td>球冠大小</td><td>N 到边界纬线的距离 1/√(1+<i>R</i>²) = ${trimNum(ch,4)}</td></tr>
+      </tbody></table>
+      <div class="why"><p class="note">在平面上，它是圆 |z| = R 的<strong>外部</strong>（蓝色，一直延伸到无穷远）；在复球面上，它就是北极 N 周围的一个<strong>球冠</strong>（红色）。R 越大，球冠越小，收缩到 N。</p>
+      <p class="note">所以“∞ 的邻域”和有限点 z₀ 的 δ 邻域 |z − z₀| &lt; δ 是同一个意思：都是离这个点很近的点。去掉 N 本身，就得到去心邻域 N<sub>R</sub>*(∞) = { z : |z| &gt; R }。</p></div>`;
+    return;
+  }
+  const z=S.z,q=z.x*z.x+z.y*z.y,P3=proj(z),r=Math.sqrt(q);
+  const where=Math.abs(r-1)<1e-3?'赤道（|z| = 1）':(r<1?'南半球（|z| < 1）':'北半球（|z| > 1）');
+  let h=`<h2>对应关系</h2>
+    <p class="fml">P = ( <i>x</i>, <i>y</i>, |<i>z</i>|² ) / ( 1 + |<i>z</i>|² )</p>
+    <table class="rt"><tbody>
+      <tr><td class="c1"><i>z</i></td><td>${S.anim?'|z| = '+trimNum(r,1):cplxHTML(z)}</td><td>|z| = ${S.anim?trimNum(r,1):niceReal(r)}</td></tr>
+      <tr><td class="cw">P</td><td colspan="2">( ${trimNum(P3[0])}, ${trimNum(P3[1])}, ${trimNum(P3[2])} )</td></tr>
+      <tr><td>|PN|</td><td colspan="2">${trimNum(Math.hypot(P3[0],P3[1],P3[2]-1),4)}　<span style="font-family:var(--sans);font-size:12.5px;color:var(--muted)">P 在${where}</span></td></tr>
+    </tbody></table>
+    <div class="why"><p class="note">|z| → ∞ 时 P 的高度 |z|²/(1+|z|²) → 1，P → N。不论 z 沿哪个方向跑远，P 都趋于同一点 N，所以扩充复平面只有一个无穷远点 ∞，没有 +∞、−∞ 之分。</p></div>`;
+  if(S.mode==='circle')h+=`<div class="why"><p class="note">平面上的圆（圆心 ${C.abs(S.z)<EPS?'0':cplxHTML(S.z)}，半径 ${niceReal(S.rho)}）的像仍是球面上的圆。${Math.abs(C.abs(S.z))<1e-6?'圆心在原点时，像是一条纬线。':''}</p></div>`;
+  if(S.mode==='line')h+=`<div class="why"><p class="note">平面上的直线向两端延伸到 ∞，它的像是一个<strong>经过 N</strong> 的圆。所以在复球面上，直线可以看成“经过 ∞ 的圆”。</p></div>`;
+  $('#readout').innerHTML=h;
+}
+function modeCtl(){
+  if(S.mode==='circle'){$('#modeCtl').innerHTML=`<div class="slider"><label for="rho">半径 ρ</label><input type="range" id="rho" min="0.1" max="2" step="0.05" value="${S.rho}"><output id="rho-out" for="rho"></output></div><p class="hint">蓝点是圆心，可以拖动。</p>`;CF.bindRange('#rho',v=>niceReal(v),v=>{S.rho=v;update();});}
+  else if(S.mode==='line'){$('#modeCtl').innerHTML=`<div class="slider"><label for="beta">方向角</label><input type="range" id="beta" min="0" max="3.1416" step="0.01" value="${S.beta}"><output id="beta-out" for="beta"></output></div><p class="hint">蓝点是直线上的一点，可以拖动。试试让直线经过原点。</p>`;CF.bindRange('#beta',v=>trimNum(v*180/PI,0)+'°',v=>{S.beta=v;update();});}
+  else if(S.mode==='nbhd'){$('#modeCtl').innerHTML=`<div class="slider"><label for="Rn">半径 <span class="m">R</span></label><input type="range" id="Rn" min="0.3" max="3.4" step="0.05" value="${Math.min(3.4,S.R)}"><output id="Rn-out" for="Rn"></output></div><div class="row"><button class="btn" id="growR" type="button">▶ R 逐渐增大</button></div><p class="hint">R 越大，平面上的蓝色区域越“远”，球面上的红色球冠越小。</p>`;
+    const rc=CF.bindRange('#Rn',v=>niceReal(v),v=>{stopAnim();S.R=v;update();});
+    $('#growR').addEventListener('click',()=>{stopAnim();S.anim=true;$('#status').innerHTML='<span>R 增大：球冠向北极 N 收缩。</span>';
+      anim=CF.animate(5000,t=>{S.R=0.5*Math.exp(Math.log(40)*CF.ease(t));update();},()=>{anim=null;S.anim=null;update();$('#status').innerHTML='<span>R = 20 时，球冠几乎缩成一点 N。</span>';});});
+  }
+  else $('#modeCtl').innerHTML='';
+  $('#toInf').hidden=S.mode==='nbhd';
+}
+function update(){readout();G.draw();}
+function stopAnim(){if(anim){anim.stop();anim=null;}if(S.anim||S.many){S.anim=null;S.many=null;}$('#status').innerHTML='';}
+
+/* ---------- 动画 ---------- */
+$('#toInf').addEventListener('click',()=>{
+  stopAnim();let z0=S.z;if(C.abs(z0)<0.2)z0={x:0.3,y:0.2};const dir=C.scale(z0,1/C.abs(z0)),r0=C.abs(z0);
+  S.anim=true;$('#status').innerHTML='<span>|z| 越来越大，P 沿球面爬向北极 N。</span>';
+  anim=CF.animate(5000,t=>{const r=r0*Math.exp(Math.log(200/r0)*CF.ease(t));S.z=C.scale(dir,r);update();},()=>{anim=null;$('#status').innerHTML='<span>|z| = 200 时，P 与 N 几乎重合。</span>';});
+});
+$('#allDir').addEventListener('click',()=>{
+  stopAnim();const dirs=lin(0,TAU,9).slice(0,8).map(a=>C.polar(1,a+0.2));
+  S.many=dirs.map(d=>({z0:C.scale(d,0.4),zc:C.scale(d,0.4),trail:[C.scale(d,0.4)]}));
+  $('#status').innerHTML='<span>八个方向同时跑向无穷远，像点全部汇聚到 N。</span>';
+  anim=CF.animate(5000,t=>{const r=0.4*Math.exp(Math.log(300/0.4)*CF.ease(t));S.many.forEach((m,i)=>{m.zc=C.scale(dirs[i],r);m.trail.push(m.zc);});G.draw();},()=>{anim=null;});
+});
+function setView(yaw,el){S.yaw=yaw;S.el=el;G.draw();}
+$('#vSide').addEventListener('click',()=>setView(0,0.2));
+$('#vObl').addEventListener('click',()=>setView(-0.6,0.42));
+$('#vTop').addEventListener('click',()=>setView(0,1.45));
+const zoomCtl=CF.bindRange('#zoom',v=>trimNum(v,2)+'×',v=>{S.zoom=v;G.draw();});
+let spinRaf=0,spinLast=0;
+$('#spin').addEventListener('change',e=>{S.spin=e.target.checked;if(S.spin&&!spinRaf){spinLast=performance.now();const f=now=>{if(!S.spin){spinRaf=0;return;}S.yaw+=(now-spinLast)/1000*0.35;spinLast=now;G.draw();spinRaf=requestAnimationFrame(f);};spinRaf=requestAnimationFrame(f);}});
+CF.bindSeg('mode',m=>{stopAnim();S.mode=m;if(m==='circle'&&C.abs(S.z)>2)S.z={x:0.8,y:0.4};modeCtl();update();});
+{const m=CF.hash.get('mode');if(['point','circle','line','nbhd'].includes(m)){S.mode=m;CF.setSeg('mode',m);}}
+G.resize();modeCtl();update();
+})();
+</script>
+</body>
+</html>

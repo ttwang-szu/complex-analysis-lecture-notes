@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第 1 章课堂演示</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:6px}
+.item{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;text-decoration:none;color:var(--ink)}
+.item:hover,.item:focus-visible{border-color:var(--ink)}
+.item .no{grid-row:span 3;font-family:var(--math);font-size:30px;line-height:1;color:var(--muted);font-variant-numeric:tabular-nums}
+.item h2{margin:0;font-size:17px}
+.item .ref{margin:0;font-size:12.5px;color:var(--muted)}
+.item .d{margin:0;font-size:14px}
+.foot{margin-top:18px;max-width:76ch;color:var(--muted);font-size:13px;display:grid;gap:4px}
+.foot p{margin:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 1 章 复数与复变函数</p>
+    <h1>第 1 章课堂演示</h1>
+    <p class="lede">九个可交互的演示，按课件顺序排列。每个都能拖动、播放，并对应课件里的公式、图和例题。完整的 HTML 课件见 <a href="../CF_Chapter1.html">CF_Chapter1.html</a>，演示已嵌入在相应页面中。</p>
+  </header>
+  <div class="list">
+    <a class="item" href="04-argument.html"><span class="no">4</span><h2>幅角的多值性与主值</h2><p class="ref">§1.1 · 式 (1.1.3)–(1.1.5) · 图 1.2</p><p class="d">点绕原点转圈时，连续幅角 Θ 不断累加，主值 arg z 在负实轴处跳变；同时高亮式 (1.1.5) 中用到的那一行。</p></a>
+    <a class="item" href="01-multiplication.html"><span class="no">1</span><h2>复数乘法 = 伸缩 + 旋转</h2><p class="ref">§1.2 · 式 (1.2.3)–(1.2.7) · 图 1.4</p><p class="d">拖动 z₁、z₂，分两步播放乘除法；幅角和超出 (−π, π] 时演示取主值。含课件选择题。</p></a>
+    <a class="item" href="02-roots.html"><span class="no">2</span><h2>n 次方根与单位根</h2><p class="ref">§1.2 · 式 (1.2.9)–(1.2.10) · 图 1.5–1.6</p><p class="d">n 个根逐个转出来，第 n 个回到 ω₀；验证 ωₖⁿ = z。含 (1+z)⁶ = (1−z)⁶ 的正六边形。</p></a>
+    <a class="item" href="06-riemann-sphere.html"><span class="no">6</span><h2>复球面与球极投影</h2><p class="ref">§1.2 · §1.3 · 图 1.9</p><p class="d">可旋转的 3D 复球面。z 跑向无穷远时 P 趋于北极 N；直线的像是经过 N 的圆；∞ 的邻域 {|z| > R} 对应北极周围的球冠。</p></a>
+    <a class="item" href="03-z-squared.html"><span class="no">3</span><h2>w = z² 的映射</h2><p class="ref">§1.4 · 图 1.17–1.19</p><p class="d">扇形张角加倍，直线变抛物线，双曲线变直线；还能随手画一条曲线，看它的像。</p></a>
+    <a class="item" href="05-joukowski.html"><span class="no">5</span><h2>Joukowski 映射 w = z + 1/z</h2><p class="ref">§1.4 · 例：|z| = 2 的像</p><p class="d">同心圆变成焦点为 ±2 的椭圆；偏心圆变成机翼翼型。</p></a>
+    <a class="item" href="08-limit-epsilon-delta.html"><span class="no">8</span><h2>极限的 ε–δ 定义</h2><p class="ref">§1.5 · 图 1.20</p><p class="d">A 的 ε 邻域与 z₀ 的去心 δ 邻域：ε 变小时 δ 跟着变小；极限不存在时，无论 δ 多小都有像点跑出去。</p></a>
+    <a class="item" href="09-curve-bounded.html"><span class="no">9</span><h2>曲线上的连续函数有界</h2><p class="ref">§1.5 · 最后一页</p><p class="d">沿曲线 C 走一遍，画出 g(t) = |f(z(t))| 并标出最大值 M；对照"区间不闭""区间无界"两个反例。</p></a>
+    <a class="item" href="07-limit-paths.html"><span class="no">7</span><h2>极限与趋近的路径</h2><p class="ref">§1.5 · 图 1.20</p><p class="d">沿不同路径走向原点，比较函数值；包括“沿所有直线都一样仍无极限”的反例和 ε–δ 图示。</p></a>
+  </div>
+  <div class="foot">
+    <p>编号是做演示时的顺序，这里按课件章节排列。</p>
+    <p>离线使用：把整个 <code>html</code> 文件夹一起拷到教室电脑上，双击 <code>CF_Chapter1.html</code>（课件）或 <code>demos/index.html</code>（演示目录）即可，不需要联网。第 1 个演示的页面是独立的，单独拷贝也能用。</p>
+  </div>
+</div>
+</body>
+</html>

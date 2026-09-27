@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>n 次方根演示</title>
+<link rel="stylesheet" href="assets/demo.css">
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" aria-label="演示目录">
+    <a href="index.html">← 全部演示</a>
+    <a href="01-multiplication.html">1 乘法</a><a href="02-roots.html" aria-current="page">2 方根</a><a href="03-z-squared.html">3 w = z²</a><a href="04-argument.html">4 幅角</a><a href="05-joukowski.html">5 Joukowski</a><a href="06-riemann-sphere.html">6 复球面</a><a href="07-limit-paths.html">7 极限路径</a><a href="08-limit-epsilon-delta.html">8 ε–δ</a><a href="09-curve-bounded.html">9 曲线上有界</a>
+  </nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 1 章 §1.2 复数的乘幂与方根 · 式 (1.2.9)–(1.2.10) · 图 1.5–1.6</p>
+    <h1>n 次方根与单位根</h1>
+    <p class="lede">非零复数 <span class="m c1">z</span> 恰有 <span class="m">n</span> 个 <span class="m">n</span> 次方根。它们都在半径为 <span class="mr">|</span><span class="m">z</span><span class="mr">|</span><sup class="mr">1/<i>n</i></sup> 的圆上，相邻两根相差 <span class="mr">2π/</span><span class="m">n</span>，围成正 <span class="m">n</span> 边形。拖动蓝点 <span class="m c1">z</span>，或改变 <span class="m">n</span>。</p>
+  </header>
+
+  <main class="layout">
+    <section class="stage-col">
+      <div class="stage">
+        <canvas id="plane" tabindex="0" aria-label="复平面。拖动 z，点击某个根可以选中它"></canvas>
+        <div class="status" id="status" aria-live="polite"></div>
+      </div>
+      <p class="hint">点击画布上的某个根（或右侧表格的一行）可以选中它，再按“验证 ωⁿ = z”。键盘：点一下画布，用方向键移动 z，按 + / − 改变 n。</p>
+    </section>
+
+    <aside class="panel">
+      <div class="card">
+        <div class="slider">
+          <label for="n">次数 <span class="m">n</span></label>
+          <input type="range" id="n" min="1" max="12" step="1" value="4">
+          <output id="n-out" for="n"></output>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="playGen" type="button">▶ 逐个生成</button>
+          <button class="btn" id="playPow" type="button">▶ 验证 ωⁿ = z</button>
+        </div>
+      </div>
+
+      <div class="card" id="readout" aria-live="polite"></div>
+
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <h2>输入 <span class="m c1">z</span></h2>
+          <div class="seg" role="radiogroup" aria-label="输入形式">
+            <input type="radio" name="inmode" id="in-rect" value="rect" checked><label for="in-rect">直角坐标</label>
+            <input type="radio" name="inmode" id="in-polar" value="polar"><label for="in-polar">极坐标</label>
+          </div>
+        </div>
+        <div class="row" style="flex-wrap:nowrap">
+          <label class="fld" style="flex:1"><span id="la" class="hint">实部 x</span><input class="num" type="text" id="za" autocomplete="off" spellcheck="false"></label>
+          <label class="fld" style="flex:1"><span id="lb" class="hint">虚部 y</span><input class="num" type="text" id="zb" autocomplete="off" spellcheck="false"></label>
+        </div>
+        <p class="hint" id="inerr" hidden style="color:var(--bad)"></p>
+        <p class="hint">可以输入 1.5、√3、−5π/6、pi/4 等，按回车确认。</p>
+      </div>
+
+      <div class="card">
+        <h2>课件中的例子</h2>
+        <div class="presets" id="presets"></div>
+      </div>
+
+      <div class="card">
+        <h2>显示</h2>
+        <div class="row">
+          <label for="range" class="hint" style="font-size:13px">视野</label>
+          <select id="range"><option value="2">±2</option><option value="4" selected>±4</option><option value="8">±8</option></select>
+          <label for="snap" class="hint" style="font-size:13px">吸附</label>
+          <select id="snap"><option value="none">不吸附</option><option value="grid">直角网格</option><option value="polar">极坐标（π/12）</option></select>
+        </div>
+        <label class="check"><input type="checkbox" id="poly" checked> 连成正 <span class="m">n</span> 边形</label>
+      </div>
+    </aside>
+  </main>
+</div>
+<style>
+.fld{display:grid;gap:2px}
+.num{width:100%;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:7px;padding:5px 8px;font-family:var(--math);font-size:16px}
+.num[aria-invalid="true"]{border-color:var(--bad)}
+</style>
+<script src="assets/plane.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,TAU,EPS,$,niceReal,nicePi,angleText,degText,cplxText,cplxHTML,parseExpr,MATH_FONT,ease}=CF;
+const SUB='₀₁₂₃₄₅₆₇₈₉',sub=k=>String(k).split('').map(d=>SUB[d]).join('');
+const SUP='⁰¹²³⁴⁵⁶⁷⁸⁹',sup=k=>String(k).split('').map(d=>SUP[d]).join('');
+const S={z:{x:-4,y:0},n:4,sel:1,snap:'none',mode:'rect',poly:true,anim:null};
+let anim=null;
+
+function info(){
+  const r=C.abs(S.z),th=C.arg(S.z),n=S.n,rr=Math.pow(r,1/n);
+  const R=[];for(let k=0;k<n;k++){const a=(th+2*k*PI)/n;R.push({k,a,p:C.polar(rr,a)});}
+  return{r,th,n,rr,R};
+}
+function snap(p){
+  if(S.snap==='grid'){const s=P.range<=2?0.25:0.5;p={x:Math.round(p.x/s)*s,y:Math.round(p.y/s)*s};}
+  else if(S.snap==='polar'){let r=Math.round(Math.hypot(p.x,p.y)/0.25)*0.25;if(r<0.25)r=0.25;const t=Math.round(Math.atan2(p.y,p.x)/(PI/12))*(PI/12);p=C.polar(r,t);}
+  return C.clean(p);
+}
+function stop(){if(anim){anim.stop();anim=null;}S.anim=null;}
+
+/* ---------- 画布 ---------- */
+const P=new CF.Plane($('#plane'),{range:4,render:draw,onEmpty:{down(p){
+  const I=info();let best=-1,bd=1e9;
+  I.R.forEach(q=>{const A=P.toS(q.p),B=P.toS(p),d=Math.hypot(A.X-B.X,A.Y-B.Y);if(d<bd){bd=d;best=q.k;}});
+  if(bd<22){S.sel=best;update();}
+}}});
+P.addHandle({get:()=>S.z,set:p=>{stop();S.z=snap(p);update();}});
+
+function rootLabel(q,I,color){
+  const A=P.toS(q.p),L=I.rr*P.ppu;const ux=Math.cos(q.a),uy=-Math.sin(q.a),d=L>40?20:16;
+  P.label('ω'+sub(q.k),A.X+ux*d,A.Y+uy*d,color,'italic 600 16px '+MATH_FONT);
+}
+function draw(P){
+  const V=P.V,O={x:0,y:0},I=info();
+  P.grid();
+  if(I.r<EPS){P.dot(S.z,V.z1,8);P.endLabel({x:.5,y:.5},'z = 0',V.z1);return;}
+  const rpx=I.rr*P.ppu;
+  P.circle(O,I.rr,V.w,1.5,[5,5],.55);
+  P.arrow(O,S.z,V.z1,2.5);
+  const A=S.anim;
+  if(A&&A.kind==='gen'){
+    const n=I.n,phases=n+1,ph=Math.min(phases-1,Math.floor(A.t*phases)),u=ease(A.t*phases-ph);
+    const a0=ph===0?0:I.R[0].a+2*(ph-1)*PI/n, da=ph===0?I.R[0].a:2*PI/n, a=a0+da*u;
+    for(let k=0;k<Math.min(ph,n);k++){const q=I.R[k];P.line(O,q.p,V.w,1.25,[4,4],.5);P.dot(q.p,V.w,6);rootLabel(q,I,V.w);}
+    if(ph>0&&S.poly&&ph>=2){const pts=I.R.slice(0,Math.min(ph,n)).map(q=>q.p);P.path(pts,V.w,1.5,{alpha:.5});}
+    P.arc(O,rpx,a0,a,V.z2,{lw:2.5,head:true});
+    const m=C.polar(I.rr,a);P.arrow(O,m,V.w,3);P.dot(m,V.w,6);
+    const mid=a0+(a-a0)/2;if(Math.abs(a-a0)*rpx>30)P.label(ph===0?'θ/n':'2π/n',P.cx+(rpx+18)*Math.cos(mid),P.cy-(rpx+18)*Math.sin(mid),V.z2,'italic 600 15px '+MATH_FONT);
+  }else{
+    if(S.poly&&I.n>=3){P.path(I.R.map(q=>q.p),V.w,1.5,{close:true,fill:V.fill2,alpha:.9});}
+    else if(S.poly&&I.n===2){P.line(I.R[0].p,I.R[1].p,V.w,1.5,null,.6);}
+    I.R.forEach(q=>P.line(O,q.p,V.w,1.25,[4,4],.45));
+    P.arc(O,30,0,I.th,V.z1,{lw:2});
+    if(Math.abs(I.th)*30>14)P.label('θ',P.cx+44*Math.cos(I.th/2),P.cy-44*Math.sin(I.th/2),V.z1,'italic 600 15px '+MATH_FONT);
+    const r2=Math.min(rpx*0.62,rpx-18);
+    if(r2>34&&Math.abs(I.R[0].a)*r2>16){P.arc(O,r2,0,I.R[0].a,V.z2,{lw:2});P.label('θ/n',P.cx+(r2+16)*Math.cos(I.R[0].a/2),P.cy-(r2+16)*Math.sin(I.R[0].a/2),V.z2,'italic 600 14px '+MATH_FONT);}
+    if(I.n>=2){const a0=I.R[0].a,a1=I.R[1].a;P.arc(O,rpx,a0,a1,V.z2,{lw:2.5,head:true,alpha:.9});const mid=(a0+a1)/2;P.label('2π/n',P.cx+(rpx+20)*Math.cos(mid),P.cy-(rpx+20)*Math.sin(mid),V.z2,'italic 600 15px '+MATH_FONT);}
+    if(A&&A.kind==='pow'){
+      const q=I.R[Math.min(S.sel,I.n-1)],s=1+(I.n-1)*A.t;
+      const pts=[];for(let j=0;j<=120;j++){const ss=1+(s-1)*j/120;pts.push(C.polar(Math.pow(I.rr,ss),q.a*ss));}
+      P.path(pts,V.violet,2.5);
+      for(let j=2;j<=Math.floor(s+1e-9);j++){const pj=C.polar(Math.pow(I.rr,j),q.a*j);P.dot(pj,V.violet,4.5);const Aj=P.toS(pj);P.label('ω'+sup(j),Aj.X+12,Aj.Y-12,V.violet,'italic 600 14px '+MATH_FONT,'left');}
+      const m=C.polar(Math.pow(I.rr,s),q.a*s);P.arrow(O,m,V.violet,3);
+    }
+    I.R.forEach(q=>{P.dot(q.p,V.w,q.k===S.sel?7:6,q.k===S.sel);rootLabel(q,I,V.w);});
+  }
+  P.dot(S.z,V.z1,8,P.drag||document.activeElement===P.cv);
+  P.endLabel(S.z,'z',V.z1,19);
+}
+
+/* ---------- 读数 ---------- */
+function statusText(){
+  const I=info(),A=S.anim;
+  if(I.r<EPS)return'z = 0 时，唯一的 n 次方根是 0。';
+  if(A&&A.kind==='gen'){
+    const n=I.n,ph=Math.min(n,Math.floor(A.t*(n+1)));
+    if(ph===0)return`第一个根 ω₀：从正实轴转过 θ/n = ${angleText(I.R[0].a)}，模取 r^{1/n} = ${niceReal(I.rr)}。`;
+    if(ph<n)return`ω${sub(ph)}：在 ω${sub(ph-1)} 的基础上再转 2π/n = ${angleText(2*PI/n)}。`;
+    return`k = n 时，(θ + 2nπ)/n = θ/n + 2π，又回到 ω₀。所以只有 ${n} 个不同的根。`;
+  }
+  if(A&&A.kind==='pow'){const k=Math.min(S.sel,I.n-1);return`ω${sub(k)} 连乘 n 次：模 (r^{1/n})ⁿ = r，幅角 n · (θ + 2·${k}π)/n = θ + ${2*k}π，与 z 的幅角相差 2π 的整数倍，落在 z 上。`;}
+  return'';
+}
+function renderReadout(){
+  const I=info();
+  let h=`<p class="fml">ω<sub><i>k</i></sub> = <i>r</i><sup>1/<i>n</i></sup> ( cos <span style="font-size:.9em">(θ+2<i>k</i>π)/<i>n</i></span> + <i>i</i> sin <span style="font-size:.9em">(θ+2<i>k</i>π)/<i>n</i></span> )，<i>k</i> = 0, 1, …, <i>n</i>−1</p>`;
+  h+=`<table class="rt"><tbody>
+    <tr><td style="font-style:italic" class="c1">z</td><td>${cplxHTML(S.z)}</td><td><i>r</i> = ${niceReal(I.r)}</td><td>θ = ${I.r<EPS?'无定义':angleText(I.th)}</td></tr>
+    <tr><td style="font-style:italic">n</td><td>${I.n}</td><td><i>r</i><sup>1/<i>n</i></sup> = ${niceReal(I.rr)}</td><td>2π/<i>n</i> = ${angleText(2*PI/I.n)}</td></tr></tbody></table>`;
+  if(I.r<EPS){$('#readout').innerHTML=h;return;}
+  h+=`<div class="tscroll"><table class="rt"><thead><tr><th><i>k</i></th><th>ω<sub><i>k</i></sub></th><th>(θ + 2<i>k</i>π)/<i>n</i></th></tr></thead><tbody>`;
+  I.R.forEach(q=>{h+=`<tr class="pick${q.k===S.sel?' on':''}" data-k="${q.k}" tabindex="0"><td>${q.k}</td><td class="cw">${cplxHTML(q.p)}</td><td>${angleText(q.a)} <small>${degText(q.a)}</small></td></tr>`;});
+  h+='</tbody></table></div>';
+  const one=Math.abs(S.z.x-1)<1e-9&&Math.abs(S.z.y)<1e-9;
+  h+=`<div class="why"><p class="note">${one?`z = 1 时这就是 n 次单位根：记 ω = e<sup>2π<i>i</i>/<i>n</i></sup>，则 ω<sub><i>k</i></sub> = ω<sup><i>k</i></sup>，即 1, ω, ω², …, ω<sup><i>n</i>−1</sup>。`:`k 取其他整数时只会重复这 ${I.n} 个值，例如 ω<sub><i>n</i></sub> = ω<sub>0</sub>。`}</p></div>`;
+  $('#readout').innerHTML=h;
+  document.querySelectorAll('#readout tr.pick').forEach(tr=>{const f=()=>{S.sel=+tr.dataset.k;update();};tr.addEventListener('click',f);tr.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f();}});});
+}
+const FA=$('#za'),FB=$('#zb');
+function fillFields(){
+  const z=S.z,r=C.abs(z),rect=S.mode==='rect';
+  if(document.activeElement!==FA){FA.value=rect?niceReal(z.x):niceReal(r);FA.removeAttribute('aria-invalid');}
+  if(document.activeElement!==FB){FB.value=rect?niceReal(z.y):(r<EPS?'0':nicePi(C.arg(z)));FB.removeAttribute('aria-invalid');}
+  $('#la').textContent=rect?'实部 x':'模 r';$('#lb').textContent=rect?'虚部 y':'幅角 θ';
+}
+function commit(){
+  let a,b,bad=false;
+  try{a=parseExpr(FA.value);FA.removeAttribute('aria-invalid');}catch(_){FA.setAttribute('aria-invalid','true');bad=true;}
+  try{b=parseExpr(FB.value);FB.removeAttribute('aria-invalid');}catch(_){FB.setAttribute('aria-invalid','true');bad=true;}
+  const err=$('#inerr');
+  if(bad){err.textContent='有一项无法识别。请写成 1.5、√3、−5π/6 这样的形式。';err.hidden=false;return;}
+  if(S.mode==='polar'&&a<0){FA.setAttribute('aria-invalid','true');err.textContent='模 r 不能为负数。';err.hidden=false;return;}
+  err.hidden=true;stop();S.z=C.clean(S.mode==='rect'?{x:a,y:b}:C.polar(a,b));update();
+}
+[FA,FB].forEach(el=>{el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();commit();}});el.addEventListener('change',commit);el.addEventListener('blur',()=>setTimeout(fillFields,0));});
+
+function update(){
+  if(S.sel>=S.n)S.sel=S.n-1;
+  renderReadout();fillFields();
+  const t=statusText();$('#status').innerHTML=t?'<span>'+t+'</span>':'';
+  $('#playPow').textContent=`▶ 验证 ω${sub(Math.min(S.sel,S.n-1))}ⁿ = z`;
+  P.draw();
+}
+function frame(){const t=statusText();$('#status').innerHTML=t?'<span>'+t+'</span>':'';P.draw();}
+
+/* ---------- 控件 ---------- */
+const nCtl=CF.bindRange('#n',v=>String(v),v=>{stop();S.n=v;if(P.W)update();});
+$('#playGen').addEventListener('click',()=>{
+  stop();if(C.abs(S.z)<EPS)return;
+  S.anim={kind:'gen',t:0};const per=S.n>6?480:700;
+  anim=CF.animate(per*(S.n+1),t=>{S.anim.t=t;frame();},()=>{S.anim=null;anim=null;update();$('#status').innerHTML=`<span>共 ${S.n} 个根，围成正 ${S.n} 边形（n ≥ 3）。</span>`;});
+});
+$('#playPow').addEventListener('click',()=>{
+  stop();if(C.abs(S.z)<EPS||S.n<2)return;
+  S.anim={kind:'pow',t:0};
+  anim=CF.animate(Math.min(6500,900*(S.n-1)+600),t=>{S.anim.t=t;frame();},()=>{anim=null;frame();});
+});
+CF.bindSeg('inmode',v=>{S.mode=v;$('#inerr').hidden=true;fillFields();});
+$('#range').addEventListener('change',e=>{P.range=+e.target.value;P.draw();});
+$('#snap').addEventListener('change',e=>{S.snap=e.target.value;});
+$('#poly').addEventListener('change',e=>{S.poly=e.target.checked;P.draw();});
+P.cv.addEventListener('keydown',e=>{
+  if(e.key==='+'||e.key==='='){nCtl.set(Math.min(12,S.n+1));return;}
+  if(e.key==='-'||e.key==='_'){nCtl.set(Math.max(1,S.n-1));return;}
+  const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[e.key];if(!d)return;
+  e.preventDefault();stop();const s=S.snap==='grid'?(P.range<=2?0.25:0.5):(e.shiftKey?0.5:0.1);
+  S.z=snap(P.clampW({x:S.z.x+d[0]*s,y:S.z.y+d[1]*s}));update();
+});
+P.cv.addEventListener('focus',()=>P.draw());P.cv.addEventListener('blur',()=>P.draw());
+
+const r3=Math.sqrt(3);
+const PRESETS=[
+  {t:'z = 1，n = 6',s:'例：(1+z)⁶ = (1−z)⁶，正六边形',f(){S.z={x:1,y:0};return 6;},range:2},
+  {t:'z = 1，n = 3',s:'单位根 1, ω, ω²',f(){S.z={x:1,y:0};return 3;},range:2},
+  {t:'z = −4，n = 4',s:'四个根 ±1 ± i',f(){S.z={x:-4,y:0};return 4;},range:4},
+  {t:'z = 8i，n = 3',s:'三个根，模都是 2',f(){S.z={x:0,y:8};return 3;},range:8},
+  {t:'z = i，n = 2',s:'平方根，两根关于原点对称',f(){S.z={x:0,y:1};return 2;},range:2},
+  {t:'z = 1 + √3 i，n = 5',s:'θ = π/3，θ/n = π/15',f(){S.z={x:1,y:r3};return 5;},range:2},
+];
+const pw=$('#presets');
+PRESETS.forEach(p=>{const b=document.createElement('button');b.type='button';b.className='btn';
+  b.innerHTML=`<span class="mr">${p.t.replace(/(\d|√3 )?i(?=，|$)/,(m)=>m.replace(/i$/,'<i>i</i>'))}</span><small>${p.s}</small>`;
+  b.addEventListener('click',()=>{stop();const n=p.f();P.range=p.range;$('#range').value=String(p.range);S.sel=Math.min(1,n-1);nCtl.set(n);$('#playGen').click();});pw.appendChild(b);});
+
+{const h=CF.hash,zx=parseFloat(h.get('z')),zy=parseFloat(h.get('zi')||'0'),n=parseInt(h.get('n'),10);
+  if(isFinite(zx)){S.z={x:zx,y:isFinite(zy)?zy:0};if(C.abs(S.z)<=2){P.range=2;$('#range').value='2';}}
+  if(n>=1&&n<=12){S.n=n;nCtl.set(n);}}
+P.resize();update();
+})();
+</script>
+</body>
+</html>

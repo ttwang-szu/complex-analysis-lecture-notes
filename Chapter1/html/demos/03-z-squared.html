@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>w = z² 映射演示</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>
+.below{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:12px;align-items:start}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" aria-label="演示目录">
+    <a href="index.html">← 全部演示</a>
+    <a href="01-multiplication.html">1 乘法</a><a href="02-roots.html">2 方根</a><a href="03-z-squared.html" aria-current="page">3 w = z²</a><a href="04-argument.html">4 幅角</a><a href="05-joukowski.html">5 Joukowski</a><a href="06-riemann-sphere.html">6 复球面</a><a href="07-limit-paths.html">7 极限路径</a><a href="08-limit-epsilon-delta.html">8 ε–δ</a><a href="09-curve-bounded.html">9 曲线上有界</a>
+  </nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 1 章 §1.4 复变函数与映射 · 例：w = z² 的映射性质 · 图 1.17–1.19</p>
+    <h1>w = z² 把 z 平面变成什么样</h1>
+    <p class="lede">若 <span class="m">z</span> = <span class="m">re</span><sup><i>i</i>θ</sup>，则 <span class="m">w</span> = <span class="m">z</span>² = <span class="m">r</span>²<span class="m">e</span><sup><i>i</i>2θ</sup>：模平方，幅角加倍。左边是 <span class="m">z</span> 平面，右边是 <span class="m">w</span> 平面，两边都可以拖动。</p>
+  </header>
+
+  <div class="row" style="margin-bottom:10px">
+    <div class="seg" role="radiogroup" aria-label="演示内容">
+      <input type="radio" name="mode" id="m-sector" value="sector" checked><label for="m-sector">扇形与射线</label>
+      <input type="radio" name="mode" id="m-lines" value="lines"><label for="m-lines">直线 → 抛物线</label>
+      <input type="radio" name="mode" id="m-hyper" value="hyper"><label for="m-hyper">双曲线 → 直线</label>
+      <input type="radio" name="mode" id="m-brush" value="brush"><label for="m-brush">自由画</label>
+    </div>
+    <button class="btn primary" id="play" type="button">▶ 播放</button>
+  </div>
+
+  <div class="planes">
+    <div class="stage"><span class="tag">z 平面</span><canvas id="zp" tabindex="0" aria-label="z 平面"></canvas><div class="status" id="statusZ"></div></div>
+    <div class="stage"><span class="tag">w 平面（w = z²）</span><canvas id="wp" tabindex="0" aria-label="w 平面"></canvas><div class="status" id="statusW"></div></div>
+  </div>
+  <p class="hint" id="hint" style="margin-top:6px"></p>
+
+  <div class="below">
+    <div class="card" id="explain" aria-live="polite"></div>
+    <div class="card" id="probe" aria-live="polite"></div>
+    <div class="card" id="opts"></div>
+  </div>
+</div>
+<script src="assets/plane.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,TAU,EPS,$,niceReal,nicePi,angleText,degText,cplxHTML,cplxText,MATH_FONT,trimNum}=CF;
+const S={mode:'sector',alpha:PI/3,R:1.6,p:{x:1,y:0.5},strokes:[],drawing:null,fam:true,anim:null,trace:null};
+let anim=null;
+const f=C.sq;
+function stop(){if(anim){anim.stop();anim=null;}S.anim=null;S.trace=null;}
+
+const ZP=new CF.Plane($('#zp'),{range:2,maxVh:0.62,render:drawZ,names:['x','y'],onEmpty:{
+  get cursor(){return S.mode==='brush'?'crosshair':'default';},
+  down(p){if(S.mode!=='brush')return;stop();S.drawing=[p];S.strokes.push(S.drawing);redraw();},
+  move(p){if(S.mode!=='brush'||!S.drawing)return;const last=S.drawing[S.drawing.length-1];if(C.dist(last,p)*ZP.ppu>2){S.drawing.push(p);redraw();}},
+  up(){S.drawing=null;}
+}});
+const WP=new CF.Plane($('#wp'),{range:4,maxVh:0.62,render:drawW,names:['u','v']});
+
+/* 探针点：z 平面拖 z；w 平面拖 w，取离当前 z 最近的平方根 */
+ZP.addHandle({enabled:()=>S.mode!=='sector'&&S.mode!=='brush',get:()=>S.p,set:p=>{stop();S.p=C.clean(p);update();}});
+WP.addHandle({enabled:()=>S.mode!=='sector'&&S.mode!=='brush',get:()=>f(S.p),set:w=>{stop();const r=Math.sqrt(C.abs(w)),t=Math.atan2(w.y,w.x)/2;let s=C.polar(r,t);if(C.dist(s,S.p)>C.dist(C.scale(s,-1),S.p))s=C.scale(s,-1);S.p=C.clean(s);update();}});
+/* 扇形：拖动扇形边上的点，同时改变 α 和半径 R */
+const sectorHandle=()=>C.polar(S.R,S.alpha);
+ZP.addHandle({enabled:()=>S.mode==='sector',get:sectorHandle,set:p=>{stop();let a=Math.atan2(p.y,p.x);if(a<0)a=a<-PI/2?PI:0;S.alpha=Math.max(0,Math.min(PI,a));S.R=Math.max(0.3,Math.min(2,C.abs(p)));update();}});
+WP.addHandle({enabled:()=>S.mode==='sector',get:()=>f(sectorHandle()),set:w=>{stop();let a=Math.atan2(w.y,w.x);if(a<0)a+=TAU;S.alpha=Math.max(0,Math.min(PI,a/2));S.R=Math.max(0.3,Math.min(2,Math.sqrt(C.abs(w))));update();}});
+
+/* ---------- 曲线族 ---------- */
+const lin=(a,b,n)=>Array.from({length:n+1},(_,i)=>a+(b-a)*i/n);
+const vline=c=>lin(-2.6,2.6,260).map(y=>({x:c,y}));
+const hline=c=>lin(-2.6,2.6,260).map(x=>({x,y:c}));
+function hyp1(c){ /* x² − y² = c 的两支 */
+  const T=lin(-2.2,2.2,220);
+  if(Math.abs(c)<1e-9)return[lin(-2.6,2.6,2).map(t=>({x:t,y:t})),lin(-2.6,2.6,2).map(t=>({x:t,y:-t}))];
+  const a=Math.sqrt(Math.abs(c));
+  if(c>0)return[T.map(t=>({x:a*Math.cosh(t),y:a*Math.sinh(t)})),T.map(t=>({x:-a*Math.cosh(t),y:a*Math.sinh(t)}))];
+  return[T.map(t=>({x:a*Math.sinh(t),y:a*Math.cosh(t)})),T.map(t=>({x:a*Math.sinh(t),y:-a*Math.cosh(t)}))];
+}
+function hyp2(c){ /* 2xy = c 的两支 */
+  const T=lin(-3,3,240);
+  if(Math.abs(c)<1e-9)return[lin(-2.6,2.6,2).map(t=>({x:t,y:0})),lin(-2.6,2.6,2).map(t=>({x:0,y:t}))];
+  const a=Math.sqrt(Math.abs(c)/2),s=Math.sign(c);
+  return[T.map(t=>({x:a*Math.exp(t),y:s*a*Math.exp(-t)})),T.map(t=>({x:-a*Math.exp(t),y:-s*a*Math.exp(-t)}))];
+}
+const FAM=[-2,-1.5,-1,-0.5,0.5,1,1.5,2];
+const HFAM=[-3,-2,-1,1,2,3];
+const mapPts=pts=>pts.map(f);
+const cu=k=>{const t=niceReal(k);return t==='1'?'':t;};
+
+/* ---------- z 平面 ---------- */
+function drawZ(P){
+  const V=P.V,O={x:0,y:0};
+  P.grid();
+  if(S.mode==='sector'){
+    const pts=[O,...lin(0,S.alpha,80).map(t=>C.polar(S.R,t))];
+    P.path(pts,V.z1,2,{close:true,fill:V.fill1});
+    P.arc(O,34,0,S.alpha,V.z2,{lw:2});
+    if(S.alpha*34>14)P.label('α',P.cx+48*Math.cos(S.alpha/2),P.cy-48*Math.sin(S.alpha/2),V.z2,'italic 600 16px '+MATH_FONT);
+    P.arrow(O,C.polar(2.3,S.alpha),V.w,2.5);
+    P.dot(sectorHandle(),V.z1,8,P.drag);
+    P.wlabel(C.polar(2.3,S.alpha),'arg z = α',V.w,{dx:0,dy:-14,size:14});
+  }else if(S.mode==='lines'){
+    if(S.fam){FAM.forEach(c=>{P.path(vline(c),V.z1,1.25,{alpha:.35});P.path(hline(c),V.z2,1.25,{alpha:.35});});}
+    P.path(vline(S.p.x),V.z1,2.5,{dash:[7,5]});P.path(hline(S.p.y),V.z2,2.5);
+    P.wlabel({x:S.p.x,y:2.1},'x = '+niceReal(S.p.x),V.z1,{dx:6,align:'left',size:14,font:'600 14px '+MATH_FONT});
+    P.wlabel({x:-2.1,y:S.p.y},'y = '+niceReal(S.p.y),V.z2,{dy:-12,align:'left',size:14,font:'600 14px '+MATH_FONT});
+  }else if(S.mode==='hyper'){
+    const c1=S.p.x*S.p.x-S.p.y*S.p.y,c2=2*S.p.x*S.p.y;
+    P.line({x:-3,y:-3},{x:3,y:3},V.gridS,1,[3,4]);P.line({x:-3,y:3},{x:3,y:-3},V.gridS,1,[3,4]);
+    if(S.fam){HFAM.forEach(c=>{hyp1(c).forEach(b=>P.path(b,V.z1,1.25,{alpha:.35}));hyp2(c).forEach(b=>P.path(b,V.z2,1.25,{alpha:.35}));});}
+    hyp1(c1).forEach(b=>P.path(b,V.z1,2.5));hyp2(c2).forEach(b=>P.path(b,V.z2,2.5,{dash:[7,5]}));
+  }else{
+    S.strokes.forEach(s=>P.path(s,V.z1,2.5));
+    if(!S.strokes.length)P.label('按住鼠标在这里画',P.W/2,P.H*0.28,V.muted,'15px '+CF.SANS_FONT);
+  }
+  if(S.trace)P.path(S.trace.z,V.violet,3.5);
+  if(S.anim&&S.anim.zpt)P.dot(S.anim.zpt,V.violet,6);
+  if(S.mode==='lines'||S.mode==='hyper'){
+    const q=C.scale(S.p,-1);P.dot(q,V.muted,5);P.wlabel(q,'−z',V.muted,{dx:14,dy:12,size:14});
+    P.dot(S.p,V.w,8,P.drag||document.activeElement===P.cv);P.endLabel(S.p,'z',V.w,18);
+  }
+}
+/* ---------- w 平面 ---------- */
+function drawW(P){
+  const V=P.V,O={x:0,y:0};
+  P.grid({labStep:1});
+  if(S.mode==='sector'){
+    const R2=S.R*S.R,pts=[O,...lin(0,2*S.alpha,160).map(t=>C.polar(R2,t))];
+    P.path(pts,V.z1,2,{close:true,fill:V.fill1});
+    P.arc(O,34,0,2*S.alpha,V.z2,{lw:2});
+    if(S.alpha*34>7)P.label('2α',P.cx+50*Math.cos(S.alpha),P.cy-50*Math.sin(S.alpha),V.z2,'italic 600 16px '+MATH_FONT);
+    P.arrow(O,C.polar(4.5,2*S.alpha),V.w,2.5);
+    P.dot(f(sectorHandle()),V.z1,8,P.drag);
+    P.wlabel(C.polar(4.3,2*S.alpha),'arg w = 2α',V.w,{dy:-14,size:14});
+    if(S.alpha>PI-1e-6){P.path([O,{x:4.6,y:0}],V.w,3);P.wlabel({x:3,y:0},'沿正实轴“割开”',V.w,{dy:16,font:'600 13px '+CF.SANS_FONT});}
+  }else if(S.mode==='lines'){
+    if(S.fam){FAM.forEach(c=>{P.path(mapPts(vline(c)),V.z1,1.25,{alpha:.35});P.path(mapPts(hline(c)),V.z2,1.25,{alpha:.35});});}
+    P.path(mapPts(vline(S.p.x)),V.z1,2.5,{dash:[7,5]});P.path(mapPts(hline(S.p.y)),V.z2,2.5);
+  }else if(S.mode==='hyper'){
+    const c1=S.p.x*S.p.x-S.p.y*S.p.y,c2=2*S.p.x*S.p.y;
+    if(S.fam){HFAM.forEach(c=>{P.path([{x:c,y:-9},{x:c,y:9}],V.z1,1.25,{alpha:.35});P.path([{x:-9,y:c},{x:9,y:c}],V.z2,1.25,{alpha:.35});});}
+    P.path([{x:c1,y:-9},{x:c1,y:9}],V.z1,2.5);P.path([{x:-9,y:c2},{x:9,y:c2}],V.z2,2.5,{dash:[7,5]});
+    P.wlabel({x:c1,y:3.7},'u = '+niceReal(c1),V.z1,{dx:6,align:'left',font:'600 14px '+MATH_FONT});
+    P.wlabel({x:-4.1,y:c2},'v = '+niceReal(c2),V.z2,{dy:-12,align:'left',font:'600 14px '+MATH_FONT});
+  }else{
+    S.strokes.forEach(s=>P.path(mapPts(s),V.w,2.5));
+  }
+  if(S.trace)P.path(S.trace.w,V.violet,3.5);
+  if(S.anim&&S.anim.zpt)P.dot(f(S.anim.zpt),V.violet,6);
+  if(S.mode==='lines'||S.mode==='hyper'){const w=f(S.p);P.dot(w,V.w,8,P.drag||document.activeElement===P.cv);P.endLabel(w,'w',V.w,18);}
+}
+
+/* ---------- 文字 ---------- */
+const HINT={
+  sector:'拖动扇形边上的蓝点：改变张角 α 和半径。右边对应点也能拖。',
+  lines:'拖动红点 z：经过它的竖线 x = c₁（虚线）和横线 y = c₂（实线）被映成两条抛物线。拖右边的 w 也行。',
+  hyper:'拖动红点 z：经过它的两条双曲线被映成 w 平面上的一条竖线和一条横线。',
+  brush:'在左边按住鼠标随手画，右边实时画出它的像。'
+};
+function explainHTML(){
+  const c1=S.p.x,c2=S.p.y;
+  if(S.mode==='sector')return`<h2>扇形 → 扇形</h2>
+    <p class="fml">0 ≤ arg <i>z</i> ≤ α &nbsp;⟶&nbsp; 0 ≤ arg <i>w</i> ≤ 2α</p>
+    <div class="why"><p>α = ${angleText(S.alpha)} <span class="note">(${degText(S.alpha)})</span>　⟶　2α = ${angleText(2*S.alpha)} <span class="note">(${degText(2*S.alpha)})</span></p>
+    <p>半径 ${niceReal(S.R)} ⟶ ${niceReal(S.R*S.R)}（模平方）</p>
+    <p class="note">${S.alpha<=PI/2+1e-9?'课件中 0 ≤ α ≤ π/2：像是张角为 2α 的扇形，仍在一个半平面内。':(S.alpha<PI-1e-6?'α > π/2 时像的张角超过 π。':'α = π：上半平面被映满整个 w 平面，只在正实轴处“接缝”。')}</p></div>`;
+  if(S.mode==='lines'){
+    const pa=c=>{const a=niceReal(c*c),b=niceReal(4*c*c*c*c);return{a,b};};
+    const A=pa(c1),B=pa(c2);
+    return`<h2>直线 → 抛物线</h2>
+    <p class="fml"><span class="c1"><i>x</i> = <i>c</i>₁ ⟶ <i>v</i>² = 4<i>c</i>₁²(<i>c</i>₁² − <i>u</i>)</span></p>
+    <p class="fml"><span class="c2"><i>y</i> = <i>c</i>₂ ⟶ <i>v</i>² = 4<i>c</i>₂²(<i>u</i> + <i>c</i>₂²)</span></p>
+    <div class="why">
+      <p class="c1">${Math.abs(c1)<EPS?'x = 0（虚轴）⟶ 非正实轴 u ≤ 0, v = 0':`x = ${niceReal(c1)} ⟶ v² = ${A.b} − ${cu(4*c1*c1)}u`}</p>
+      <p class="c2">${Math.abs(c2)<EPS?'y = 0（实轴）⟶ 非负实轴 u ≥ 0, v = 0':`y = ${niceReal(c2)} ⟶ v² = ${cu(4*c2*c2)}u + ${B.b}`}</p>
+      <p class="note">推导：x = c₁ 时 u = c₁² − y²，v = 2c₁y，消去 y 即得。竖线的像开口向左，横线的像开口向右。两条像曲线在 w 点仍然垂直相交。</p>
+    </div>`;
+  }
+  if(S.mode==='hyper'){
+    const h1=S.p.x*S.p.x-S.p.y*S.p.y,h2=2*S.p.x*S.p.y;
+    return`<h2>双曲线 → 直线</h2>
+    <p class="fml"><i>u</i> = <i>x</i>² − <i>y</i>²,　<i>v</i> = 2<i>xy</i></p>
+    <div class="why">
+      <p class="c1">x² − y² = ${niceReal(h1)} ⟶ u = ${niceReal(h1)}</p>
+      <p class="c2">2xy = ${niceReal(h2)} ⟶ v = ${niceReal(h2)}</p>
+      <p class="note">c ≠ 0 时，x² − y² = c₁ 是以 y = ±x 为渐近线的等轴双曲线，2xy = c₂ 以坐标轴为渐近线。每条双曲线的两支都映到同一条直线上（z 和 −z 的像相同）。</p>
+    </div>`;
+  }
+  return`<h2>自由画</h2><div class="why"><p class="note">试试：画一个绕原点一圈的圈，像会绕原点两圈（幅角加倍）；画一个不包含原点的小圈，像也是一个小圈。经过原点的曲线在原点处夹角会加倍。</p></div>
+    <div class="row"><button class="btn" id="clear" type="button">清空</button><button class="btn" id="shCircle" type="button">画圆 |z| = 1</button><button class="btn" id="shOff" type="button">画圆 |z − 1| = 0.5</button><button class="btn" id="shSq" type="button">画正方形</button></div>`;
+}
+function probeHTML(){
+  if(S.mode==='sector'){const z=sectorHandle(),w=f(z);return`<h2>蓝点</h2><table class="rt"><tbody><tr><td><i>z</i></td><td>${cplxHTML(z)}</td><td>|z| = ${niceReal(C.abs(z))}</td><td>arg = ${angleText(C.arg(z))}</td></tr><tr><td><i>w</i></td><td>${cplxHTML(w)}</td><td>|w| = ${niceReal(C.abs(w))}</td><td>arg = ${C.abs(w)<EPS?'—':angleText(C.arg(w))}</td></tr></tbody></table>`;}
+  if(S.mode==='brush')return`<h2>对应关系</h2><div class="why"><p><i>w</i> = <i>z</i>²：|<i>w</i>| = |<i>z</i>|²，arg <i>w</i> ≡ 2 arg <i>z</i> (mod 2π)</p><p class="note">z 和 −z 映到同一点，所以 w = z² 是“二对一”的。</p></div>`;
+  const z=S.p,w=f(z),r=C.abs(z),t=C.arg(z),tw=r<EPS?0:C.arg(w),raw=2*t,wrap=r>EPS&&Math.abs(CF.principal(raw)-raw)>1e-9;
+  return`<h2>红点</h2><table class="rt"><tbody>
+    <tr><td><i>z</i></td><td>${cplxHTML(z)}</td><td>|z| = ${niceReal(r)}</td><td>arg = ${r<EPS?'无定义':angleText(t)}</td></tr>
+    <tr><td><i>w</i></td><td>${cplxHTML(w)}</td><td>|w| = ${niceReal(r*r)}</td><td>arg = ${r<EPS?'无定义':angleText(tw)}</td></tr></tbody></table>
+    <div class="why"><p>u = x² − y² = ${niceReal(w.x)},　v = 2xy = ${niceReal(w.y)}</p>
+    <p class="note">${r<EPS?'':`2 arg z = ${angleText(raw)}${wrap?'，超出 (−π, π]，取主值后为 '+angleText(tw):''}。`}灰点 −z = ${cplxText(C.scale(z,-1))} 是 w 的另一个原像。</p></div>`;
+}
+function optsHTML(){
+  if(S.mode==='lines'||S.mode==='hyper')return`<h2>显示</h2><label class="check"><input type="checkbox" id="fam" ${S.fam?'checked':''}> 同时画出整族曲线（淡色）</label><p class="hint">“播放”：让点沿着蓝色曲线走一遍，右边同步画出像。</p>`;
+  if(S.mode==='sector')return`<h2>显示</h2><p class="hint">“播放”：α 从 0 增大到 π，右边的像从 0 张开到 2π。</p><div class="row"><button class="btn" id="aHalf" type="button">α = π/2</button><button class="btn" id="aPi4" type="button">α = π/4</button><button class="btn" id="aPi" type="button">α = π</button></div>`;
+  return`<h2>显示</h2><p class="hint">“播放”：按画的顺序重放最后一笔，看点和像同步移动。</p>`;
+}
+function bindDyn(){
+  const fam=$('#fam');if(fam)fam.addEventListener('change',e=>{S.fam=e.target.checked;redraw();});
+  const set=(id,a)=>{const b=$(id);if(b)b.addEventListener('click',()=>{stop();S.alpha=a;update();});};
+  set('#aHalf',PI/2);set('#aPi4',PI/4);set('#aPi',PI);
+  const cl=$('#clear');if(cl)cl.addEventListener('click',()=>{stop();S.strokes=[];redraw();});
+  const add=(id,g)=>{const b=$(id);if(b)b.addEventListener('click',()=>{stop();S.strokes.push(g());redraw();});};
+  add('#shCircle',()=>lin(0,TAU,240).map(t=>C.polar(1,t)));
+  add('#shOff',()=>lin(0,TAU,240).map(t=>C.add({x:1,y:0},C.polar(0.5,t))));
+  add('#shSq',()=>{const s=[],e=[[0.3,0.3],[1.5,0.3],[1.5,1.5],[0.3,1.5],[0.3,0.3]];for(let i=0;i<4;i++)for(let j=0;j<60;j++){const u=j/60;s.push({x:e[i][0]+(e[i+1][0]-e[i][0])*u,y:e[i][1]+(e[i+1][1]-e[i][1])*u});}s.push({x:.3,y:.3});return s;});
+}
+function redraw(){ZP.draw();WP.draw();}
+function update(){
+  $('#explain').innerHTML=explainHTML();$('#probe').innerHTML=probeHTML();
+  $('#hint').textContent=HINT[S.mode];bindDyn();redraw();
+}
+function setMode(m){stop();S.mode=m;$('#opts').innerHTML=optsHTML();$('#statusZ').innerHTML='';update();}
+
+/* ---------- 播放 ---------- */
+function traceAlong(zpts,dur){
+  stop();const n=zpts.length;S.trace={z:[],w:[]};S.anim={zpt:zpts[0]};
+  anim=CF.animate(dur,t=>{const k=Math.max(1,Math.floor(t*(n-1))+1);S.trace.z=zpts.slice(0,k);S.trace.w=S.trace.z.map(f);S.anim.zpt=zpts[k-1];redraw();},()=>{anim=null;});
+}
+$('#play').addEventListener('click',()=>{
+  if(S.mode==='sector'){
+    stop();const R=S.R;S.anim={};
+    anim=CF.animate(4200,t=>{S.alpha=PI*t;S.R=R;$('#explain').innerHTML=explainHTML();$('#probe').innerHTML=probeHTML();redraw();},()=>{anim=null;S.anim=null;update();});
+  }else if(S.mode==='lines'){traceAlong(lin(-2.1,2.1,300).map(y=>({x:S.p.x,y})),4000);}
+  else if(S.mode==='hyper'){
+    const c1=S.p.x*S.p.x-S.p.y*S.p.y,br=hyp1(c1);
+    const b=br.map(pts=>({pts,d:Math.min(...pts.map(q=>C.dist(q,S.p)))})).sort((a,b)=>a.d-b.d)[0].pts.filter(q=>Math.abs(q.x)<2.4&&Math.abs(q.y)<2.4);
+    traceAlong(b,4000);
+  }else{const s=S.strokes[S.strokes.length-1];if(s&&s.length>1)traceAlong(s,Math.min(6000,Math.max(1500,s.length*12)));}
+});
+CF.bindSeg('mode',setMode);
+[ZP,WP].forEach(P=>{P.cv.addEventListener('focus',()=>P.draw());P.cv.addEventListener('blur',()=>P.draw());});
+ZP.cv.addEventListener('keydown',e=>{
+  const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[e.key];if(!d)return;e.preventDefault();stop();
+  if(S.mode==='sector'){S.alpha=Math.max(0,Math.min(PI,S.alpha+(d[1]||d[0])*PI/24));}
+  else if(S.mode!=='brush'){S.p=C.clean(ZP.clampW({x:S.p.x+d[0]*0.1,y:S.p.y+d[1]*0.1}));}
+  update();
+});
+ZP.resize();WP.resize();
+{const m=CF.hash.get('mode');if(m&&HINT[m]){CF.setSeg('mode',m);setMode(m);}else setMode('sector');}
+})();
+</script>
+</body>
+</html>

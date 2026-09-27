@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>曲线上的连续与有界</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>
+.verdict{margin:0;font-size:15px;font-weight:600}
+.verdict.ok{color:var(--target)} .verdict.no{color:var(--w)}
+.cases{display:grid;gap:8px}
+.cases .btn{display:grid;text-align:left;padding:7px 10px}
+.cases .btn small{color:var(--muted);font-size:12px}
+.cases .btn[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" aria-label="演示目录">
+    <a href="index.html">← 全部演示</a>
+    <a href="01-multiplication.html">1 乘法</a><a href="02-roots.html">2 方根</a><a href="03-z-squared.html">3 w = z²</a><a href="04-argument.html">4 幅角</a><a href="05-joukowski.html">5 Joukowski</a><a href="06-riemann-sphere.html">6 复球面</a><a href="07-limit-paths.html">7 极限路径</a><a href="08-limit-epsilon-delta.html">8 ε–δ</a><a href="09-curve-bounded.html" aria-current="page">9 曲线上有界</a>
+  </nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 1 章 §1.5 极限与连续性 · 曲线上的连续函数</p>
+    <h1>曲线上的连续函数为什么有界</h1>
+    <p class="lede">曲线 C：<span class="m">z</span> = <span class="m">z</span>(<span class="m">t</span>)，<span class="m">t</span> ∈ [<span class="m">a</span>, <span class="m">b</span>]。参数化把"f 在 C 上"变成"g(t) = |f(z(t))| 在区间上"，于是可以用闭区间上连续函数的最值定理。拖动左边的点，或按"沿 C 走一遍"。</p>
+  </header>
+
+  <main class="layout">
+    <section class="stage-col">
+      <div class="stage"><span class="tag">z 平面：曲线 C</span><canvas id="zp" tabindex="0" aria-label="z 平面上的曲线 C"></canvas><div class="status" id="status" aria-live="polite"></div></div>
+      <div class="stage"><span class="tag">g(t) = |f(z(t))|</span><canvas id="chart" aria-label="g(t) 的图像"></canvas></div>
+    </section>
+    <aside class="panel">
+      <div class="card">
+        <h2>情形</h2>
+        <div class="cases" id="cases"></div>
+        <button class="btn primary" id="play" type="button">▶ 沿 C 走一遍</button>
+      </div>
+      <div class="card" id="readout" aria-live="polite"></div>
+    </aside>
+  </main>
+</div>
+<script src="assets/plane.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,TAU,EPS,$,trimNum,cplxHTML,MATH_FONT,SANS_FONT}=CF;
+const r3=v=>trimNum(v,3);
+/* a、b 为参数区间；aOpen / bInf 表示反例 */
+const CASES=[
+  {t:'C：上半单位圆，f(z) = 1/(z − 2)',s:'闭有界区间 [0, π]：有界，并取到最大值',
+   z:t=>C.polar(1,t),f:z=>C.inv(C.sub(z,{x:2,y:0})),a:0,b:PI,range:2.2,ymax:1.3,
+   curve:'z(t) = e<sup>it</sup>，t ∈ [0, π]',fn:'f(z) = 1/(z − 2)'},
+  {t:'C：螺线段，f(z) = z² + 1',s:'闭有界区间 [0, 2π]：有界',
+   z:t=>C.polar(0.3+0.25*t,t),f:z=>C.add(C.sq(z),{x:1,y:0}),a:0,b:TAU,range:2.3,ymax:null,
+   curve:'z(t) = (0.3 + 0.25t)e<sup>it</sup>，t ∈ [0, 2π]',fn:'f(z) = z² + 1'},
+  {t:'反例：区间不闭 (0, 1]，f(z) = 1/z',s:'缺了端点 t = 0：连续但无界',
+   z:t=>({x:t,y:0.35*t}),f:C.inv,a:0,b:1,aOpen:true,range:1.3,ymax:12,
+   curve:'z(t) = t(1 + 0.35i)，t ∈ (0, 1]',fn:'f(z) = 1/z'},
+  {t:'反例：区间无界 [1, +∞)，f(z) = z',s:'曲线伸到无穷远：连续但无界',
+   z:t=>({x:t,y:0.3*Math.sin(t)}),f:z=>z,a:1,b:12,bInf:true,range:7,ymax:13,
+   curve:'z(t) = t + 0.3i sin t，t ∈ [1, +∞)',fn:'f(z) = z'},
+];
+const S={k:0,t:0.8,trail:null};
+let anim=null;
+const K=()=>CASES[S.k];
+const g=t=>C.abs(K().f(K().z(t)));
+function tMin(){const c=K();return c.aOpen?c.a+(c.b-c.a)*0.002:c.a;}
+function samples(n){const c=K(),a=tMin(),out=[];for(let i=0;i<=n;i++){const t=a+(c.b-a)*i/n;out.push({t,z:c.z(t),y:g(t)});}return out;}
+function maxInfo(){const pts=samples(2000);let m=pts[0];pts.forEach(p=>{if(p.y>m.y)m=p;});return m;}
+function stop(){if(anim){anim.stop();anim=null;}S.trail=null;$('#status').innerHTML='';}
+
+const ZP=new CF.Plane($('#zp'),{range:2.2,maxVh:0.46,aspect:0.7,render:drawZ});
+ZP.addHandle({get:()=>K().z(S.t),set:p=>{stop();const pts=samples(800);let best=pts[0],bd=1e9;pts.forEach(q=>{const d=C.dist(q.z,p);if(d<bd){bd=d;best=q;}});S.t=best.t;update();}});
+function drawZ(P){
+  const V=P.V,c=K();P.grid(P.range<=3?{step:0.5,labStep:1,unit:false}:{unit:false});
+  const pts=samples(600);
+  P.path(pts.map(p=>p.z),V.z1,3);
+  if(c.bInf){const e=pts[pts.length-1].z;P.arrow(pts[pts.length-12].z,C.add(e,{x:0.6,y:0}),V.z1,3);P.wlabel(C.add(e,{x:0.3,y:0}),'→ ∞',V.z1,{dy:-16,size:16});}
+  const s0=pts[0].z;
+  if(c.aOpen){const Q=P.toS(c.z(c.a));P.ctx.save();P.ctx.beginPath();P.ctx.arc(Q.X,Q.Y,6,0,TAU);P.ctx.fillStyle=V.surface;P.ctx.fill();P.ctx.lineWidth=2.5;P.ctx.strokeStyle=V.z1;P.ctx.stroke();P.ctx.restore();P.wlabel(c.z(c.a),'t = 0 不在 C 上',V.w,{dx:10,dy:18,align:'left',font:'600 13px '+SANS_FONT});}
+  else{P.dot(s0,V.z1,5);P.wlabel(s0,'z(a)',V.z1,{dx:-8,dy:16,size:14});}
+  if(!c.bInf){const e=pts[pts.length-1].z;P.dot(e,V.z1,5);P.wlabel(e,'z(b)',V.z1,{dx:10,dy:16,size:14});}
+  if(!c.aOpen&&!c.bInf){const m=maxInfo();P.dot(m.z,V.target,6,true);P.wlabel(m.z,'|f| 最大',V.target,{dx:12,dy:-14,align:'left',font:'600 13px '+SANS_FONT});}
+  if(S.trail)P.path(S.trail.map(t=>c.z(t)),V.violet,4,{alpha:.6});
+  const z=c.z(S.t);P.dot(z,V.w,8,P.drag);P.wlabel(z,'z(t)',V.w,{dx:14,dy:-14,size:16});
+}
+
+const CH=new CF.Chart($('#chart'),{render:drawChart,aspect:0.42,maxVh:0.32,minH:180});
+function drawChart(G){
+  const V=G.V,c=K(),pts=samples(800),m=maxInfo();
+  const ymax=c.ymax||m.y*1.15;
+  G.setScale(c.a,c.b,0,ymax);
+  const st=ymax>6?(ymax>10?4:2):(ymax>2?0.5:0.25),yt=[];for(let v=0;v<=ymax+1e-9;v+=st)yt.push({v,t:trimNum(v,2),strong:v===0});
+  const xs=c.b-c.a>5?2:(c.b-c.a>2?1:0.25),xt=[];for(let v=Math.ceil(c.a/xs)*xs;v<=c.b+1e-9;v+=xs)xt.push({v,t:trimNum(v,2)});
+  G.axes({yticks:yt,xticks:xt,xname:'t'});
+  G.series(pts.map(p=>({x:p.t,y:Math.min(p.y,ymax*1.5)})),V.z1,2.5);
+  if(!c.aOpen&&!c.bInf){G.hline(m.y,V.target,1.5,[6,4]);G.pdot(m.t,m.y,V.target,5.5);G.label('M = '+r3(m.y),G.X(m.t)+8,G.Y(m.y)-12,V.target,'600 14px '+MATH_FONT,'left');}
+  if(c.aOpen)G.label('t → 0⁺ 时 g(t) → +∞',G.X(c.a)+14,G.Y(ymax)+14,V.w,'600 13px '+SANS_FONT,'left');
+  if(c.bInf)G.label('t → +∞ 时 g(t) → +∞',G.X(c.b)-8,G.Y(ymax)+14,V.w,'600 13px '+SANS_FONT,'right');
+  const y=g(S.t);G.pdot(S.t,Math.min(y,ymax),V.w,5.5);
+}
+
+function readoutHTML(){
+  const c=K(),z=c.z(S.t),w=c.f(z),bad=c.aOpen||c.bInf,m=maxInfo();
+  let h=`<h2>当前情形</h2><table class="rt"><tbody>
+    <tr><td>C</td><td>${c.curve}</td></tr><tr><td>f</td><td>${c.fn}</td></tr>
+    <tr><td>t</td><td>${r3(S.t)}</td></tr><tr><td>z(t)</td><td>${cplxHTML(z)}</td></tr>
+    <tr><td>g(t)</td><td>|f(z(t))| = ${r3(C.abs(w))}</td></tr></tbody></table>`;
+  if(!bad)h+=`<p class="verdict ok">✓ 有界：|f(z)| ≤ M = ${r3(m.y)}，在 t = ${r3(m.t)} 处取到</p>
+    <div class="why"><p class="note">g(t) 是闭区间 [a, b] 上的连续函数，由最值定理一定能取到最大值 M。这个 M 就是 f 在 C 上的界。</p></div>`;
+  else h+=`<p class="verdict no">✗ 无界：f 在 C 上处处连续，但 |f(z)| 可以任意大</p>
+    <div class="why"><p class="note">${c.aOpen?'参数区间 (0, 1] 不闭：端点 t = 0 对应的点 z = 0 不在 C 上，f 在那里没有定义。t 越靠近 0，g(t) = 1/|z(t)| 越大，没有最大值。':'参数区间 [1, +∞) 无界：曲线一直伸向无穷远，|f(z)| = |z| 随之无限增大。'}</p>
+    <p class="note">所以定理要求参数区间是<strong>闭的</strong>、<strong>有界的</strong>，缺一不可。</p></div>`;
+  return h;
+}
+function update(){ZP.range=K().range;ZP.draw();CH.draw();$('#readout').innerHTML=readoutHTML();
+  document.querySelectorAll('#cases .btn').forEach((b,i)=>b.setAttribute('aria-pressed',i===S.k?'true':'false'));}
+function load(k){stop();S.k=k;const c=K();S.t=tMin()+(c.b-tMin())*0.55;update();}
+const cw=$('#cases');CASES.forEach((c,i)=>{const b=document.createElement('button');b.type='button';b.className='btn';b.innerHTML=`<span>${c.t}</span><small>${c.s}</small>`;b.addEventListener('click',()=>load(i));cw.appendChild(b);});
+$('#play').addEventListener('click',()=>{
+  stop();const c=K(),a=tMin();S.trail=[];
+  $('#status').innerHTML=`<span>${c.aOpen?'从 t = 1 往 t → 0 走，g(t) 越来越大。':(c.bInf?'t 不断增大，g(t) 没有上限。':'t 从 a 走到 b，g(t) 在某处取到最大值 M。')}</span>`;
+  const from=c.aOpen?c.b:a,to=c.aOpen?a:c.b;
+  anim=CF.animate(4500,u=>{S.t=from+(to-from)*CF.ease(u);S.trail.push(S.t);update();},()=>{anim=null;});
+});
+ZP.cv.addEventListener('keydown',e=>{const d={ArrowLeft:-1,ArrowRight:1}[e.key];if(!d)return;e.preventDefault();stop();const c=K();S.t=Math.max(tMin(),Math.min(c.b,S.t+d*(c.b-c.a)/100));update();});
+{const k=parseInt(CF.hash.get('case'),10);S.k=k>=0&&k<CASES.length?k:0;}
+ZP.resize();CH.resize();load(S.k);
+})();
+</script>
+</body>
+</html>

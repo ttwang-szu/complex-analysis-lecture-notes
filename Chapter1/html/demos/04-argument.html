@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>幅角与主值演示</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--math);font-size:15px;padding:3px 9px;border-radius:999px;background:var(--chip);border:1px solid transparent;font-variant-numeric:tabular-nums}
+.chip.on{border-color:var(--violet);color:var(--violet);font-weight:600}
+.chip.pv{border-color:var(--z1);color:var(--z1)}
+.rt tr.act td{background:var(--chip);font-weight:600}
+.rt tr.act td:first-child{box-shadow:inset 3px 0 0 var(--z1)}
+.flash{color:var(--w);font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" aria-label="演示目录">
+    <a href="index.html">← 全部演示</a>
+    <a href="01-multiplication.html">1 乘法</a><a href="02-roots.html">2 方根</a><a href="03-z-squared.html">3 w = z²</a><a href="04-argument.html" aria-current="page">4 幅角</a><a href="05-joukowski.html">5 Joukowski</a><a href="06-riemann-sphere.html">6 复球面</a><a href="07-limit-paths.html">7 极限路径</a><a href="08-limit-epsilon-delta.html">8 ε–δ</a><a href="09-curve-bounded.html">9 曲线上有界</a>
+  </nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 1 章 §1.1 复数的表示 · 式 (1.1.3)–(1.1.5) · 图 1.2</p>
+    <h1>幅角的多值性与主值</h1>
+    <p class="lede">让点 <span class="m">z</span> 绕原点转圈：紫色的“连续幅角”<span class="mr">Θ</span> 一直累加，它总是 <span class="mr">Arg</span> <span class="m">z</span> 中的某一个值；蓝色的主值 <span class="mr">arg</span> <span class="m">z</span> 限定在 <span class="mr">(−π, π]</span>，每次穿过负实轴都要跳一次。</p>
+  </header>
+
+  <main class="layout">
+    <section class="stage-col">
+      <div class="stage">
+        <canvas id="plane" tabindex="0" aria-label="复平面。拖动 z 绕原点转动"></canvas>
+        <div class="status" id="status" aria-live="polite"></div>
+      </div>
+      <div class="stage">
+        <span class="tag">随时间变化：<span style="color:var(--violet)">Θ（连续）</span> 与 <span style="color:var(--z1)">arg z（主值）</span></span>
+        <canvas id="chart" aria-label="幅角随时间变化的曲线"></canvas>
+      </div>
+      <p class="hint">拖动 z 绕原点转圈，或按“自动转动”。键盘：点一下画布，左右方向键转动 z。</p>
+    </section>
+
+    <aside class="panel">
+      <div class="card">
+        <div class="row">
+          <button class="btn primary" id="play" type="button">▶ 自动转动</button>
+          <div class="seg" role="radiogroup" aria-label="方向">
+            <input type="radio" name="dir" id="d-ccw" value="1" checked><label for="d-ccw">逆时针</label>
+            <input type="radio" name="dir" id="d-cw" value="-1"><label for="d-cw">顺时针</label>
+          </div>
+          <button class="btn" id="reset" type="button">重置 Θ</button>
+        </div>
+        <div class="slider"><label for="speed">速度</label><input type="range" id="speed" min="0.1" max="1.5" step="0.05" value="0.5"><output id="speed-out" for="speed"></output></div>
+      </div>
+
+      <div class="card" id="readout" aria-live="polite"></div>
+
+      <div class="card">
+        <h2>用式 (1.1.5) 求主值</h2>
+        <table class="rt" id="quad"></table>
+      </div>
+
+      <div class="card">
+        <h2>课件中的例子</h2>
+        <div class="presets" id="presets"></div>
+        <label class="row hint" style="font-size:13px">吸附
+          <select id="snap"><option value="none">不吸附</option><option value="polar" selected>极坐标（π/12）</option></select>
+        </label>
+      </div>
+    </aside>
+  </main>
+</div>
+<script src="assets/plane.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,TAU,EPS,$,niceReal,nicePi,angleText,degText,cplxHTML,MATH_FONT,trimNum,principal}=CF;
+const S={z:C.polar(1.8,PI/4),Theta:PI/4,playing:false,dir:1,speed:0.5,snap:'polar',flash:'',flashT:0};
+const hist=[];const WIN=12;let t0=performance.now()/1000;
+
+function setZ(z){
+  const r=C.abs(z);if(r<0.15)return;
+  const d=principal(C.arg(z)-C.arg(S.z));
+  const before=S.Theta;S.Theta+=d;S.z=C.clean(z);
+  const kb=Math.round((before-C.arg(C.polar(1,before)))/TAU),ka=kOf();
+  if(ka!==kb){S.flash=`穿过负实轴：arg z 跳了 ${d>0?'−2π':'+2π'}，Θ 仍然连续，k 从 ${kb} 变成 ${ka}。`;S.flashT=performance.now();}
+}
+const kOf=()=>Math.round((S.Theta-C.arg(S.z))/TAU);
+function snap(p){
+  if(S.snap!=='polar')return p;
+  let r=Math.round(Math.hypot(p.x,p.y)/0.25)*0.25;if(r<0.25)r=0.25;
+  return C.polar(r,Math.round(Math.atan2(p.y,p.x)/(PI/12))*(PI/12));
+}
+
+/* ---------- 复平面 ---------- */
+const P=new CF.Plane($('#plane'),{range:2.2,maxVh:0.55,aspect:0.8,render:draw});
+P.addHandle({get:()=>S.z,set:p=>{stopPlay();setZ(snap(p));refresh();}});
+function draw(P){
+  const V=P.V,O={x:0,y:0};
+  P.grid(P.range<=3?{step:0.5,labStep:1}:{});
+  /* 负实轴：主值的跳跃处 */
+  P.path([{x:0,y:0},{x:-9,y:0}],V.w,3,{dash:[8,6],alpha:.7});
+  P.label('主值在这里跳跃',P.cx-P.ppu*1.2,P.cy+16,V.w,'600 13px '+CF.SANS_FONT);
+  /* Θ 的螺旋弧：每多转一圈，半径大一些 */
+  const n=Math.max(2,Math.ceil(Math.abs(S.Theta)/0.03)),pts=[];
+  for(let j=0;j<=n;j++){const a=S.Theta*j/n,rp=26+Math.abs(a)/TAU*11;pts.push(C.polar(rp/P.ppu,a));}
+  P.path(pts,V.violet,2.5);
+  if(pts.length>2){const a=pts[pts.length-1],b=pts[pts.length-3];P.arrow(b,a,V.violet,2.5);}
+  const end=pts[pts.length-1],E=P.toS(end),ua=S.Theta;
+  P.label('Θ',E.X+14*Math.cos(ua+PI/2*Math.sign(S.Theta||1)),E.Y-14*Math.sin(ua+PI/2*Math.sign(S.Theta||1)),V.violet,'italic 600 16px '+MATH_FONT);
+  /* 主值弧 */
+  const t=C.arg(S.z);P.arc(O,16,0,t,V.z1,{lw:2.5});
+  P.arrow(O,S.z,V.z1,2.5);
+  P.dot(S.z,V.z1,8,P.drag||document.activeElement===P.cv);
+  P.endLabel(S.z,'z',V.z1,19);
+}
+
+/* ---------- 曲线图 ---------- */
+const CH=new CF.Chart($('#chart'),{render:drawChart,aspect:0.36,maxVh:0.28,minH:160});
+function drawChart(G){
+  const V=G.V,now=performance.now()/1000-t0,x0=Math.max(0,now-WIN),x1=Math.max(WIN,now);
+  const vis=hist.filter(h=>h.t>=x0-0.1);
+  let lo=-PI,hi=PI;vis.forEach(h=>{lo=Math.min(lo,h.T);hi=Math.max(hi,h.T);});
+  lo=Math.floor(lo/PI-0.3)*PI;hi=Math.ceil(hi/PI+0.3)*PI;
+  G.setScale(x0,x1,lo,hi);
+  const step=(hi-lo)/PI>10?2:1,yt=[];
+  for(let k=Math.ceil(lo/PI);k<=Math.floor(hi/PI);k+=1){if(k%step)continue;yt.push({v:k*PI,t:k===0?'0':(k===1?'π':k===-1?'−π':trimNum(k,0)+'π'),math:true,strong:k===0});}
+  const xt=[];for(let s=Math.ceil(x0/2)*2;s<=x1;s+=2)xt.push({v:s,t:s+'s'});
+  /* (−π, π] 带 */
+  const c=G.ctx;c.save();c.fillStyle=V.fill1;c.fillRect(G.pad.l,G.Y(PI),G.W-G.pad.l-G.pad.r,G.Y(-PI)-G.Y(PI));c.restore();
+  G.axes({yticks:yt,xticks:xt,xname:'时间'});
+  G.series(vis.map(h=>({x:h.t,y:h.T})),V.violet,2.5);
+  const pv=[];let prev=null;
+  vis.forEach(h=>{if(prev&&Math.abs(h.a-prev.a)>PI){pv.push(null);}pv.push({x:h.t,y:h.a});prev=h;});
+  G.series(pv,V.z1,2.5);
+  vis.forEach((h,i)=>{if(i&&Math.abs(h.a-vis[i-1].a)>PI){G.pdot(h.t,h.a,V.w,3.5);G.pdot(vis[i-1].t,vis[i-1].a,V.w,3.5);}});
+  if(vis.length){const h=vis[vis.length-1];G.pdot(h.t,h.T,V.violet,5);G.pdot(h.t,h.a,V.z1,5);}
+  G.label('(−π, π]',G.W-G.pad.r-6,G.Y(PI)+10,V.z1,'13px '+MATH_FONT,'right');
+}
+
+/* ---------- 读数 ---------- */
+function renderReadout(){
+  const z=S.z,r=C.abs(z),a=C.arg(z),k=kOf();
+  let chips='';for(let j=-3;j<=3;j++){const v=a+2*j*PI;chips+=`<span class="chip${j===k?' on':''}${j===0?' pv':''}">${angleText(v)}</span>`;}
+  const fl=S.flash&&performance.now()-S.flashT<4000?`<p class="flash">${S.flash}</p>`:'';
+  $('#readout').innerHTML=`<table class="rt"><tbody>
+    <tr><td><i>z</i></td><td>${cplxHTML(z)}</td><td>|<i>z</i>| = ${niceReal(r)}</td></tr>
+    <tr><td class="c1">arg <i>z</i></td><td class="c1" colspan="2">${angleText(a)} <small>${degText(a)}</small>　<span style="font-family:var(--sans);font-size:12.5px;color:var(--muted)">唯一，属于 (−π, π]</span></td></tr>
+    <tr><td class="cv">Θ</td><td class="cv" colspan="2">${angleText(S.Theta)} = arg <i>z</i> + 2·(${k})π</td></tr></tbody></table>
+    <div class="why"><p>Arg <i>z</i> = { arg <i>z</i> + 2<i>k</i>π : <i>k</i> ∈ ℤ }</p><div class="chips">${chips}<span class="chip">…</span></div>
+    <p class="note">蓝框是主值（k = 0），紫框是当前的连续幅角 Θ（k = ${k}）。它们表示同一个方向，所以对应同一个复数：${niceReal(r)}e<sup><i>i</i>(${angleText(a)} + 2<i>k</i>π)</sup> 的值都一样。</p>${fl}</div>`;
+}
+const ROWS=[
+  ['第一、四象限','arctan(y/x)'],['第二象限','arctan(y/x) + π'],['第三象限','arctan(y/x) − π'],
+  ['正虚轴','π/2'],['负虚轴','−π/2'],['负实轴','π'],['正实轴','0']];
+function quadRow(z){
+  const e=1e-9,x=Math.abs(z.x)<e?0:z.x,y=Math.abs(z.y)<e?0:z.y;
+  if(y===0)return x>0?6:5; if(x===0)return y>0?3:4; if(x>0)return 0; return y>0?1:2;
+}
+function renderQuad(){
+  const q=quadRow(S.z),at=Math.atan(S.z.y/S.z.x);
+  let h='<tbody>';
+  ROWS.forEach((r,i)=>{h+=`<tr class="${i===q?'act':''}"><td style="font-family:var(--sans);font-size:13.5px">${r[0]}</td><td>${r[1]}</td></tr>`;});
+  h+='</tbody>';
+  let calc='';
+  if(q<=2){calc=`arctan(${niceReal(S.z.y)} / ${niceReal(S.z.x)}) = ${angleText(at)}`+(q===1?` ，+ π = ${angleText(at+PI)}`:q===2?` ，− π = ${angleText(at-PI)}`:'');}
+  else calc=`z 在${ROWS[q][0]}上，直接得 arg z = ${ROWS[q][1]}`;
+  $('#quad').innerHTML=h+`<tfoot><tr><td colspan="2" style="border-top:1px solid var(--line);font-size:15px;padding-top:8px">${calc}</td></tr></tfoot>`;
+}
+function refresh(){renderReadout();renderQuad();P.draw();
+  const fl=S.flash&&performance.now()-S.flashT<4000;$('#status').innerHTML=fl?'<span class="flash">'+S.flash+'</span>':'';}
+
+/* ---------- 时钟：采样 + 自动转动 ---------- */
+let last=performance.now(),raf=0;
+function tick(now){
+  const dt=Math.min(0.1,(now-last)/1000);last=now;
+  if(S.playing){const r=C.abs(S.z);const a=C.arg(S.z)+S.dir*S.speed*TAU*dt*0.5;setZ(C.polar(r,a));}
+  hist.push({t:now/1000-t0,T:S.Theta,a:C.arg(S.z)});
+  while(hist.length&&hist[0].t<now/1000-t0-WIN-1)hist.shift();
+  if(S.playing)refresh();else if(S.flash&&now-S.flashT>4000&&now-S.flashT<4100)refresh();
+  CH.draw();
+  raf=requestAnimationFrame(tick);
+}
+function stopPlay(){S.playing=false;$('#play').textContent='▶ 自动转动';}
+$('#play').addEventListener('click',()=>{S.playing=!S.playing;$('#play').textContent=S.playing?'❚❚ 暂停':'▶ 自动转动';});
+CF.bindSeg('dir',v=>{S.dir=+v;});
+CF.bindRange('#speed',v=>trimNum(v,2)+' 圈/秒',v=>{S.speed=v;});
+$('#reset').addEventListener('click',()=>{S.Theta=C.arg(S.z);S.flash='';hist.length=0;t0=performance.now()/1000;refresh();});
+$('#snap').addEventListener('change',e=>{S.snap=e.target.value;});
+P.cv.addEventListener('keydown',e=>{
+  const d={ArrowLeft:1,ArrowRight:-1,ArrowUp:1,ArrowDown:-1}[e.key];if(!d)return;e.preventDefault();stopPlay();
+  setZ(C.polar(C.abs(S.z),C.arg(S.z)+d*PI/12));refresh();
+});
+P.cv.addEventListener('focus',()=>P.draw());P.cv.addEventListener('blur',()=>P.draw());
+document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf);raf=0;}else if(!raf){last=performance.now();raf=requestAnimationFrame(tick);}});
+
+const r3=Math.sqrt(3);
+const PRESETS=[
+  {t:'1 + i',s:'主值 π/4',z:{x:1,y:1}},
+  {t:'−3√3 − 3i',s:'第三象限：−5π/6',z:{x:-3*r3,y:-3},scale:true},
+  {t:'−1',s:'负实轴：π（不是 −π）',z:{x:-1,y:0}},
+  {t:'−i',s:'负虚轴：−π/2',z:{x:0,y:-1}},
+  {t:'1 + sin 1 + i cos 1',s:'主值 π/4 − 1/2',z:{x:1+Math.sin(1),y:Math.cos(1)}},
+];
+const pw=$('#presets');
+PRESETS.forEach(p=>{const b=document.createElement('button');b.type='button';b.className='btn';
+  b.innerHTML=`<span class="mr">${p.t.replace(/i(?=$| cos)/,'<i>i</i>')}</span><small>${p.s}</small>`;
+  b.addEventListener('click',()=>{stopPlay();const z=p.z;P.range=Math.max(2.2,C.abs(z)*1.15);S.z=C.clean(z);S.Theta=C.arg(S.z);S.flash='';refresh();});pw.appendChild(b);});
+
+P.resize();CH.resize();refresh();raf=requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
