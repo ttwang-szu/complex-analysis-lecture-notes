@@ -451,27 +451,6 @@ On the nonuniqueness of arguments:
 \end{frame}
 
 
-\begin{frame}
-\frametitle{对 $2\pi$ 求模}
-对 $2\pi$ 求模，就是用 $2\pi$ 作除数求余数。余数区间必须预先规定。为了得到幅角主值，取余数区间为 $(-\pi,\pi]$。对任意 $\theta\in\mathbb R$，存在唯一的 $k\in\mathbb Z$ 和 $r\in(-\pi,\pi]$，使得
-\[
-\theta=2k\pi+r.
-\]
-此时，$r$ 是 $\theta$ 对 $2\pi$ 求模所得的余数，记作
-\[
-r=\theta\bmod 2\pi,\qquad -\pi<r\leq\pi.
-\]
-模 $2\pi$ 同余表示两个角度具有相同的余数：
-\[
-\theta_1\equiv\theta_2\pmod{2\pi}
-\quad\Longleftrightarrow\quad
-\theta_1-\theta_2=2k\pi,\quad k\in\mathbb Z.
-\]
-例如，$\frac{17\pi}{12}=2\pi-\frac{7\pi}{12}$，所以
-\[
-\frac{17\pi}{12}\bmod 2\pi=-\frac{7\pi}{12}.
-\]
-\end{frame}
 
 
 
@@ -564,7 +543,8 @@ r=\theta\bmod 2\pi,\qquad -\pi<r\leq\pi.
 	Two vertices\textnormal{（顶点）} of an equilateral triangle\textnormal{（等边三角形）} are $z_1=1+2i$ and $z_2=3+2i$. Find the possible third vertices.
 \end{example}
 \begin{solution}<2->
-	As shown in Figure 1.5, fix $z_1$ and rotate the vector $z_2-z_1$ through $\frac{\pi}{3}$ or $-\frac{\pi}{3}$. The endpoint（终点） of the resulting vector is a possible third vertex $z_3$.
+	As shown in Figure 1.5, fix $z_1$ and rotate the vector $z_2-z_1$ through $\frac{\pi}{3}$ or $-\frac{\pi}{3}$. The endpoint（终点） of the resulting vector is a possible third vertex $z_3$:
+	\[z_3=z_1+(z_2-z_1)e^{\pm i\pi/3}=(1+2i)+2\left(\frac12\pm i\frac{\sqrt3}{2}\right)=2+(2\pm\sqrt3)i.\]
 \end{solution}
 \end{frame}
 
@@ -741,7 +721,7 @@ These six roots are the vertices of a regular hexagon（正六边形） inscribe
 
 \begin{frame}
 \begin{solution}[Solution\ (Cont.)]
-	From
+	Write the sixth roots as $\omega=e^{i\alpha}$, where $\alpha=\frac{k\pi}{3}$ $(k=0,1,\ldots,5)$. From
 	\[\omega=\frac{1+z}{1-z}\Rightarrow z=\frac{\omega-1}{\omega+1}\]
 	\[z=\frac{e^{i\alpha}-1}{e^{i\alpha}+1}=\frac{\cos\alpha+i\sin\alpha-1}{\cos\alpha+i\sin\alpha+1}\]
 	\[z=\frac{2\sin\frac{\alpha}{2}\left(-\sin\frac{\alpha}{2}+i\cos\frac{\alpha}{2}\right)}{2\cos\frac{\alpha}{2}\left(\cos\frac{\alpha}{2}+i\sin\frac{\alpha}{2}\right)}=\tan\frac{\alpha}{2}\frac{e^{i\left(\frac{\pi}{2}+\frac{\alpha}{2}\right)}}{e^{i\frac{\alpha}{2}}}=i\tan\frac{\alpha}{2}\]
@@ -956,22 +936,31 @@ Taking absolute values gives
 
 \begin{frame}
 \begin{proofs}[\proofname\ (Cont.)]
+Let $a=\abs{z_2-z_3}$, $b=\abs{z_3-z_1}$, and $c=\abs{z_1-z_2}$. These are positive because the three points are pairwise distinct. Then (2) and (4) read
+\[b^2=ca,\qquad a^2=cb.\]
+Dividing the first equation by the second gives $\frac{b^2}{a^2}=\frac{a}{b}$, so $a^3=b^3$ and hence $a=b$. Substituting into $a^2=cb$ gives $c=a$. Therefore,
+\[\abs{z_2-z_3}=\abs{z_3-z_1}=\abs{z_1-z_2},\]
+that is, $\triangle z_1z_2z_3$ is equilateral.
+\end{proofs}
+\end{frame}
+
+\begin{frame}
+\begin{proofs}[\proofname\ (Cont.)]
 Conversely, if $\triangle z_1z_2z_3$ is equilateral, then
-\[\abs{\frac{z_2-z_1}{z_3-z_1}}=\abs{\frac{z_1-z_3}{z_2-z_3}}=1\]
-\begin{equation*}
-\left\{
-\begin{aligned}
-\arg\left(\frac{z_2-z_1}{z_3-z_1}\right)=\arg(z_2-z_1)-\arg(z_3-z_1)=\pm\frac{\pi}{3} \\
-\arg\left(\frac{z_1-z_3}{z_2-z_3}\right)=\arg(z_1-z_3)-\arg(z_2-z_3)=\pm\frac{\pi}{3}
-\end{aligned}
-\right.
-\end{equation*}
+\[\abs{\frac{z_2-z_1}{z_3-z_1}}=\abs{\frac{z_1-z_3}{z_2-z_3}}=1.\]
+Moreover, every interior angle equals $\frac{\pi}{3}$, so
+\[\frac{z_2-z_1}{z_3-z_1}=e^{i\sigma_1\pi/3},\qquad \frac{z_1-z_3}{z_2-z_3}=e^{i\sigma_2\pi/3},\qquad \sigma_1,\sigma_2\in\{1,-1\},\]
+where, by (1.2.7),
+\begin{align*}
+\sigma_1\frac{\pi}{3}&\equiv\arg(z_2-z_1)-\arg(z_3-z_1)\pmod{2\pi},\\
+\sigma_2\frac{\pi}{3}&\equiv\arg(z_1-z_3)-\arg(z_2-z_3)\pmod{2\pi}.
+\end{align*}
 \end{proofs}
 \end{frame}
 
 \begin{frame}
 \begin{proof}[\proofname\ (Cont.)]
-The two arguments have the same sign, so
+Traverse the triangle along the cycle $z_1\to z_3\to z_2\to z_1$. The first quotient is the rotation at $z_1$ from the side toward the next vertex $z_3$ to the side toward the previous vertex $z_2$; the second quotient is the same rotation at $z_3$, from the side toward $z_2$ to the side toward $z_1$. Hence both rotations have the same orientation: $\sigma_1=\sigma_2=1$ if the cycle is counterclockwise, and $\sigma_1=\sigma_2=-1$ otherwise. Therefore,
 \[\frac{z_2-z_1}{z_3-z_1}=\frac{z_1-z_3}{z_2-z_3}\]
 \end{proof}
 Finally, we illustrate two geometric applications of complex numbers: (i) expressing a plane curve（平面曲线） $F(x,y)=0$ by a complex equation, and (ii) identifying the curve or region represented by a complex equation.
@@ -1007,7 +996,7 @@ which can be simplified as
 
 \begin{frame}
 \begin{example}
-Describe the loci（轨迹） or regions（区域） represented by the following conditions:
+Describe the loci（轨迹） or point sets（点集） represented by the following conditions:
 \begin{enumerate}
 \item $\abs{z+2i}=2$;
 \item $\abs{z-i}+\abs{z+i}\leq4$;
@@ -1017,6 +1006,18 @@ Describe the loci（轨迹） or regions（区域） represented by the followin
 \begin{solution}<2->
 \begin{enumerate}
 \item The equation $\abs{z+2i}=2$ describes all points at distance $2$ from $-2i$. Hence, it represents the circle（圆） centered at $-2i$ with radius（半径） $2$ (see Figure 1.8(a)).
+\end{enumerate}
+\end{solution}
+\end{frame}
+
+\begin{frame}
+\begin{solution}[Solution\ (Cont.)]
+\begin{enumerate}
+\setcounter{enumi}{1}
+\item The sum of the distances from $z$ to the foci（焦点） $i$ and $-i$ is at most $4$. This is an ellipse with $2a=4$ and focal distance $2c=2$, so $b^2=a^2-c^2=3$. Hence, the condition represents the closed elliptical region
+\[\frac{x^2}{3}+\frac{y^2}{4}\leq1\]
+including its boundary (see Figure 1.8(b)).
+\item The condition $0\leq\arg(z-1)\leq\frac{\pi}{4}$ describes the closed sector with vertex $1$ bounded by the rays of angles $0$ and $\frac{\pi}{4}$, that is, $0\leq y\leq x-1$. Intersecting it with the strip $2\leq x\leq3$ gives the closed trapezoid（梯形） with vertices $2$, $3$, $3+2i$, and $2+i$ (see Figure 1.8(c)).
 \end{enumerate}
 \end{solution}
 \end{frame}
@@ -1074,7 +1075,7 @@ For a finite complex number $a$, arithmetic involving $\infty$ is only partially
 \end{enumerate}
 \end{frame}
 
-\section{Regions in the Complex Plane}
+\section{Domains in the Complex Plane}
 \begin{frame}
 	\frametitle{Outline}
 	\tableofcontents[currentsection] 
@@ -1287,7 +1288,7 @@ For a finite complex number $a$, arithmetic involving $\infty$ is only partially
 \end{frame}
 
 \begin{frame}
-\begin{solution}[Solution.\ (Cont.)]
+\begin{solution}[Solution\ (Cont.)]
 	Because $2\cos\theta<r<4\cos\theta$,
 	\[2r\cos\theta<r^2<4r\cos\theta,\quad2x<x^2+y^2<4x\]
 	The first inequality gives $(x-1)^2+y^2>1$, and the second gives $(x-2)^2+y^2<4$. Thus, the point set is the shaded region in Figure 1.13:
@@ -1303,7 +1304,7 @@ For a finite complex number $a$, arithmetic involving $\infty$ is only partially
 
 
 \begin{frame}
-\begin{solution}[Solution.\ (Cont.)]
+\begin{solution}[Solution\ (Cont.)]
 	\begin{figure}
 		\includegraphics[height=0.6\textheight]{Figure_1_13.jpg}
 		\caption{1.13}
@@ -1323,7 +1324,7 @@ For a finite complex number $a$, arithmetic involving $\infty$ is only partially
 
 
 \begin{frame}
-\begin{solution}[Solution.\ (Cont.)]
+\begin{solution}[Solution\ (Cont.)]
 	\begin{figure}
 		\includegraphics[height=0.6\textheight]{Figure_1_14.jpg}
 		\caption{1.14}
@@ -1378,13 +1379,29 @@ For a finite complex number $a$, arithmetic involving $\infty$ is only partially
 
 \begin{frame}
 \begin{definition}[Cont.]
-Let $w=f(z)$, with $z=x+iy$ and $w=u+iv$. Then
-
-\[f(z)=w=u+iv,\qquad
-f(x+iy)=u(x,y)+iv(x,y).\]
-
+Let $w=f(z)$, with $z=x+iy$ and $w=u+iv$. Since $z\longleftrightarrow(x,y)$,
+\begin{align*}
+f(z)&=w=u+iv,\\
+f(x+iy)&=\underbrace{\operatorname{Re}f(x+iy)}_{u(x,y)}+i\,\underbrace{\operatorname{Im}f(x+iy)}_{v(x,y)}\\
+&=u(x,y)+iv(x,y).
+\end{align*}
 \end{definition}
 \end{frame}
+
+
+\begin{frame}
+\begin{definition}[Cont.]
+Conversely, any real-valued $u(x,y)$ and $v(x,y)$ on $G$ define a complex function. Hence
+\[w=f(z)\quad\Longleftrightarrow\quad\begin{cases}u=u(x,y)\\ v=v(x,y)\end{cases}\qquad(x,y)\longmapsto(u,v).\]
+\end{definition}
+\begin{enumerate}
+	\item []
+	The formula may involve $\overline z$, $\abs z$, $\operatorname{Re}z$, $x$, $y$, not only $z$:
+	\[f(z)=\overline z=x-iy\quad\Longrightarrow\quad u(x,y)=x,\quad v(x,y)=-y.\]
+\end{enumerate}
+\end{frame}
+
+
 
 
 
@@ -1447,7 +1464,7 @@ f(x+iy)=u(x,y)+iv(x,y).\]
 
 
 \begin{frame}
-\begin{solution}[Solution.\ (Cont.)]
+\begin{solution}[Solution\ (Cont.)]
 	\begin{enumerate}
 		\item []
 		\begin{enumerate}[(1)]
@@ -1464,7 +1481,7 @@ f(x+iy)=u(x,y)+iv(x,y).\]
 
 
 \begin{frame}
-\begin{solution}[Solution.\ (Cont.)]
+\begin{solution}[Solution\ (Cont.)]
 	\begin{enumerate}
 		\setcounter{enumi}{1}
 		\item If $z=x+iy$ and $w=u+iv$, then $w=z^2$ gives
@@ -1479,7 +1496,7 @@ f(x+iy)=u(x,y)+iv(x,y).\]
 
 
 \begin{frame}
-\begin{solution}[Solution.\ (Cont.)]
+\begin{solution}[Solution\ (Cont.)]
 	\begin{enumerate}
 		\item []
 		\begin{enumerate}
@@ -1497,7 +1514,7 @@ f(x+iy)=u(x,y)+iv(x,y).\]
 
 
 \begin{frame}
-\begin{solution}[Solution.\ (Cont.)]
+\begin{solution}[Solution\ (Cont.)]
 	\begin{enumerate}
 		\item []
 		\begin{enumerate}
@@ -1523,7 +1540,7 @@ f(x+iy)=u(x,y)+iv(x,y).\]
 
 
 \begin{frame}
-\begin{solution}[Solution.\ (Cont.)]
+\begin{solution}[Solution\ (Cont.)]
 	\begin{enumerate}
 		\item []
 		\begin{enumerate}
@@ -1554,7 +1571,7 @@ f(x+iy)=u(x,y)+iv(x,y).\]
 
 
 \begin{frame}
-\begin{solution}[Solution.\ (Cont.)]
+\begin{solution}[Solution\ (Cont.)]
 	\begin{enumerate}
 		\item []
 		\begin{enumerate}
@@ -1571,7 +1588,7 @@ f(x+iy)=u(x,y)+iv(x,y).\]
 
 
 \begin{frame}
-\begin{solution}[Solution.\ (Cont.)]
+\begin{solution}[Solution\ (Cont.)]
 	\begin{enumerate}
 		\item []
 		\begin{enumerate}
@@ -1625,7 +1642,7 @@ f(x+iy)=u(x,y)+iv(x,y).\]
 
 
 \begin{frame}
-\begin{solution}[Solution.\ (Cont.)]
+\begin{solution}[Solution\ (Cont.)]
 	Parametrize $\abs z=2$ by $x=2\cos\theta$ and $y=2\sin\theta$, where $0\leq\theta\leq2\pi$. Substitution into (1) gives
 	\[u=\frac52\cos\theta,\qquad v=\frac32\sin\theta.\]
 	Therefore, the image is the ellipse（椭圆）
@@ -1720,6 +1737,34 @@ f(x+iy)=u(x,y)+iv(x,y).\]
 \begin{property}
 	If $\lim_{z\to z_0}f(z)$ exists, then $f$ is bounded in some deleted neighborhood of $z_0$.
 \end{property}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Intuition: Uniqueness of the Limit}
+Suppose $f(z)\to A$ and $f(z)\to B$ with $A\neq B$. Take
+\[\varepsilon=\frac{\abs{A-B}}{2}:\qquad \{w:\abs{w-A}<\varepsilon\}\cap\{w:\abs{w-B}<\varepsilon\}=\varnothing.\]
+For $z$ close enough to $z_0$, $f(z)$ would lie in both disks:
+\[\abs{A-B}\leq\abs{A-f(z)}+\abs{f(z)-B}<\varepsilon+\varepsilon=\abs{A-B},\]
+a contradiction. Hence $A=B$.
+\begin{enumerate}
+	\item []
+	Intuition: $f(z)$ cannot approach two different points at the same time.
+\end{enumerate}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Intuition: Local Boundedness}
+Take $\varepsilon=1$. There is a $\delta>0$ such that
+\[\begin{aligned}0<\abs{z-z_0}<\delta\;&\Longrightarrow\;\abs{f(z)-A}<1\\
+&\Longrightarrow\;\abs{f(z)}\leq\abs{f(z)-A}+\abs{A}<\abs{A}+1.\end{aligned}\]
+Intuition: $f(z)$ is tied to $A$ by a string of length $1$.
+\begin{itemize}
+	\item The bound is only local: $f(z)=\frac1z$ satisfies $\lim_{z\to1}f(z)=1$ and is bounded near $1$, but it is unbounded near $0$.
+	\item The value $f(z_0)$ plays no role, because the neighborhood is deleted.
+	\item Contrapositive: if $f$ is unbounded near $z_0$, e.g. $\frac1z$ near $0$, then $\lim_{z\to z_0}f(z)$ does not exist.
+\end{itemize}
 \end{frame}
 
 
@@ -1849,6 +1894,31 @@ f(x+iy)=u(x,y)+iv(x,y).\]
 	where $z$ is restricted to $C$. If $C$ is parametrized over a closed bounded interval and $f$ is continuous on $C$, then $f$ is bounded on $C$. Thus, there exists $M>0$ such that
 	\[\abs{f(z)}\leq M\qquad(z\in C).\]
 \end{enumerate}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Intuition: Continuity along a Curve}
+Along $C$, $z$ may approach $z_0$ only through points of $C$. For example,
+\[f(z)=\begin{cases}\frac{xy}{x^2+y^2}, & z\neq0\\ 0, & z=0\end{cases}\qquad C:\ z(t)=t,\ t\in[-1,1].\]
+\begin{itemize}
+	\item In the plane: $f$ is not continuous at $0$ (along $y=x$ the limit is $1/2$).
+	\item On $C$: $y=0$, so $f(z)\equiv0$ and $f$ is continuous on $C$.
+\end{itemize}
+Restricting $z$ to $C$ leaves only one way to approach $z_0$, so the condition is weaker.
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Intuition: Why a Closed Bounded Parameter Interval?}
+Parametrization turns the curve $C$ into an interval $[a,b]$:
+\[z=z(t),\ t\in[a,b]\ \Longrightarrow\ g(t)=\abs{f(z(t))}\ \text{continuous on }[a,b].\]
+By the extreme value theorem（最值定理）, $g(t)\leq g(t^*)=M$ for some $t^*\in[a,b]$.
+\begin{itemize}
+	\item Not closed: $z(t)=t$, $t\in(0,1]$, $f(z)=1/z$ is continuous but unbounded.
+	\item Not bounded: $z(t)=t$, $t\in[1,+\infty)$, $f(z)=z$ is continuous but unbounded.
+\end{itemize}
+In Chapter 3, this $M$ gives the estimate $\abs{\int_C f\,dz}\leq ML$.
 \end{frame}
 
 
