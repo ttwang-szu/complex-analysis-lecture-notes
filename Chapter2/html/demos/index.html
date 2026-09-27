@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第 2 章课堂演示</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:6px}
+.item{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;text-decoration:none;color:var(--ink)}
+.item:hover,.item:focus-visible{border-color:var(--ink)}
+.item .no{grid-row:span 3;font-family:var(--math);font-size:30px;line-height:1;color:var(--muted)}
+.item h2{margin:0;font-size:17px}
+.item .ref{margin:0;font-size:12.5px;color:var(--muted)}
+.item .d{margin:0;font-size:14px}
+.foot{margin-top:18px;max-width:76ch;color:var(--muted);font-size:13px;display:grid;gap:4px}.foot p{margin:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 2 章 解析函数</p>
+    <h1>第 2 章课堂演示</h1>
+    <p class="lede">八个可交互的演示，按课件顺序排列。完整的 HTML 课件见 <a href="../CF_Chapter2.html">CF_Chapter2.html</a>，演示已嵌入在相应页面中。</p>
+  </header>
+  <div class="list">
+    <a class="item" href="01-difference-quotient.html"><span class="no">1</span><h2>导数与趋近方向无关</h2><p class="ref">§2.1 · 例 1.1、1.2 · 图 2.1</p><p class="d">Δz 绕 z₀ 转一圈，看差商的轨迹：可导时 r → 0 收缩为 f′(z₀)，否则缩不成一点。</p></a>
+    <a class="item" href="02-local-linear.html"><span class="no">2</span><h2>局部就是"伸缩 + 旋转"</h2><p class="ref">§2.2 · C–R 方程的几何意义</p><p class="d">小方格网的像：解析时是转过角度的小正方形，否则被压成平行四边形。显示 Jacobi 矩阵。</p></a>
+    <a class="item" href="03-cr-heatmap.html"><span class="no">3</span><h2>C–R 方程在哪里成立</h2><p class="ref">§2.2 · 例 2.1–2.3、2.6</p><p class="d">C–R 残差热图：只在一点或一条线上成立 ≠ 解析。拖动滑块求例 2.3、2.6 中的系数。</p></a>
+    <a class="item" href="04-orthogonal.html"><span class="no">4</span><h2>正交曲线族</h2><p class="ref">§2.2 · 例 2.8</p><p class="d">u = c₁ 与 v = c₂ 两族等值线；拖动交点看夹角是否为 90°。</p></a>
+    <a class="item" href="05-exp-map.html"><span class="no">5</span><h2>指数映射 w = eᶻ</h2><p class="ref">§2.3 · 指数函数</p><p class="d">竖线 → 圆，横线 → 射线，水平带 → 扇形；竖直移动 2π，像回到原处（周期 2πi）。</p></a>
+    <a class="item" href="06-log-branches.html"><span class="no">6</span><h2>Ln z 的值与分支</h2><p class="ref">§2.3 · 对数函数</p><p class="d">z 绕原点转圈：连续分支升到上一条带，主值 ln z 在负实轴处跳变 2πi。</p></a>
+    <a class="item" href="07-sine.html"><span class="no">7</span><h2>复正弦函数无界</h2><p class="ref">§2.3 · 例 3.12、3.14</p><p class="d">|sin z|、|cos z|、|tanh z| 热图；竖直带在 sin z 下映满平面：横线 → 椭圆，竖线 → 双曲线。</p></a>
+    <a class="item" href="08-power.html"><span class="no">8</span><h2>乘幂 aᵇ 有几个值</h2><p class="ref">§2.3 · 例 3.7–3.9</p><p class="d">指数 b·Ln a 排成一条直线；a^{p/q} 有 q 个值，i^i 全是正实数，1^{√2} 在单位圆上无穷多个。</p></a>
+  </div>
+  <div class="foot">
+    <p>离线使用：把整个 <code>html</code> 文件夹一起拷到教室电脑上，双击 <code>CF_Chapter2.html</code>（课件）或 <code>demos/index.html</code>（演示目录）即可，不需要联网。</p>
+  </div>
+</div>
+</body>
+</html>

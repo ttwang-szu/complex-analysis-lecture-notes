@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C–R 方程检查</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>
+.verdict{margin:0;font-size:15px;font-weight:600}.verdict.ok{color:var(--target)}.verdict.no{color:var(--w)}
+.scale{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+.scale i{display:inline-block;height:10px;flex:1;border-radius:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" id="nav" aria-label="演示目录"></nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 2 章 §2.2 解析的充要条件 · 例 2.1–2.3、例 2.6</p>
+    <h1>C–R 方程在哪里成立</h1>
+    <p class="lede">颜色表示 C–R 残差 R = |u<sub>x</sub> − v<sub>y</sub>| + |u<sub>y</sub> + v<sub>x</sub>|：绿色表示 R = 0（C–R 方程成立），越红表示偏离越大。解析要求在一片区域里都是绿色；只在一个点或一条线上为绿色，只能说在那里可导。</p>
+  </header>
+
+  <main class="layout">
+    <section class="stage-col">
+      <div class="stage"><canvas id="plane" tabindex="0" aria-label="C–R 残差热图"></canvas><div class="status" id="status" aria-live="polite"></div></div>
+      <div class="scale" aria-hidden="true"><span>R = 0（C–R 成立）</span><i style="background:linear-gradient(90deg,var(--target),var(--surface),var(--w))"></i><span>R 很大</span></div>
+    </section>
+    <aside class="panel">
+      <div class="card">
+        <h2>函数</h2>
+        <select id="fn" style="font-family:var(--math);font-size:16px"></select>
+        <div id="params"></div>
+      </div>
+      <div class="card" id="readout" aria-live="polite"></div>
+      <div class="card" id="probe" aria-live="polite"></div>
+    </aside>
+  </main>
+</div>
+<script src="assets/plane.js"></script>
+<script src="assets/field.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,$,trimNum,cplxHTML,MATH_FONT,SANS_FONT}=CF;const {F,jac,rgb,mix}=CF2;
+const r3=v=>trimNum(v,3);
+const P2={a:0,b:0,c:0,d:0,l:0,m:0,n:0};
+/* 每项：f，零点集说明 zero（all / none / 描述）*/
+const LIST=[
+  {k:'z2',zero:'all'},{k:'exp',zero:'all'},{k:'lin',zero:'none'},{k:'conj',zero:'none'},
+  {k:'zre',zero:'只在原点 z = 0（例 2.1(3)）',pt:{x:0,y:0}},{k:'conj2',zero:'只在原点 z = 0（例 2.2）',pt:{x:0,y:0}},
+  {k:'abs2',zero:'只在原点 z = 0（例 1.2(3)）',pt:{x:0,y:0}},{k:'xy2',zero:'直线 y = x 上',line:true},
+  {k:'ex23',label:'x² + axy + by² + i(cx² + dxy + y²)（例 2.3）',param:['a','b','c','d'],
+    f:z=>{const{x,y}=z;return{x:x*x+P2.a*x*y+P2.b*y*y,y:P2.c*x*x+P2.d*x*y+y*y};},answer:{a:2,b:-1,c:-1,d:2}},
+  {k:'ex26',label:'my³ + nx²y + i(x³ + lxy²)（例 2.6）',param:['l','m','n'],
+    f:z=>{const{x,y}=z;return{x:P2.m*y*y*y+P2.n*x*x*y,y:x*x*x+P2.l*x*y*y};},answer:{l:-3,m:1,n:-3}},
+];
+const S={i:0,probe:{x:0.8,y:0.5}};
+const item=()=>LIST[S.i];
+const fun=()=>item().f||F[item().k].f;
+const label=()=>item().label||('f(z) = '+F[item().k].label);
+const R=p=>{const M=jac(fun(),p);return Math.abs(M.ux-M.vy)+Math.abs(M.uy+M.vx);};
+
+let heat=null,key='';
+const P=new CF.Plane($('#plane'),{range:2,maxVh:0.78,aspect:0.85,render:draw,onEmpty:{down(p){S.probe=p;renderProbe();P.draw();},move(p){S.probe=p;renderProbe();P.draw();}}});
+P.addHandle({get:()=>S.probe,set:p=>{S.probe=p;renderProbe();P.draw();}});
+function draw(P){
+  const V=P.V,k=[S.i,JSON.stringify(P2),P.W,P.H,V.surface].join('|');
+  if(k!==key){const g=rgb(V.target),s=rgb(V.surface),r=rgb(V.w);
+    heat=CF2.heat(P,p=>{const v=R(p);if(!isFinite(v))return s;const t=v/(v+0.6);return t<0.02?mix(s,g,0.75):(t<0.5?mix(g,s,Math.min(1,t/0.5)):mix(s,r,(t-0.5)/0.5*0.85));},3);key=k;}
+  CF2.blit(P,heat);P.grid({step:0.5,labStep:1,unit:false});
+  const it=item();
+  if(it.pt){P.dot(it.pt,V.target,7,true);P.wlabel(it.pt,'只在这里可导',V.target,{dx:12,dy:-16,align:'left',font:'600 13px '+SANS_FONT});}
+  if(it.line){P.line({x:-3,y:-3},{x:3,y:3},V.target,3,[8,5]);P.wlabel({x:1.3,y:1.3},'y = x：可导',V.target,{dx:10,dy:14,align:'left',font:'600 13px '+SANS_FONT});}
+  P.dot(S.probe,V.ink,6,true);
+}
+function zeroText(){
+  const it=item();
+  if(it.param){const ok=Object.keys(it.answer).every(k=>P2[k]===it.answer[k]);return ok?'all':'none';}
+  return it.zero;
+}
+function renderReadout(){
+  const it=item(),z=zeroText();
+  let h=`<h2>${label()}</h2>`;
+  if(!it.param){h+=`<table class="rt"><tbody><tr><td>u</td><td>${F[it.k].u}</td></tr><tr><td>v</td><td>${F[it.k].v}</td></tr></tbody></table>`;}
+  if(z==='all')h+=`<p class="verdict ok">✓ C–R 方程处处成立（且偏导连续）：在整个平面解析。</p>`;
+  else if(z==='none')h+=`<p class="verdict no">✗ C–R 方程${it.param?'不能对所有 x、y 都成立：调整参数试试。':'处处不成立：处处不可导、处处不解析。'}</p>`;
+  else h+=`<p class="verdict no">C–R 方程${z}成立：只在那里可导，没有一片区域可导，所以处处不解析。</p>`;
+  if(it.param){const eq=it.k==='ex23'?'u<sub>x</sub> = 2x + ay = v<sub>y</sub> = dx + 2y；u<sub>y</sub> = ax + 2by = −v<sub>x</sub> = −2cx − dy':'u<sub>x</sub> = 2nxy = v<sub>y</sub> = 2lxy；u<sub>y</sub> = 3my² + nx² = −v<sub>x</sub> = −3x² − ly²';
+    h+=`<div class="why"><p class="note">${eq}。拖动滑块，让整个平面变绿。</p></div>`;}
+  $('#readout').innerHTML=h;
+}
+function renderProbe(){
+  const M=jac(fun(),S.probe),r=Math.abs(M.ux-M.vy)+Math.abs(M.uy+M.vx);
+  $('#probe').innerHTML=`<h2>黑点 z = ${cplxHTML(S.probe)}</h2><table class="rt"><tbody>
+    <tr><td>u<sub>x</sub> = ${r3(M.ux)}</td><td>v<sub>y</sub> = ${r3(M.vy)}</td><td>u<sub>x</sub> − v<sub>y</sub> = ${r3(M.ux-M.vy)}</td></tr>
+    <tr><td>u<sub>y</sub> = ${r3(M.uy)}</td><td>v<sub>x</sub> = ${r3(M.vx)}</td><td>u<sub>y</sub> + v<sub>x</sub> = ${r3(M.uy+M.vx)}</td></tr></tbody></table>
+    <p class="hint">R = ${r3(r)}　在画布上点击或拖动黑点查看任意位置。</p>`;
+}
+function renderParams(){
+  const it=item(),box=$('#params');
+  if(!it.param){box.innerHTML='';return;}
+  box.innerHTML=it.param.map(k=>`<div class="slider"><label for="p-${k}">${k}</label><input type="range" id="p-${k}" min="-4" max="4" step="1" value="${P2[k]}"><output id="p-${k}-out" for="p-${k}"></output></div>`).join('')+`<button class="btn" id="ans" type="button">显示答案</button>`;
+  it.param.forEach(k=>CF.bindRange('#p-'+k,v=>String(v),v=>{P2[k]=v;update();}));
+  $('#ans').addEventListener('click',()=>{Object.assign(P2,it.answer);renderParams();update();});
+}
+function update(){renderReadout();renderProbe();P.draw();}
+const sel=$('#fn');
+LIST.forEach((it,i)=>{const o=document.createElement('option');o.value=i;o.textContent=it.label||('f(z) = '+F[it.k].label);sel.appendChild(o);});
+sel.addEventListener('change',()=>{S.i=+sel.value;Object.keys(P2).forEach(k=>P2[k]=0);renderParams();update();});
+{const h=CF.hash.get('fn');const i=LIST.findIndex(it=>it.k===h);if(i>=0){S.i=i;sel.value=String(i);}}
+P.resize();renderParams();update();
+})();
+</script>
+</body>
+</html>

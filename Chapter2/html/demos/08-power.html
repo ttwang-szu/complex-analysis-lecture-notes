@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>乘幂的多值</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>.below{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:12px;align-items:start}
+.num{width:100%;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:7px;padding:5px 8px;font-family:var(--math);font-size:16px}
+.num[aria-invalid="true"]{border-color:var(--bad)}
+.fld{display:grid;gap:2px;flex:1}.fld span{font-size:12px;color:var(--muted)}</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" id="nav" aria-label="演示目录"></nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 2 章 §2.3 乘幂 a<sup>b</sup> = e<sup>b Ln a</sup> · 例 3.7–3.9</p>
+    <h1>乘幂 aᵇ 有几个值</h1>
+    <p class="lede">a<sup>b</sup> = e<sup>b Ln a</sup>，而 Ln a = ln|a| + i(arg a + 2kπ) 有无穷多个值。左边是指数 E<sub>k</sub> = b·Ln a，它们总排在一条直线上，间距 2πb·i；右边是 w<sub>k</sub> = e<sup>E<sub>k</sub></sup>。b 为整数时只有 1 个值，b = p/q 时有 q 个值，否则有无穷多个值。</p>
+  </header>
+
+  <div class="row" style="margin-bottom:10px">
+    <button class="btn primary" id="grow" type="button">▶ k 从 0 逐步扩大</button>
+    <label class="check"><input type="checkbox" id="logr"> 按 log₁₀|w| 画半径（模相差很大时）</label>
+  </div>
+
+  <div class="planes">
+    <div class="stage"><span class="tag">指数平面：E<sub>k</sub> = b·Ln a</span><canvas id="ep" aria-label="指数平面"></canvas><div class="status" id="status" aria-live="polite"></div></div>
+    <div class="stage"><span class="tag">w 平面：aᵇ 的值 w<sub>k</sub> = e<sup>E<sub>k</sub></sup></span><canvas id="wp" aria-label="w 平面"></canvas></div>
+  </div>
+
+  <div class="below">
+    <div class="card">
+      <h2>例子</h2>
+      <div class="presets" id="presets"></div>
+      <div class="slider"><label for="K">|k| ≤ K</label><input type="range" id="K" min="0" max="80" step="1" value="3"><output id="K-out" for="K"></output></div>
+      <div class="row" style="flex-wrap:nowrap">
+        <label class="fld"><span>a（复数）</span><input class="num" id="ain" type="text" value="i" autocomplete="off" spellcheck="false"></label>
+        <label class="fld"><span>b（复数）</span><input class="num" id="bin" type="text" value="i" autocomplete="off" spellcheck="false"></label>
+      </div>
+      <p class="hint">可以输入 2、−3、1+i、sqrt(2)、1/3、2i 等，按回车确认。</p>
+    </div>
+    <div class="card" id="readout" aria-live="polite"></div>
+  </div>
+</div>
+<script src="assets/plane.js"></script>
+<script src="assets/field.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,TAU,$,trimNum,cplxHTML,cplxText,angleText,parseExpr,MATH_FONT,SANS_FONT}=CF;const {exp}=CF2;
+const r3=v=>trimNum(v,3);
+const PRESETS=[
+  {t:'8^{1/3}',a:{x:8,y:0},b:{x:1/3,y:0},s:'b = 1/3：3 个值',kind:{q:3},log:false},
+  {t:'i^{1/2}',a:{x:0,y:1},b:{x:0.5,y:0},s:'b = 1/2：2 个值',kind:{q:2},log:false},
+  {t:'(−1)^{2/3}',a:{x:-1,y:0},b:{x:2/3,y:0},s:'b = 2/3：3 个值',kind:{q:3},log:false},
+  {t:'1^{√2}',a:{x:1,y:0},b:{x:Math.SQRT2,y:0},s:'无理指数：单位圆上无穷多个点',kind:{inf:true},log:false,K:40},
+  {t:'(−3)^{√5}',a:{x:-3,y:0},b:{x:Math.sqrt(5),y:0},s:'例 3.8：半径 3^{√5} 的圆上',kind:{inf:true},log:false,K:30},
+  {t:'i^i',a:{x:0,y:1},b:{x:0,y:1},s:'例 3.7：全是正实数',kind:{inf:true},log:true},
+  {t:'(1+i)^i',a:{x:1,y:1},b:{x:0,y:1},s:'例 3.9：幅角都是 ½ ln 2',kind:{inf:true},log:true},
+  {t:'2^3',a:{x:2,y:0},b:{x:3,y:0},s:'整数指数：只有 1 个值',kind:{q:1},log:false},
+];
+const S={a:{x:0,y:1},b:{x:0,y:1},K:3,log:true,kind:{inf:true}};
+let anim=null;
+function stop(){if(anim){anim.stop();anim=null;}$('#status').innerHTML='';}
+const Ek=k=>{const L={x:Math.log(C.abs(S.a)),y:C.arg(S.a)+2*k*PI};return C.mul(S.b,L);};
+const vals=()=>{const out=[];for(let k=-S.K;k<=S.K;k++){const E=Ek(k);out.push({k,E,w:exp(E)});}return out;};
+function distinct(V){const u=[];V.forEach(v=>{if(!u.some(q=>C.dist(q.w,v.w)<1e-7*(1+C.abs(v.w))))u.push(v);});return u.length;}
+const logMap=w=>{const m=C.abs(w);if(m<1e-12)return{x:0,y:0};const r=Math.max(0,Math.log10(m)+3);return C.polar(r,C.arg(w));};
+const EP=new CF.Plane($('#ep'),{range:4,maxVh:0.56,render:drawE,names:['Re E','Im E']});
+const WP=new CF.Plane($('#wp'),{range:2,maxVh:0.56,render:drawW,names:['Re w','Im w']});
+function views(V){
+  let m=2;V.forEach(v=>{m=Math.max(m,Math.abs(v.E.x)+0.5,Math.abs(v.E.y)+0.5);});EP.range=Math.min(m,600);
+  if(S.log)WP.range=6.5;else{let M=1.2;V.forEach(v=>{const a=C.abs(v.w);if(isFinite(a)&&a<1e4)M=Math.max(M,a*1.15);});WP.range=M;}
+}
+function drawE(P){
+  const V=P.V,vs=vals();P.grid(P.range<=6?{step:1,labStep:1,unit:false}:{step:Math.pow(10,Math.floor(Math.log10(P.range/2))),labStep:Math.pow(10,Math.floor(Math.log10(P.range/2)))*2,unit:false});
+  /* 水平带：幅角每差 2π 对应同一个 w */
+  const b=P.bounds();if(P.range<40)for(let k=Math.floor(b.y0/TAU);k<=Math.ceil(b.y1/TAU);k++)P.line({x:b.x0,y:k*TAU-PI},{x:b.x1,y:k*TAU-PI},V.gridS,1,[4,4]);
+  if(vs.length>1)P.line(vs[0].E,vs[vs.length-1].E,V.z1,1.5,[6,4],.7);
+  vs.forEach(v=>{P.dot(v.E,v.k===0?V.w:V.z1,v.k===0?6:4.5);});
+  const e0=Ek(0);P.wlabel(e0,'k = 0',V.w,{dx:12,dy:-12,align:'left',font:'600 13px '+SANS_FONT});
+}
+function drawW(P){
+  const V=P.V,vs=vals(),O={x:0,y:0};P.grid(S.log?{step:1,labStep:1,unit:false,labels:false}:{unit:true});
+  if(S.log){for(let n=-3;n<=3;n++){const r=n+3;if(r<=0)continue;P.circle(O,r,V.gridS,1.2,[3,4]);P.wlabel({x:r*0.707,y:r*0.707},'10'+(n<0?'⁻':'')+'⁰¹²³'[Math.abs(n)],V.muted,{font:'12px '+MATH_FONT});}
+    P.wlabel({x:0,y:-6},'半径 = log₁₀|w| + 3',V.muted,{font:'12px '+SANS_FONT});}
+  vs.forEach(v=>{const p=S.log?logMap(v.w):v.w;if(!isFinite(p.x))return;P.dot(p,v.k===0?V.w:V.target,v.k===0?6:4.5);});
+  const w0=vs.find(v=>v.k===0);if(w0){const p=S.log?logMap(w0.w):w0.w;P.wlabel(p,'k = 0（主值）',V.w,{dx:12,dy:-12,align:'left',font:'600 13px '+SANS_FONT});}
+}
+function readoutHTML(){
+  const vs=vals(),n=distinct(vs),kd=S.kind;
+  const sci=v=>{if(v===0)return'0';const a=Math.abs(v);if(a>=1e-3&&a<1e5)return r3(v);const e=Math.floor(Math.log10(a)),m=v/Math.pow(10,e);return trimNum(m,3)+'×10'+String(e).replace('-','⁻').replace(/\d/g,d=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[d]);};
+  let rows='';vs.filter(v=>Math.abs(v.k)<=2).forEach(v=>{const m=C.abs(v.w);rows+=`<tr><td>k = ${String(v.k).replace('-','−')}</td><td>${m>=1e-3&&m<1e5?cplxHTML(C.clean(v.w)):'—'}</td><td>|w| = ${sci(m)}</td><td>arg w = ${angleText(C.arg(v.w))}</td></tr>`;});
+  const total=kd.q?`恰好 ${kd.q} 个不同的值`:(kd.inf?'无穷多个值':'—');
+  return`<h2>a = ${cplxHTML(S.a)}，b = ${cplxHTML(S.b)}</h2>
+    <p class="fml">a<sup>b</sup> = e<sup>b[ln|a| + i(arg a + 2kπ)]</sup></p>
+    <table class="rt"><tbody>${rows}</tbody></table>
+    <p style="margin:0">当前 |k| ≤ ${S.K} 共 ${vs.length} 个 k，得到 <b>${n}</b> 个不同的点；总共：${total}。</p>
+    <div class="why"><p class="note">${kd.q===1?'b 为整数时 e^{2kbπi} = 1，所有 k 给出同一个值。':kd.q?'b = p/q 时，k 每增加 q，指数的虚部增加 2pπ，值重复。':'b 为无理数或虚数时，各个 k 给出的值互不相同。'}${S.b.y!==0&&S.b.x===0?' b 为纯虚数时，E<sub>k</sub> 排在一条水平线上：各个值的幅角相同，只有模不同，所以在 w 平面上排成一条射线。':''}</p></div>`;
+}
+function update(){const vs=vals();views(vs);EP.draw();WP.draw();$('#readout').innerHTML=readoutHTML();}
+function load(p){stop();S.a=p.a;S.b=p.b;S.kind=p.kind;S.log=p.log;$('#logr').checked=p.log;$('#ain').value=cplxText(p.a).replace(/ /g,'');$('#bin').value=p.t.includes('√2')?'sqrt(2)':p.t.includes('√5')?'sqrt(5)':cplxText(p.b).replace(/ /g,'');
+  const K=p.K||3;$('#K').value=K;S.K=K;$('#K-out').textContent=String(K);update();}
+function parseC(str){const s=String(str).replace(/\s+/g,'').replace(/−/g,'-');if(!s)throw 0;
+  /* 形如 x、yi、x+yi、x-yi；i 前可省略系数 */
+  const m=s.match(/^(.*?)([+-]?[^+-]*i)$/);if(m&&m[2]){const im=m[2].replace(/i$/,'');const y=(im===''||im==='+')?1:im==='-'?-1:parseExpr(im);const x=m[1]===''?0:parseExpr(m[1]);return{x,y};}
+  return{x:parseExpr(s),y:0};}
+function commit(){let a,b;try{a=parseC($('#ain').value);$('#ain').removeAttribute('aria-invalid');}catch(_){$('#ain').setAttribute('aria-invalid','true');return;}
+  try{b=parseC($('#bin').value);$('#bin').removeAttribute('aria-invalid');}catch(_){$('#bin').setAttribute('aria-invalid','true');return;}
+  if(C.abs(a)<1e-12){$('#ain').setAttribute('aria-invalid','true');return;}
+  stop();S.a=a;S.b=b;
+  if(Math.abs(b.y)<1e-12){let q=0;for(let d=1;d<=12;d++){if(Math.abs(b.x*d-Math.round(b.x*d))<1e-9){q=d;break;}}S.kind=q?{q}:{inf:true};}else S.kind={inf:true};
+  update();}
+['#ain','#bin'].forEach(id=>{$(id).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();commit();}});$(id).addEventListener('change',commit);});
+const pw=$('#presets');PRESETS.forEach(p=>{const b=document.createElement('button');b.type='button';b.className='btn';
+  b.innerHTML=`<span class="mr">${p.t.replace(/\^\{([^}]*)\}/,'<sup>$1</sup>').replace(/\^(\S)/,'<sup>$1</sup>')}</span><small>${p.s}</small>`;b.addEventListener('click',()=>load(p));pw.appendChild(b);});
+CF.bindRange('#K',v=>String(v),v=>{S.K=v;if(EP.W)update();});
+$('#logr').addEventListener('change',e=>{S.log=e.target.checked;update();});
+$('#grow').addEventListener('click',()=>{stop();const Kmax=S.kind.q?Math.max(S.kind.q*2,6):60;$('#status').innerHTML=`<span>${S.kind.q?'k 再大，值也只是重复。':'k 越大，新的值越多。'}</span>`;
+  anim=CF.animate(6000,t=>{const K=Math.round(Kmax*t);if(K!==S.K){S.K=K;$('#K').value=K;$('#K-out').textContent=String(K);update();}},()=>{anim=null;});});
+EP.resize();WP.resize();
+{const i=parseInt(CF.hash.get('p'),10);load(PRESETS[i>=0&&i<PRESETS.length?i:5]);}
+})();
+</script>
+</body>
+</html>

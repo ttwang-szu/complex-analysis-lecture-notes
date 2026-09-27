@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>差商与方向</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>
+.below{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:12px;align-items:start}
+.verdict{margin:0;font-size:15px;font-weight:600}.verdict.ok{color:var(--target)}.verdict.no{color:var(--w)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" id="nav" aria-label="演示目录"></nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 2 章 §2.1 导数的定义 · 例 1.1 · 图 2.1</p>
+    <h1>导数与趋近方向无关</h1>
+    <p class="lede">让 Δz = re<sup><i>i</i>φ</sup> 绕 z₀ 转一圈，右边画出差商 <span class="m">Q</span>(φ) = [f(z₀ + Δz) − f(z₀)] / Δz 的轨迹。可导时，r → 0 轨迹收缩为一点 f′(z₀)；不可导时，轨迹缩不成一点：极限依赖方向。</p>
+  </header>
+
+  <div class="row" style="margin-bottom:10px">
+    <label for="fn" class="hint" style="font-size:13px">函数</label>
+    <select id="fn" style="font-family:var(--math);font-size:16px"></select>
+    <button class="btn primary" id="spin" type="button">▶ Δz 转一圈</button>
+    <button class="btn" id="shrink" type="button">▶ r → 0</button>
+  </div>
+
+  <div class="planes">
+    <div class="stage"><span class="tag">z 平面：Δz = re<sup>iφ</sup></span><canvas id="zp" tabindex="0" aria-label="z 平面"></canvas><div class="status" id="status" aria-live="polite"></div></div>
+    <div class="stage"><span class="tag">差商 Q(φ) 的轨迹</span><canvas id="qp" aria-label="差商平面"></canvas></div>
+  </div>
+  <p class="hint" style="margin-top:6px">拖动 z₀（黑点），或拖动红点改变 Δz 的方向与长度。</p>
+
+  <div class="below">
+    <div class="card">
+      <div class="slider"><label for="r">|Δz| = r</label><input type="range" id="r" min="0" max="1" step="0.001" value="0.8"><output id="r-out" for="r"></output></div>
+      <div class="row"><button class="btn" id="dirs" type="button">只看两个方向：水平 / 竖直</button></div>
+    </div>
+    <div class="card" id="readout" aria-live="polite"></div>
+  </div>
+</div>
+<script src="assets/plane.js"></script>
+<script src="assets/field.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,TAU,$,trimNum,cplxHTML,MATH_FONT}=CF;const {F}=CF2;
+const r3=v=>trimNum(v,3);
+const S={fn:'z2',z0:{x:0.8,y:0.5},r:0.6,phi:0.5,two:false,trails:null};
+let anim=null;
+const rFromSlider=t=>0.005*Math.pow(1/0.005,t);   /* 0.005 … 1，对数刻度 */
+const sliderFromR=r=>Math.log(r/0.005)/Math.log(1/0.005);
+const f=()=>F[S.fn].f;
+function Q(phi,r){const dz=C.polar(r,phi);return C.div(C.sub(f()(C.add(S.z0,dz)),f()(S.z0)),dz);}
+function locus(r,n){const out=[];for(let i=0;i<=n;i++)out.push(Q(TAU*i/n,r));return out;}
+function spread(pts){let m=0;for(const p of pts)for(const q of pts)m=Math.max(m,C.dist(p,q));return m;}
+function stop(){if(anim){anim.stop();anim=null;}S.trails=null;$('#status').innerHTML='';}
+
+/* 右图视野：按 r = 1 时的轨迹定，缩小 r 时不跟着缩放，才能看出收缩 */
+function setView(){const L=locus(1,120);let cx=0,cy=0;L.forEach(p=>{cx+=p.x;cy+=p.y;});cx/=L.length;cy/=L.length;
+  let R=0;L.forEach(p=>R=Math.max(R,Math.hypot(p.x-cx,p.y-cy)));QP.center={x:cx,y:cy};QP.range=Math.max(0.8,R*1.25+0.3);}
+
+const ZP=new CF.Plane($('#zp'),{range:2,maxVh:0.56,render:drawZ});
+const QP=new CF.Plane($('#qp'),{range:2,maxVh:0.56,render:drawQ});
+ZP.addHandle({get:()=>C.add(S.z0,C.polar(S.r,S.phi)),set:p=>{stop();const d=C.sub(p,S.z0);S.r=Math.max(0.005,Math.min(1,C.abs(d)));S.phi=Math.atan2(d.y,d.x);syncR();update();}});
+ZP.addHandle({get:()=>S.z0,set:p=>{stop();if(S.fn==='inv'&&C.abs(p)<0.3)return;S.z0=C.clean(p);setView();update();}});
+
+function drawZ(P){
+  const V=P.V;P.grid({step:0.5,labStep:1});
+  P.circle(S.z0,S.r,V.z1,1.75,[5,4]);
+  if(S.two){P.line(C.sub(S.z0,{x:1.2,y:0}),C.add(S.z0,{x:1.2,y:0}),V.z2,2,null,.8);P.line(C.sub(S.z0,{x:0,y:1.2}),C.add(S.z0,{x:0,y:1.2}),V.violet,2,null,.8);}
+  const p=C.add(S.z0,C.polar(S.r,S.phi));
+  P.arrow(S.z0,p,V.w,2.5);P.dot(S.z0,V.ink,6,true);P.wlabel(S.z0,'z₀',V.ink,{dx:-14,dy:-14,size:17});
+  P.dot(p,V.w,7,P.drag);P.wlabel(p,'z₀+Δz',V.w,{dx:16,dy:-14,size:15,align:'left'});
+  P.arc(S.z0,Math.min(28,S.r*P.ppu*0.6),0,S.phi,V.z2,{lw:2});
+}
+function drawQ(P){
+  const V=P.V,fn=F[S.fn];P.grid({step:0.25,labStep:0.5,unit:false});
+  if(S.trails)S.trails.forEach((L,i)=>P.path(L,V.z1,1.5,{alpha:0.15+0.5*i/S.trails.length}));
+  const L=locus(S.r,240);P.path(L,V.z1,2.5);
+  if(fn.an){const d=fn.d(S.z0);P.dot(d,V.target,6,true);P.wlabel(d,"f′(z₀)",V.target,{dx:14,dy:16,size:15,align:'left'});}
+  if(S.two){const a=Q(0,S.r),b=Q(PI/2,S.r);P.dot(a,V.z2,7);P.wlabel(a,'水平方向',V.z2,{dx:12,dy:-12,align:'left',font:'600 13px '+CF.SANS_FONT});P.dot(b,V.violet,7);P.wlabel(b,'竖直方向',V.violet,{dx:12,dy:14,align:'left',font:'600 13px '+CF.SANS_FONT});}
+  const q=Q(S.phi,S.r);P.dot(q,V.w,7);P.wlabel(q,'Q(φ)',V.w,{dx:14,dy:-14,size:15,align:'left'});
+}
+function readoutHTML(){
+  const fn=F[S.fn],L=locus(S.r,180),sp=spread(L),q=Q(S.phi,S.r),q0=Q(0,S.r),q1=Q(PI/2,S.r);
+  const L2=locus(S.r/10,180),sp2=spread(L2),shrinks=sp2<sp*0.5||sp<1e-3;
+  let h=`<h2>f(z) = ${fn.label}，z₀ = ${cplxHTML(S.z0)}</h2><table class="rt"><tbody>
+    <tr><td>r</td><td>${r3(S.r)}</td></tr>
+    <tr><td>Q(φ)</td><td>${cplxHTML(q)}　<small>φ = ${r3(S.phi)}</small></td></tr>
+    <tr><td>水平 / 竖直</td><td>Q(0) = ${cplxHTML(q0)}，Q(π/2) = ${cplxHTML(q1)}</td></tr>
+    <tr><td>轨迹直径</td><td>${r3(sp)}　<small>r 缩小 10 倍后：${r3(sp2)}</small></td></tr></tbody></table>`;
+  if(fn.an)h+=`<p class="verdict ok">✓ 轨迹随 r → 0 收缩到 f′(z₀) = ${cplxHTML(fn.d(S.z0))}：极限与方向无关，f 在 z₀ 可导。</p>`;
+  else if(shrinks)h+=`<p class="verdict ok">✓ 在这一点轨迹也会收缩：f 在 z₀ 可导（但只是这一点，不是解析）。</p>`;
+  else h+=`<p class="verdict no">✗ r 再小，轨迹也缩不成一点：不同方向得到不同的极限，f 在 z₀ 不可导。</p>`;
+  const why={lin:'Q = (2Δx + iΔy)/(Δx + iΔy)：只与方向 φ 有关，与 r 无关。水平方向得 2，竖直方向得 1（例 1.1）。',
+    conj:'Q = Δz̄/Δz = e^{−2iφ}：轨迹是单位圆，与 r 无关。',
+    abs2:'Q = z̄₀ + Δz̄ + z₀·e^{−2iφ}：r → 0 后轨迹仍是半径 |z₀| 的圆；只有 z₀ = 0 时收缩（例 1.2）。',
+    zre:'只有在 z₀ = 0 处轨迹收缩（例 2.1(3)）：把 z₀ 拖到原点试试。',
+    conj2:'只有在 z₀ = 0 处轨迹收缩（例 2.2）：把 z₀ 拖到原点试试。',
+    xy2:'在直线 y = x 上轨迹会收缩：u_x = 2x = v_y = 2y。',
+  }[S.fn];
+  if(why)h+=`<div class="why"><p class="note">${why}</p></div>`;
+  return h;
+}
+function syncR(){$('#r').value=sliderFromR(S.r);$('#r-out').textContent=r3(S.r);}
+function update(){ZP.draw();QP.draw();$('#readout').innerHTML=readoutHTML();}
+
+const sel=$('#fn');CF2.funcSelect(sel,['z2','z3','inv','exp','lin','conj','abs2','zre','conj2','xy2'],S.fn);
+sel.addEventListener('change',()=>{stop();S.fn=sel.value;if(S.fn==='inv'&&C.abs(S.z0)<0.5)S.z0={x:0.8,y:0.5};setView();update();});
+$('#r').addEventListener('input',e=>{stop();S.r=rFromSlider(+e.target.value);$('#r-out').textContent=r3(S.r);update();});
+$('#dirs').addEventListener('click',()=>{S.two=!S.two;$('#dirs').textContent=S.two?'隐藏两个方向':'只看两个方向：水平 / 竖直';update();});
+$('#spin').addEventListener('click',()=>{stop();const p0=S.phi;$('#status').innerHTML='<span>Δz 绕 z₀ 转一圈，右边的点 Q(φ) 沿轨迹走一圈。</span>';
+  anim=CF.animate(4000,t=>{S.phi=p0+TAU*t;update();},()=>{anim=null;});});
+$('#shrink').addEventListener('click',()=>{stop();const r0=Math.max(S.r,0.6);S.trails=[];let last=-1;
+  $('#status').innerHTML=`<span>${F[S.fn].an?'r 越小，轨迹越小，最后缩成一点 f′(z₀)。':'r 越小，轨迹却不缩小（或缩不成一点）。'}</span>`;
+  anim=CF.animate(5000,t=>{S.r=r0*Math.pow(0.01/r0,CF.ease(t));S.phi+=0.12;const k=Math.floor(t*8);if(k!==last){last=k;S.trails.push(locus(S.r,160));}syncR();update();},()=>{anim=null;});});
+{const h=CF.hash.get('fn');if(h&&F[h]){S.fn=h;sel.value=h;}}
+ZP.resize();QP.resize();syncR();setView();update();
+})();
+</script>
+</body>
+</html>

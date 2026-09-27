@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>局部伸缩与旋转</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>
+.below{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:12px;align-items:start}
+.verdict{margin:0;font-size:15px;font-weight:600}.verdict.ok{color:var(--target)}.verdict.no{color:var(--w)}
+.mat{display:inline-grid;grid-template-columns:auto auto;gap:2px 16px;font-family:var(--math);font-size:16px;border-left:2px solid var(--ink);border-right:2px solid var(--ink);padding:2px 10px;vertical-align:middle;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" id="nav" aria-label="演示目录"></nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 2 章 §2.2 Cauchy–Riemann 方程的几何意义</p>
+    <h1>解析函数在局部就是"伸缩 + 旋转"</h1>
+    <p class="lede">在 z₀ 附近放一个小方格网，看它的像。可导时 f(z₀ + Δz) ≈ f(z₀) + f′(z₀)Δz：小正方形被放大 |f′(z₀)| 倍、旋转 arg f′(z₀)，仍是正方形（第 1 章：乘法 = 伸缩 + 旋转）。C–R 方程正是 Jacobi 矩阵具有"旋转 × 缩放"形式的条件。</p>
+  </header>
+
+  <div class="row" style="margin-bottom:10px">
+    <label for="fn" class="hint" style="font-size:13px">函数</label>
+    <select id="fn" style="font-family:var(--math);font-size:16px"></select>
+    <button class="btn primary" id="zoom" type="button">▶ 方格逐渐缩小</button>
+  </div>
+
+  <div class="planes">
+    <div class="stage"><span class="tag">z 平面（以 z₀ 为中心放大）</span><canvas id="zp" tabindex="0" aria-label="z 平面"></canvas><div class="status" id="status" aria-live="polite"></div></div>
+    <div class="stage"><span class="tag">w 平面：方格的像（以 f(z₀) 为中心放大）</span><canvas id="wp" aria-label="w 平面"></canvas></div>
+  </div>
+  <p class="hint" style="margin-top:6px">拖动左边的黑点 z₀ 改变位置（松开后重新居中），方向键微调。字母"F"用来看出方向是否被翻转。</p>
+
+  <div class="below">
+    <div class="card">
+      <div class="slider"><label for="h">方格大小 h</label><input type="range" id="h" min="0" max="1" step="0.001" value="0.75"><output id="h-out" for="h"></output></div>
+      <label class="check"><input type="checkbox" id="lin" checked> 叠加线性近似 f(z₀) + J·Δz（虚线）</label>
+    </div>
+    <div class="card" id="readout" aria-live="polite"></div>
+  </div>
+</div>
+<script src="assets/plane.js"></script>
+<script src="assets/field.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,TAU,$,trimNum,cplxHTML,angleText,degText,MATH_FONT,SANS_FONT}=CF;const {F,jac}=CF2;
+const r3=v=>trimNum(v,3);
+const S={fn:'z2',z0:{x:1,y:0.6},h:0.4,lin:true,dragging:false};
+let anim=null;
+const hFrom=t=>0.01*Math.pow(100,t),tFrom=h=>Math.log(h/0.01)/Math.log(100);
+const f=()=>F[S.fn].f;
+function stop(){if(anim){anim.stop();anim=null;}$('#status').innerHTML='';}
+const N=8;
+function gridLines(){const L=[],h=S.h,z0=S.z0;
+  for(let i=0;i<=N;i++){const t=-h+2*h*i/N,a=[],b=[];for(let j=0;j<=40;j++){const s=-h+2*h*j/40;a.push({x:z0.x+t,y:z0.y+s});b.push({x:z0.x+s,y:z0.y+t});}L.push({pts:a,dir:'v'},{pts:b,dir:'h'});}
+  return L;}
+function Fshape(){const h=S.h,z0=S.z0,k=h*0.6;return[[{x:-0.3,y:-0.5},{x:-0.3,y:0.5},{x:0.35,y:0.5}],[{x:-0.3,y:0.05},{x:0.2,y:0.05}]].map(s=>s.map(p=>({x:z0.x+p.x*k,y:z0.y+p.y*k})));}
+function J(){return jac(f(),S.z0);}
+const applyJ=(M,d)=>({x:M.ux*d.x+M.uy*d.y,y:M.vx*d.x+M.vy*d.y});
+
+const ZP=new CF.Plane($('#zp'),{range:1,maxVh:0.56,render:drawZ});
+const WP=new CF.Plane($('#wp'),{range:1,maxVh:0.56,render:drawW});
+ZP.addHandle({get:()=>S.z0,set:p=>{stop();if(S.fn==='inv'&&C.abs(p)<0.2)return;S.dragging=true;S.z0=C.clean(p);update();},end:()=>{S.dragging=false;update();}});
+function views(){
+  if(!S.dragging)ZP.center=S.z0;ZP.range=S.h*1.6;
+  const M=J(),n=Math.max(Math.hypot(M.ux,M.vx),Math.hypot(M.uy,M.vy),1e-6);
+  WP.center=f()(S.z0);WP.range=S.h*1.6*n*1.25;
+}
+function drawZ(P){
+  const V=P.V;P.grid({step:niceStep(P.range),labStep:niceStep(P.range)*2,unit:false,labels:true});
+  gridLines().forEach(l=>P.path(l.pts,l.dir==='v'?V.z1:V.z2,1.5));
+  P.path([{x:S.z0.x-S.h,y:S.z0.y-S.h},{x:S.z0.x+S.h,y:S.z0.y-S.h},{x:S.z0.x+S.h,y:S.z0.y+S.h},{x:S.z0.x-S.h,y:S.z0.y+S.h}],V.ink,2.5,{close:true});
+  Fshape().forEach(s=>P.path(s,V.w,4));
+  P.dot(S.z0,V.ink,6,P.drag);P.wlabel(S.z0,'z₀',V.ink,{dx:-14,dy:14,size:16});
+}
+function drawW(P){
+  const V=P.V,fz=f(),w0=fz(S.z0),M=J();P.grid({step:niceStep(P.range),labStep:niceStep(P.range)*2,unit:false});
+  gridLines().forEach(l=>P.path(l.pts.map(fz),l.dir==='v'?V.z1:V.z2,1.5));
+  const sq=[[-1,-1],[1,-1],[1,1],[-1,1]].map(([a,b])=>({x:S.z0.x+a*S.h,y:S.z0.y+b*S.h}));
+  const edge=[];for(let e=0;e<4;e++){const A=sq[e],B=sq[(e+1)%4];for(let j=0;j<=30;j++){const t=j/30;edge.push(fz({x:A.x+(B.x-A.x)*t,y:A.y+(B.y-A.y)*t}));}}
+  P.path(edge,V.ink,2.5,{close:true});
+  if(S.lin){P.path(sq.map(p=>C.add(w0,applyJ(M,C.sub(p,S.z0)))),V.target,2,{close:true,dash:[6,4]});}
+  Fshape().forEach(s=>{const pts=[];for(let i=0;i<s.length-1;i++)for(let j=0;j<=12;j++){const t=j/12;pts.push(fz({x:s[i].x+(s[i+1].x-s[i].x)*t,y:s[i].y+(s[i+1].y-s[i].y)*t}));}P.path(pts,V.w,4);});
+  P.dot(w0,V.ink,6);P.wlabel(w0,'f(z₀)',V.ink,{dx:-18,dy:14,size:15});
+}
+function niceStep(r){const raw=r/3,p=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/p;return(m<2?1:m<5?2:5)*p;}
+function readoutHTML(){
+  const fn=F[S.fn],M=J(),e1={x:M.ux,y:M.vx},e2={x:M.uy,y:M.vy},l1=C.abs(e1),l2=C.abs(e2);
+  let ang=Math.atan2(e2.y,e2.x)-Math.atan2(e1.y,e1.x);ang=CF.principal(ang);
+  const cr1=M.ux-M.vy,cr2=M.uy+M.vx,ok=Math.abs(cr1)+Math.abs(cr2)<1e-4*(1+l1+l2),det=M.ux*M.vy-M.uy*M.vx;
+  let h=`<h2>f(z) = ${fn.label}，z₀ = ${cplxHTML(S.z0)}</h2>
+    <p>Jacobi 矩阵 J = <span class="mat"><span>u<sub>x</sub> = ${r3(M.ux)}</span><span>u<sub>y</sub> = ${r3(M.uy)}</span><span>v<sub>x</sub> = ${r3(M.vx)}</span><span>v<sub>y</sub> = ${r3(M.vy)}</span></span></p>
+    <table class="rt"><tbody>
+    <tr><td>u<sub>x</sub> − v<sub>y</sub></td><td>${r3(cr1)}</td><td>u<sub>y</sub> + v<sub>x</sub></td><td>${r3(cr2)}</td></tr>
+    <tr><td>两条网格线的像</td><td colspan="3">长度比 ${r3(l2/Math.max(l1,1e-12))}，夹角 ${degText(Math.abs(ang))}${det<0?'，方向翻转（镜像）':''}</td></tr></tbody></table>`;
+  if(ok){const d={x:M.ux,y:M.vx};h+=`<p class="verdict ok">✓ C–R 方程成立：J = ${r3(C.abs(d))} × 旋转 ${angleText(C.arg(d))}。小正方形 → 小正方形（长度比 1、夹角 90°）。</p>
+    <div class="why"><p class="note">J = [[a, −b], [b, a]] 正是乘以复数 a + ib = f′(z₀) 的矩阵：伸缩 |f′(z₀)| = ${r3(C.abs(d))} 倍，旋转 arg f′(z₀) = ${angleText(C.arg(d))}。</p></div>`;}
+  else h+=`<p class="verdict no">✗ C–R 方程不成立：J 不是"旋转 × 缩放"，小正方形被压成平行四边形${det<0?'，而且被翻转':''}。</p>
+    <div class="why"><p class="note">线性近似 J·Δz 不能写成一个复数乘以 Δz，所以 f′(z₀) 不存在。</p></div>`;
+  return h;
+}
+function update(){views();ZP.draw();WP.draw();$('#readout').innerHTML=readoutHTML();}
+const sel=$('#fn');CF2.funcSelect(sel,['z2','z3','inv','exp','sin','lin','conj','abs2','zre','xy2'],S.fn);
+sel.addEventListener('change',()=>{stop();S.fn=sel.value;if(S.fn==='inv'&&C.abs(S.z0)<0.3)S.z0={x:1,y:0.6};update();});
+CF.bindRange('#h',t=>r3(hFrom(t)),t=>{S.h=hFrom(t);if(ZP.W)update();});
+$('#h').value=tFrom(S.h);$('#h-out').textContent=r3(S.h);
+$('#lin').addEventListener('change',e=>{S.lin=e.target.checked;update();});
+$('#zoom').addEventListener('click',()=>{stop();const h0=Math.max(S.h,0.5);$('#status').innerHTML='<span>方格越小，像越接近一个真正的正方形（解析时）。</span>';
+  anim=CF.animate(5000,t=>{S.h=h0*Math.pow(0.02/h0,CF.ease(t));$('#h').value=tFrom(S.h);$('#h-out').textContent=r3(S.h);update();},()=>{anim=null;});});
+ZP.cv.addEventListener('keydown',e=>{const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[e.key];if(!d)return;e.preventDefault();stop();S.z0={x:S.z0.x+d[0]*S.h*0.25,y:S.z0.y+d[1]*S.h*0.25};update();});
+{const h=CF.hash.get('fn');if(h&&F[h]){S.fn=h;sel.value=h;}}
+ZP.resize();WP.resize();update();
+})();
+</script>
+</body>
+</html>

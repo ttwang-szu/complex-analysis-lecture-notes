@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>指数函数映射</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>.below{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:12px;align-items:start}</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" id="nav" aria-label="演示目录"></nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 2 章 §2.3 指数函数 · |eᶻ| = eˣ，Arg eᶻ = y + 2kπ，周期 2πi</p>
+    <h1>w = eᶻ 把 z 平面变成什么样</h1>
+    <p class="lede">e<sup>x+iy</sup> = e<sup>x</sup>(cos y + i sin y)：实部 x 决定模 e<sup>x</sup>，虚部 y 决定幅角。所以竖线 x = c 变成圆 |w| = e<sup>c</sup>，横线 y = c 变成射线 arg w = c；z 竖直移动 2π，像回到原处。</p>
+  </header>
+
+  <div class="row" style="margin-bottom:10px">
+    <div class="seg" role="radiogroup" aria-label="演示内容">
+      <input type="radio" name="mode" id="m-grid" value="grid" checked><label for="m-grid">坐标网</label>
+      <input type="radio" name="mode" id="m-strip" value="strip"><label for="m-strip">水平带 → 扇形</label>
+    </div>
+    <button class="btn primary" id="up" type="button">▶ z 竖直移动 2π</button>
+    <button class="btn" id="sweep" type="button">▶ 横线扫过 −π &lt; y ≤ π</button>
+  </div>
+
+  <div class="planes">
+    <div class="stage"><span class="tag">z 平面</span><canvas id="zp" tabindex="0" aria-label="z 平面"></canvas><div class="status" id="status" aria-live="polite"></div></div>
+    <div class="stage"><span class="tag">w 平面（w = eᶻ）</span><canvas id="wp" aria-label="w 平面"></canvas></div>
+  </div>
+  <p class="hint" style="margin-top:6px">拖动左边红点 z；在"水平带"模式下拖动滑块改变带高 h。</p>
+
+  <div class="below">
+    <div class="card" id="ctl"></div>
+    <div class="card" id="readout" aria-live="polite"></div>
+  </div>
+</div>
+<script src="assets/plane.js"></script>
+<script src="assets/field.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,TAU,$,trimNum,cplxHTML,angleText,nicePi,MATH_FONT,SANS_FONT,principal}=CF;const {exp}=CF2;
+const r3=v=>trimNum(v,3);
+const S={mode:'grid',z:{x:0.4,y:0.9},h:PI/2,trail:null,sweepY:null};
+let anim=null;
+const lin=(a,b,n)=>Array.from({length:n+1},(_,i)=>a+(b-a)*i/n);
+const XS=[-1.5,-1,-0.5,0,0.5,1],YS=lin(-PI,PI,12).slice(0,12);
+function stop(){if(anim){anim.stop();anim=null;}S.trail=null;S.sweepY=null;$('#status').innerHTML='';}
+const ZP=new CF.Plane($('#zp'),{range:3.6,maxVh:0.6,render:drawZ,names:['x','y']});
+const WP=new CF.Plane($('#wp'),{range:3.2,maxVh:0.6,render:drawW,names:['u','v']});
+ZP.addHandle({get:()=>S.z,set:p=>{stop();S.z=C.clean({x:Math.max(-1.8,Math.min(1.15,p.x)),y:p.y});update();}});
+function strip(P,y0,y1,fill){const b=P.bounds(),A=P.toS({x:b.x0,y:y1}),B=P.toS({x:b.x1,y:y0});P.ctx.save();P.ctx.fillStyle=fill;P.ctx.fillRect(A.X,A.Y,B.X-A.X,B.Y-A.Y);P.ctx.restore();}
+function drawZ(P){
+  const V=P.V;P.grid({step:0.5,labStep:1,unit:false,labels:false});
+  /* y 轴上标 π 的倍数 */
+  const c=P.ctx;c.save();c.fillStyle=V.muted;c.font='13px '+MATH_FONT;c.textAlign='right';c.textBaseline='middle';
+  [-2,-1,1,2].forEach(k=>{const Y=P.toS({x:0,y:k*PI}).Y;c.fillText((k===1?'':k===-1?'−':k>0?k:'−'+(-k))+'π',P.cx-6,Y);});c.restore();
+  if(S.mode==='grid'){
+    strip(P,-PI,PI,V.fill1);
+    [-PI,PI].forEach(y=>P.line({x:-9,y},{x:9,y},V.z1,1.5,[6,4],.8));
+    P.wlabel({x:-3,y:PI},'y = π',V.z1,{dy:-10,align:'left',font:'600 13px '+MATH_FONT});
+    XS.forEach(x=>P.line({x,y:-PI},{x,y:PI},V.z1,1.5,null,.8));
+    YS.forEach(y=>P.line({x:-1.5,y},{x:1,y},V.z2,1.5,null,.8));
+    [-1,1].forEach(k=>{const q=C.add(S.z,{x:0,y:2*k*PI});P.dot(q,V.w,5);P.wlabel(q,k>0?'z + 2πi':'z − 2πi',V.w,{dx:12,dy:-10,align:'left',size:13});});
+  }else{
+    strip(P,0,S.h,V.fill1);P.line({x:-9,y:0},{x:9,y:0},V.z1,2);P.line({x:-9,y:S.h},{x:9,y:S.h},V.z1,2,[6,4]);
+    P.wlabel({x:-3,y:S.h},'y = h',V.z1,{dy:-10,align:'left',font:'600 13px '+MATH_FONT});
+  }
+  if(S.sweepY!==null)P.line({x:-1.5,y:S.sweepY},{x:1.2,y:S.sweepY},V.violet,3.5);
+  if(S.trail)P.path(S.trail.z,V.violet,3);
+  P.dot(S.z,V.w,8,P.drag);P.wlabel(S.z,'z',V.w,{dx:12,dy:-12,size:17});
+}
+function drawW(P){
+  const V=P.V,O={x:0,y:0};P.grid({step:0.5,labStep:1,unit:false});
+  if(S.mode==='grid'){
+    XS.forEach(x=>P.circle(O,Math.exp(x),V.z1,1.5,null,.8));
+    YS.forEach(y=>P.line(C.polar(Math.exp(-1.5),y),C.polar(Math.exp(1),y),V.z2,1.5,null,.8));
+  }else{
+    const R=Math.exp(1.2),pts=[O,...lin(0,S.h,120).map(t=>C.polar(R,t))];P.path(pts,V.z1,2,{close:true,fill:V.fill1});
+    P.arc(O,34,0,S.h,V.z2,{lw:2});P.wlabel(C.polar(0.7,S.h/2),'h',V.z2,{size:16});
+    if(S.h>=TAU-1e-3){P.line(O,{x:R,y:0},V.w,3);P.wlabel({x:2,y:0},'正实轴不在像中（带不含 y = 0 与 y = 2π）',V.w,{dy:16,font:'600 12px '+SANS_FONT});}
+    P.dot(O,V.surface,5);P.circle(O,0.06,V.ink,2);P.wlabel(O,'0 不在像中',V.muted,{dx:12,dy:-12,align:'left',font:'12px '+SANS_FONT});
+  }
+  if(S.sweepY!==null)P.line(C.polar(Math.exp(-1.5),S.sweepY),C.polar(Math.exp(1.2),S.sweepY),V.violet,3.5);
+  if(S.trail)P.path(S.trail.w,V.violet,3);
+  const w=exp(S.z);P.arrow(O,w,V.w,2,{alpha:.6});P.dot(w,V.w,8);P.wlabel(w,'eᶻ',V.w,{dx:12,dy:-12,size:16});
+}
+function ctlHTML(){
+  if(S.mode==='grid')return`<h2>坐标网</h2><p class="hint">蓝色竖线 x = c ↦ 圆 |w| = e<sup>c</sup>；橙色横线 y = c ↦ 射线 arg w = c。蓝色带 −π &lt; y ≤ π 恰好映满 w 平面（去掉原点）一次。</p>`;
+  return`<h2>水平带 0 &lt; y &lt; h</h2><div class="slider"><label for="h">带高 h</label><input type="range" id="h" min="0.1" max="6.2832" step="0.01" value="${S.h}"><output id="h-out" for="h"></output></div>
+    <div class="row"><button class="btn" id="hp2" type="button">h = π/2</button><button class="btn" id="hp" type="button">h = π</button><button class="btn" id="h2p" type="button">h = 2π</button></div>
+    <p class="hint">像是张角为 h 的扇形（不含原点）。h = 2π 时，扇形张满整个平面。</p>`;
+}
+function bindCtl(){
+  if(S.mode!=='strip')return;
+  const hc=CF.bindRange('#h',v=>angleText(v),v=>{S.h=v;if(ZP.W){ZP.draw();WP.draw();}});
+  [['#hp2',PI/2],['#hp',PI],['#h2p',TAU]].forEach(([id,v])=>$(id).addEventListener('click',()=>hc.set(v)));
+}
+function readoutHTML(){
+  const z=S.z,w=exp(z);
+  return`<h2>红点</h2><table class="rt"><tbody>
+    <tr><td>z</td><td>${cplxHTML(z)}</td></tr>
+    <tr><td>eᶻ</td><td>${cplxHTML(w)}</td></tr>
+    <tr><td>|eᶻ|</td><td>eˣ = ${r3(Math.exp(z.x))}</td></tr>
+    <tr><td>Arg eᶻ</td><td>y + 2kπ，其中 y = ${r3(z.y)}；主值 ${angleText(principal(z.y))}</td></tr></tbody></table>
+    <div class="why"><p class="note">z、z ± 2πi、z ± 4πi … 都映到同一个 w：e<sup>z+2kπi</sup> = eᶻ，这就是周期 2πi。反过来，每个 w ≠ 0 有无穷多个原像，这正是下一节 Ln w 多值的原因。</p></div>`;
+}
+function update(){ZP.draw();WP.draw();$('#readout').innerHTML=readoutHTML();}
+function setMode(m){stop();S.mode=m;$('#ctl').innerHTML=ctlHTML();bindCtl();update();}
+CF.bindSeg('mode',setMode);
+$('#up').addEventListener('click',()=>{stop();const z0={...S.z};S.trail={z:[],w:[]};$('#status').innerHTML='<span>z 往上移动 2π，eᶻ 绕原点转一整圈回到原处。</span>';
+  anim=CF.animate(4500,t=>{S.z={x:z0.x,y:z0.y+TAU*CF.ease(t)};S.trail.z.push(S.z);S.trail.w.push(exp(S.z));update();},()=>{anim=null;S.z={x:z0.x,y:z0.y};update();});});
+$('#sweep').addEventListener('click',()=>{stop();$('#status').innerHTML='<span>横线 y = c 从 −π 扫到 π，像射线转过一整圈，扫遍整个 w 平面。</span>';
+  anim=CF.animate(5000,t=>{S.sweepY=-PI+TAU*t;ZP.draw();WP.draw();},()=>{anim=null;});});
+{const m=CF.hash.get('mode');if(m==='strip'){CF.setSeg('mode','strip');S.mode='strip';}}
+ZP.resize();WP.resize();$('#ctl').innerHTML=ctlHTML();bindCtl();update();
+})();
+</script>
+</body>
+</html>

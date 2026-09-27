@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>正交曲线族</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>.verdict{margin:0;font-size:15px;font-weight:600}.verdict.ok{color:var(--target)}.verdict.no{color:var(--w)}</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" id="nav" aria-label="演示目录"></nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 2 章 §2.2 例 2.8：u = c₁ 与 v = c₂ 正交</p>
+    <h1>解析函数的实部、虚部等值线互相垂直</h1>
+    <p class="lede">蓝线是 u(x, y) = c₁，橙线是 v(x, y) = c₂。拖动黑点，看两条曲线在交点处的夹角：f 解析且 f′ ≠ 0 时，C–R 方程保证 ∇u · ∇v = u<sub>x</sub>v<sub>x</sub> + u<sub>y</sub>v<sub>y</sub> = 0，所以夹角总是 90°。</p>
+  </header>
+
+  <main class="layout">
+    <section class="stage-col">
+      <div class="stage"><canvas id="plane" tabindex="0" aria-label="等值线图"></canvas><div class="status" id="status" aria-live="polite"></div></div>
+    </section>
+    <aside class="panel">
+      <div class="card">
+        <h2>函数</h2>
+        <select id="fn" style="font-family:var(--math);font-size:16px"></select>
+        <div class="row">
+          <button class="btn primary" id="tour" type="button">▶ 黑点绕一圈</button>
+          <label class="check"><input type="checkbox" id="grad" checked> 显示梯度 ∇u、∇v</label>
+        </div>
+        <div class="slider"><label for="dens">等值线密度</label><input type="range" id="dens" min="6" max="24" step="1" value="12"><output id="dens-out" for="dens"></output></div>
+      </div>
+      <div class="card" id="readout" aria-live="polite"></div>
+    </aside>
+  </main>
+</div>
+<script src="assets/plane.js"></script>
+<script src="assets/field.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,TAU,$,trimNum,cplxHTML,degText,MATH_FONT,SANS_FONT}=CF;const {F,jac}=CF2;
+const r3=v=>trimNum(v,3);
+const EXTRA={skew:{label:'x + i(x + y)',f:z=>({x:z.x,y:z.x+z.y}),an:false,u:'x',v:'x + y'}};
+const KEYS=['z2','z3','exp','inv','conj','zre','skew'];
+const S={k:'z2',p:{x:0.9,y:0.6},dens:12,grad:true};
+let anim=null,cache=null,ckey='';
+const FN=()=>F[S.k]||EXTRA[S.k];
+function niceLevels(g,P){
+  const b=P.bounds();let lo=Infinity,hi=-Infinity;
+  for(let i=0;i<=40;i++)for(let j=0;j<=40;j++){const v=g(b.x0+(b.x1-b.x0)*i/40,b.y0+(b.y1-b.y0)*j/40);if(isFinite(v)&&Math.abs(v)<50){lo=Math.min(lo,v);hi=Math.max(hi,v);}}
+  const raw=(hi-lo)/S.dens,p=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/p,st=(m<2?1:m<5?2:5)*p,L=[];
+  for(let v=Math.ceil(lo/st)*st;v<=hi;v+=st)L.push(Math.abs(v)<1e-12?0:v);return L;
+}
+const P=new CF.Plane($('#plane'),{range:2,maxVh:0.8,aspect:0.85,render:draw,onEmpty:{down(p){stop();S.p=p;update();},move(p){S.p=p;update();}}});
+P.addHandle({get:()=>S.p,set:p=>{stop();S.p=p;update();}});
+function stop(){if(anim){anim.stop();anim=null;}$('#status').innerHTML='';}
+function draw(P){
+  const V=P.V,f=FN().f,k=[S.k,S.dens,P.W,P.H].join('|');
+  if(k!==ckey){const gu=(x,y)=>f({x,y}).x,gv=(x,y)=>f({x,y}).y;
+    cache={u:CF2.contours(P,gu,niceLevels(gu,P),170),v:CF2.contours(P,gv,niceLevels(gv,P),170)};ckey=k;}
+  P.grid({step:0.5,labStep:1,unit:false});
+  CF2.drawContours(P,cache.u,V.z1,1.6,{alpha:.85});
+  CF2.drawContours(P,cache.v,V.z2,1.6,{alpha:.85});
+  const M=jac(f,S.p),gu={x:M.ux,y:M.uy},gv={x:M.vx,y:M.vy},nu=C.abs(gu),nv=C.abs(gv);
+  const len=0.45;
+  if(nu>1e-9&&nv>1e-9){
+    const tu=C.scale({x:-gu.y,y:gu.x},len/nu),tv=C.scale({x:-gv.y,y:gv.x},len/nv);
+    P.line(C.sub(S.p,tu),C.add(S.p,tu),V.z1,3.5);P.line(C.sub(S.p,tv),C.add(S.p,tv),V.z2,3.5);
+    if(S.grad){P.arrow(S.p,C.add(S.p,C.scale(gu,0.35/nu)),V.z1,2,{alpha:.9});P.arrow(S.p,C.add(S.p,C.scale(gv,0.35/nv)),V.z2,2,{alpha:.9});
+      P.wlabel(C.add(S.p,C.scale(gu,0.42/nu)),'∇u',V.z1,{size:14});P.wlabel(C.add(S.p,C.scale(gv,0.42/nv)),'∇v',V.z2,{size:14});}
+    const a1=Math.atan2(tu.y,tu.x),a2=Math.atan2(tv.y,tv.x);let d=CF.principal(a2-a1);if(Math.abs(d)>PI/2)d=d>0?d-PI:d+PI;
+    P.arc(S.p,26,a1,a1+d,V.ink,{lw:2});
+  }
+  P.dot(S.p,V.ink,7,true);
+}
+function angleInfo(){
+  const M=jac(FN().f,S.p),dot=M.ux*M.vx+M.uy*M.vy,nu=Math.hypot(M.ux,M.uy),nv=Math.hypot(M.vx,M.vy);
+  if(nu<1e-9||nv<1e-9)return{ang:NaN,dot,M};
+  let c=Math.abs(dot)/(nu*nv);c=Math.min(1,c);return{ang:Math.acos(c),dot,M};
+}
+function renderReadout(){
+  const fn=FN(),{ang,dot,M}=angleInfo(),ok=isFinite(ang)&&Math.abs(ang-PI/2)<1e-4;
+  let h=`<h2>f(z) = ${fn.label}</h2><table class="rt"><tbody>
+    <tr><td>u</td><td>${fn.u}</td><td>v</td><td>${fn.v}</td></tr>
+    <tr><td>∇u</td><td>(${r3(M.ux)}, ${r3(M.uy)})</td><td>∇v</td><td>(${r3(M.vx)}, ${r3(M.vy)})</td></tr>
+    <tr><td>∇u · ∇v</td><td colspan="3">${r3(dot)}</td></tr>
+    <tr><td>夹角</td><td colspan="3">${isFinite(ang)?degText(ang):'—（梯度为零，f′ = 0）'}</td></tr></tbody></table>`;
+  if(fn.an&&isFinite(ang))h+=`<p class="verdict ok">✓ 解析：由 C–R 方程，∇u·∇v = u<sub>x</sub>v<sub>x</sub> + u<sub>y</sub>v<sub>y</sub> = v<sub>y</sub>v<sub>x</sub> − v<sub>x</sub>v<sub>y</sub> = 0，处处正交。</p>`;
+  else if(fn.an)h+=`<p class="verdict no">这里 f′(z) = 0，结论不适用（例题要求 f′ ≠ 0）。</p>`;
+  else if(ok)h+=`<p class="verdict no">这两族曲线也正交，但 f 并不解析：正交是解析的必要结果，不能反过来推出解析。</p>`;
+  else h+=`<p class="verdict no">✗ 不解析：夹角不是 90°，两族曲线不正交。</p>`;
+  $('#readout').innerHTML=h;
+}
+function update(){renderReadout();P.draw();}
+const sel=$('#fn');
+KEYS.forEach(k=>{const fn=F[k]||EXTRA[k];const o=document.createElement('option');o.value=k;o.textContent='f(z) = '+fn.label+(fn.an?'':'（非解析）');sel.appendChild(o);});
+sel.addEventListener('change',()=>{stop();S.k=sel.value;if(S.k==='inv'&&C.abs(S.p)<0.3)S.p={x:0.9,y:0.6};update();});
+CF.bindRange('#dens',v=>String(v),v=>{S.dens=v;if(P.W)update();});
+$('#grad').addEventListener('change',e=>{S.grad=e.target.checked;P.draw();});
+$('#tour').addEventListener('click',()=>{stop();const r=Math.max(0.5,C.abs(S.p)),t0=Math.atan2(S.p.y,S.p.x);$('#status').innerHTML='<span>黑点沿圆周移动，观察夹角是否始终为 90°。</span>';
+  anim=CF.animate(6000,t=>{S.p=C.polar(r,t0+TAU*t);update();},()=>{anim=null;});});
+{const h=CF.hash.get('fn');if(h&&(F[h]||EXTRA[h])&&KEYS.includes(h)){S.k=h;sel.value=h;}}
+P.resize();update();
+})();
+</script>
+</body>
+</html>

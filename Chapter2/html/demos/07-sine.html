@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>正弦函数无界</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>.below{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:12px;align-items:start}
+.scale{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);margin-top:4px}
+.scale i{display:inline-block;height:10px;flex:1;border-radius:3px}</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" id="nav" aria-label="演示目录"></nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 2 章 §2.3 三角函数与双曲函数 · 例 3.12、3.14</p>
+    <h1>复正弦函数是无界的</h1>
+    <p class="lede">|sin(x + iy)|² = sin²x + sinh²y：沿虚轴方向按 sinh y 增长，没有上界，和实数的 |sin x| ≤ 1 完全不同。映射模式中，竖直带 −π/2 ≤ x ≤ π/2 被 sin z 映满整个 w 平面：横线变椭圆，竖线变双曲线。</p>
+  </header>
+
+  <div class="row" style="margin-bottom:10px">
+    <div class="seg" role="radiogroup" aria-label="模式">
+      <input type="radio" name="mode" id="m-heat" value="heat" checked><label for="m-heat">|f(z)| 热图</label>
+      <input type="radio" name="mode" id="m-map" value="map"><label for="m-map">映射 w = sin z</label>
+    </div>
+    <span id="fnbox"><label for="fn" class="hint" style="font-size:13px">函数</label>
+    <select id="fn" style="font-family:var(--math);font-size:16px"><option value="sin">f(z) = sin z</option><option value="cos">f(z) = cos z</option><option value="tanh">f(z) = tanh z</option></select></span>
+    <button class="btn primary" id="climb" type="button">▶ 沿虚轴向上走</button>
+  </div>
+
+  <div class="planes">
+    <div class="stage"><span class="tag" id="ztag">z 平面：|f(z)|</span><canvas id="zp" tabindex="0" aria-label="z 平面"></canvas><div class="status" id="status" aria-live="polite"></div></div>
+    <div class="stage" id="wstage" hidden><span class="tag">w 平面（w = sin z）</span><canvas id="wp" aria-label="w 平面"></canvas></div>
+    <div class="stage" id="cstage"><span class="tag" id="ctag">沿竖线 x = x₀：|f(x₀ + iy)|</span><canvas id="chart" aria-label="沿竖线的模"></canvas></div>
+  </div>
+  <div class="scale" id="scale"><span>|f| &lt; 1</span><i style="background:linear-gradient(90deg,var(--z1),var(--surface),var(--w))"></i><span>|f| &gt; 1（黑线：|f| = 1）</span></div>
+
+  <div class="below">
+    <div class="card" id="ctl"></div>
+    <div class="card" id="readout" aria-live="polite"></div>
+  </div>
+</div>
+<script src="assets/plane.js"></script>
+<script src="assets/field.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,TAU,$,trimNum,cplxHTML,MATH_FONT,SANS_FONT}=CF;const {sin,cos,rgb,mix}=CF2;
+const r3=v=>trimNum(v,3);
+const tanh=z=>{const e=CF2.exp(C.scale(z,2)),one={x:1,y:0};return C.div(C.sub(e,one),C.add(e,one));};
+const FN={sin,cos,tanh};
+const S={mode:'heat',fn:'sin',z:{x:0.7,y:0.8},sol:true,trail:null};
+let anim=null,heat=null,hkey='',cont=null;
+const lin=(a,b,n)=>Array.from({length:n+1},(_,i)=>a+(b-a)*i/n);
+function stop(){if(anim){anim.stop();anim=null;}S.trail=null;$('#status').innerHTML='';}
+const ZP=new CF.Plane($('#zp'),{range:3.3,maxVh:0.6,render:drawZ,names:['x','y']});
+const WP=new CF.Plane($('#wp'),{range:3,maxVh:0.6,render:drawW,names:['u','v']});
+const CH=new CF.Chart($('#chart'),{render:drawChart,aspect:0.95,maxVh:0.6,minH:260});
+ZP.addHandle({get:()=>S.z,set:p=>{stop();S.z=C.clean(p);update();}});
+const cy=[-1.5,-1,-0.5,0.5,1,1.5],cx=[-PI/2,-PI/3,-PI/6,0,PI/6,PI/3,PI/2];
+function drawZ(P){
+  const V=P.V,f=FN[S.fn];
+  if(S.mode==='heat'){
+    const k=[S.fn,P.W,P.H,V.surface].join('|');
+    if(k!==hkey){const lo=rgb(V.z1),mid=rgb(V.surface),hi=rgb(V.w);
+      heat=CF2.heat(P,p=>{const v=C.abs(f(p));if(!isFinite(v))return hi;const t=Math.max(-1,Math.min(1,Math.log(v)/Math.log(20)));return t<0?mix(mid,lo,-t*0.8):mix(mid,hi,t*0.8);},3);
+      cont=CF2.contours(P,(x,y)=>C.abs(f({x,y})),[1],180);hkey=k;}
+    CF2.blit(P,heat);P.grid({step:0.5,labStep:1,unit:false});CF2.drawContours(P,cont,V.ink,2.2);
+    if(S.fn==='sin'&&S.sol){for(let n=-1;n<=1;n++){const a={x:2*n*PI,y:1},b={x:(2*n+1)*PI,y:-1};[a,b].forEach(q=>{P.dot(q,V.target,6,true);});}
+      P.wlabel({x:0,y:1},'sin z = i sinh 1 的解',V.target,{dx:12,dy:-16,align:'left',font:'600 13px '+SANS_FONT});}
+    P.line({x:S.z.x,y:-9},{x:S.z.x,y:9},V.violet,1.5,[6,4]);
+  }else{
+    P.grid({step:0.5,labStep:1,unit:false});
+    const b=P.bounds(),A=P.toS({x:-PI/2,y:b.y1}),B=P.toS({x:PI/2,y:b.y0});P.ctx.save();P.ctx.fillStyle=V.fill1;P.ctx.fillRect(A.X,A.Y,B.X-A.X,B.Y-A.Y);P.ctx.restore();
+    cy.forEach(y=>P.line({x:-PI/2,y},{x:PI/2,y},V.z2,1.8));
+    cx.forEach(x=>P.line({x,y:-3},{x,y:3},V.z1,1.8));
+  }
+  if(S.trail)P.path(S.trail,V.violet,3);
+  P.dot(S.z,V.w,8,P.drag);P.wlabel(S.z,'z',V.w,{dx:12,dy:-12,size:17});
+}
+function drawW(P){
+  const V=P.V;P.grid({step:0.5,labStep:1,unit:false});
+  cy.forEach(y=>P.path(lin(-PI/2,PI/2,120).map(x=>sin({x,y})),V.z2,1.8));
+  cx.forEach(x=>P.path(lin(-3,3,160).map(y=>sin({x,y})),V.z1,1.8));
+  if(S.trail)P.path(S.trail.map(sin),V.violet,3);
+  const w=sin(S.z);P.dot(w,V.w,8);P.wlabel(w,'sin z',V.w,{dx:12,dy:-12,size:16});
+  P.dot({x:1,y:0},V.ink,4);P.dot({x:-1,y:0},V.ink,4);
+}
+function drawChart(G){
+  const V=G.V,f=FN[S.fn],x0=S.z.x,ys=lin(-3,3,300),pts=ys.map(y=>({x:y,y:C.abs(f({x:x0,y}))})),ymax=S.fn==='tanh'?3:11;
+  G.setScale(-3,3,0,ymax);
+  const yt=(S.fn==='tanh'?[0,1,2,3]:[0,1,2,4,6,8,10]).map(v=>({v,t:String(v),strong:v===1}));
+  G.axes({yticks:yt,xticks:[-3,-2,-1,0,1,2,3].map(v=>({v,t:String(v)})),xname:'y'});
+  G.hline(1,V.ink,2,[6,4]);G.label('1（实三角函数的界）',G.X(-2.9),G.Y(1)-10,V.ink,'600 12px '+SANS_FONT,'left');
+  G.series(pts.map(p=>({x:p.x,y:Math.min(p.y,ymax*1.5)})),V.w,2.5);
+  const v=C.abs(f(S.z));G.pdot(S.z.y,Math.min(v,ymax),V.violet,5.5);
+}
+function ctlHTML(){
+  if(S.mode==='heat')return`<h2>热图</h2><label class="check"><input type="checkbox" id="sol" ${S.sol?'checked':''}> 标出例 3.12：sin z = i sinh 1 的解</label>
+    <p class="hint">黑线是 |f(z)| = 1。选 tanh z 时，黑线正是例 3.14 |tanh z| = 1 的解：水平线 Im z = π/4 + kπ/2。</p>`;
+  return`<h2>映射 w = sin z</h2><p class="hint">橙色横线 y = c ↦ 椭圆 u²/cosh²c + v²/sinh²c = 1；蓝色竖线 x = c ↦ 双曲线 u²/sin²c − v²/cos²c = 1（焦点都是 ±1）。</p>`;
+}
+function readoutHTML(){
+  const z=S.z,f=FN[S.fn],w=f(z),s2=Math.sin(z.x)**2+Math.sinh(z.y)**2;
+  let h=`<h2>红点 z = ${cplxHTML(z)}</h2><table class="rt"><tbody>
+    <tr><td>${S.mode==='map'?'sin':S.fn} z</td><td>${cplxHTML(S.mode==='map'?sin(z):w)}</td></tr>
+    <tr><td>|${S.mode==='map'?'sin':S.fn} z|</td><td>${r3(C.abs(S.mode==='map'?sin(z):w))}</td></tr>`;
+  if(S.fn==='sin'||S.mode==='map')h+=`<tr><td>sin²x + sinh²y</td><td>${r3(s2)} = |sin z|²</td></tr>`;
+  h+=`</tbody></table><div class="why"><p class="note">sin z = sin x cosh y + i cos x sinh y，cos z = cos x cosh y − i sin x sinh y。|sin iy| = sinh|y|，|cos iy| = cosh y，都随 |y| 无限增大。</p></div>`;
+  return h;
+}
+function bindCtl(){const s=$('#sol');if(s)s.addEventListener('change',e=>{S.sol=e.target.checked;ZP.draw();});}
+function update(){ZP.draw();if(S.mode==='map')WP.draw();else CH.draw();$('#readout').innerHTML=readoutHTML();}
+function setMode(m){stop();S.mode=m;$('#wstage').hidden=m!=='map';$('#cstage').hidden=m==='map';$('#scale').hidden=m==='map';$('#fnbox').hidden=m==='map';
+  $('#ztag').textContent=m==='map'?'z 平面：竖直带 −π/2 ≤ x ≤ π/2':'z 平面：|f(z)|';$('#ctl').innerHTML=ctlHTML();bindCtl();
+  if(m==='map'){S.fn='sin';$('#fn').value='sin';WP.resize();}else CH.resize();update();}
+CF.bindSeg('mode',setMode);
+$('#fn').addEventListener('change',e=>{stop();S.fn=e.target.value;hkey='';update();});
+$('#climb').addEventListener('click',()=>{stop();const x0=S.z.x;S.trail=[];$('#status').innerHTML='<span>z 沿竖线向上走，|f(z)| 越来越大（tanh 除外）。</span>';
+  anim=CF.animate(4500,t=>{S.z={x:x0,y:-2.8+5.6*CF.ease(t)};S.trail.push(S.z);update();},()=>{anim=null;});});
+{const h=CF.hash;const f=h.get('fn');if(FN[f]){S.fn=f;$('#fn').value=f;}if(h.get('mode')==='map'){CF.setSeg('mode','map');}}
+ZP.resize();CH.resize();WP.resize();setMode(CF.hash.get('mode')==='map'?'map':'heat');
+})();
+</script>
+</body>
+</html>

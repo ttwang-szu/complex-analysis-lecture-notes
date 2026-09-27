@@ -26,3 +26,7 @@ Thumbs.db
 
 # Local source archives
 *.zip
+
+# Python caches
+__pycache__/
+*.pyc

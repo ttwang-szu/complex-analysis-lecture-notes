@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>对数函数与分支</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>.below{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:12px;align-items:start}
+.flash{color:var(--w);font-weight:600}</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" id="nav" aria-label="演示目录"></nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 2 章 §2.3 对数函数 · Ln z = ln|z| + i Arg z，主值 ln z，分支</p>
+    <h1>Ln z 的多个值与分支</h1>
+    <p class="lede">Ln z 的所有值排在 w 平面的一条竖线 Re w = ln|z| 上，彼此相差 2πi，每条高 2π 的水平带是一个分支。让 z 绕原点转一圈：紫色的"连续分支"平滑地升到上一条带；蓝色的主值 ln z 一过负实轴（割线）就跳回主值带。</p>
+  </header>
+
+  <div class="row" style="margin-bottom:10px">
+    <button class="btn primary" id="ccw" type="button">▶ 逆时针绕原点一圈</button>
+    <button class="btn" id="cw" type="button">▶ 顺时针绕一圈</button>
+    <button class="btn" id="reset" type="button">重置分支</button>
+  </div>
+
+  <div class="planes">
+    <div class="stage"><span class="tag">z 平面（负实轴为割线）</span><canvas id="zp" tabindex="0" aria-label="z 平面"></canvas><div class="status" id="status" aria-live="polite"></div></div>
+    <div class="stage"><span class="tag">w 平面：Ln z 的值</span><canvas id="wp" aria-label="w 平面"></canvas></div>
+  </div>
+  <p class="hint" style="margin-top:6px">拖动红点 z 绕原点转，观察两种颜色的点如何变化。</p>
+
+  <div class="below">
+    <div class="card" id="readout" aria-live="polite"></div>
+    <div class="card" id="values" aria-live="polite"></div>
+  </div>
+</div>
+<script src="assets/plane.js"></script>
+<script src="assets/field.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,TAU,$,trimNum,cplxHTML,angleText,MATH_FONT,SANS_FONT}=CF;
+const r3=v=>trimNum(v,3);
+const S={z:C.polar(1.5,PI/4),Theta:PI/4,trail:null,flash:'',ft:0};
+let anim=null;
+function stop(){if(anim){anim.stop();anim=null;}$('#status').innerHTML='';}
+const kOf=()=>Math.round((S.Theta-C.arg(S.z))/TAU);
+function setZ(z){if(C.abs(z)<0.12)return;const before=kOf();S.Theta+=CF.principal(C.arg(z)-C.arg(S.z));S.z=C.clean(z);const after=kOf();
+  if(after!==before){S.flash=`z 穿过负实轴：主值 ln z 跳变 ${after>before?'−':'+'}2πi，连续分支从第 ${before} 支进入第 ${after} 支。`;S.ft=performance.now();}}
+const ZP=new CF.Plane($('#zp'),{range:2,maxVh:0.62,render:drawZ});
+const WP=new CF.Plane($('#wp'),{range:9.8,maxVh:0.62,aspect:1.2,render:drawW,names:['Re w','Im w']});
+ZP.addHandle({get:()=>S.z,set:p=>{stop();setZ(p);update();}});
+function drawZ(P){
+  const V=P.V;P.grid({step:0.5,labStep:1});
+  P.path([{x:0,y:0},{x:-9,y:0}],V.w,4,{alpha:.8});
+  P.wlabel({x:-1.2,y:0},'割线：arg z 在此跳变',V.w,{dy:16,font:'600 13px '+SANS_FONT});
+  if(S.trail)P.path(S.trail.z,V.violet,3);
+  P.arrow({x:0,y:0},S.z,V.z1,2,{alpha:.6});P.arc({x:0,y:0},24,0,C.arg(S.z),V.z1,{lw:2});
+  P.dot(S.z,V.w,8,P.drag);P.wlabel(S.z,'z',V.w,{dx:12,dy:-12,size:17});
+}
+function drawW(P){
+  const V=P.V,c=P.ctx,b=P.bounds(),lr=Math.log(C.abs(S.z));
+  /* 分支带 */
+  for(let k=-2;k<=2;k++){const y0=(2*k-1)*PI,y1=(2*k+1)*PI,A=P.toS({x:b.x0,y:y1}),B=P.toS({x:b.x1,y:y0});
+    c.save();c.fillStyle=k===0?V.fill1:(k%2?V.chip:V.surface);c.fillRect(A.X,A.Y,B.X-A.X,B.Y-A.Y);c.restore();
+    P.line({x:b.x0,y:y0},{x:b.x1,y:y0},V.gridS,1.25,[5,4]);
+    P.wlabel({x:b.x1-0.4,y:2*k*PI},k===0?'主值带 k = 0':'k = '+k,k===0?V.z1:V.muted,{align:'right',font:'600 13px '+SANS_FONT});}
+  P.grid({step:1,labStep:2,unit:false,labels:false});
+  const cc=P.ctx;cc.save();cc.fillStyle=V.muted;cc.font='13px '+MATH_FONT;cc.textAlign='right';cc.textBaseline='middle';
+  [-2,-1,1,2].forEach(k=>{cc.fillText((k===1?'':k===-1?'−':k>0?k:'−'+(-k))+'π',P.cx-6,P.toS({x:0,y:k*PI}).Y);});cc.restore();
+  /* 所有值 */
+  for(let k=-2;k<=2;k++){const w={x:lr,y:C.arg(S.z)+2*k*PI};P.dot(w,V.muted,4.5);}
+  if(S.trail)P.path(S.trail.w,V.violet,3);
+  const wc={x:lr,y:S.Theta},wp={x:lr,y:C.arg(S.z)};
+  P.dot(wc,V.violet,9);P.wlabel(wc,'连续分支',V.violet,{dx:14,dy:-10,align:'left',font:'600 13px '+SANS_FONT});
+  P.dot(wp,V.z1,7);P.wlabel(wp,'ln z（主值）',V.z1,{dx:14,dy:12,align:'left',font:'600 13px '+SANS_FONT});
+}
+function update(){
+  ZP.draw();WP.draw();const lr=Math.log(C.abs(S.z)),a=C.arg(S.z),k=kOf();
+  const fl=S.flash&&performance.now()-S.ft<4000?`<p class="flash">${S.flash}</p>`:'';
+  $('#readout').innerHTML=`<h2>z = ${cplxHTML(S.z)}</h2><table class="rt"><tbody>
+    <tr><td>ln|z|</td><td>${r3(lr)}</td></tr>
+    <tr><td>arg z</td><td>${angleText(a)}</td></tr>
+    <tr><td class="c1">ln z</td><td class="c1">${r3(lr)} + ${r3(a)}i　<small>主值，Im ∈ (−π, π]</small></td></tr>
+    <tr><td class="cv">连续分支</td><td class="cv">${r3(lr)} + ${r3(S.Theta)}i　<small>第 k = ${k} 支</small></td></tr></tbody></table>${fl}`;
+  let rows='';for(let j=-2;j<=2;j++)rows+=`<tr${j===k?' class="on"':''}><td>k = ${j}</td><td>${r3(lr)} + ${r3(a+2*j*PI)}i</td></tr>`;
+  $('#values').innerHTML=`<h2>Ln z = ln z + 2kπi</h2><table class="rt"><tbody>${rows}</tbody></table>
+    <div class="why"><p class="note">每固定一个 k 就得到一个单值分支。主值分支在割线（负实轴与原点）之外连续、可导，且 (ln z)′ = 1/z；在割线上，从上方与下方趋近得到的虚部相差 2π。</p></div>`;
+}
+function spin(dir){stop();const r=C.abs(S.z),a0=C.arg(S.z);S.trail={z:[],w:[]};
+  $('#status').innerHTML=`<span>z ${dir>0?'逆':'顺'}时针绕原点一圈：连续分支${dir>0?'上':'下'}移 2π，主值在负实轴处跳回。</span>`;
+  anim=CF.animate(5000,t=>{setZ(C.polar(r,a0+dir*TAU*t));S.trail.z.push(S.z);S.trail.w.push({x:Math.log(r),y:S.Theta});update();},()=>{anim=null;});}
+$('#ccw').addEventListener('click',()=>spin(1));$('#cw').addEventListener('click',()=>spin(-1));
+$('#reset').addEventListener('click',()=>{stop();S.Theta=C.arg(S.z);S.trail=null;S.flash='';update();});
+ZP.cv.addEventListener('keydown',e=>{const d={ArrowLeft:1,ArrowRight:-1}[e.key];if(!d)return;e.preventDefault();stop();setZ(C.polar(C.abs(S.z),C.arg(S.z)+d*PI/12));update();});
+ZP.resize();WP.resize();update();
+})();
+</script>
+</body>
+</html>
