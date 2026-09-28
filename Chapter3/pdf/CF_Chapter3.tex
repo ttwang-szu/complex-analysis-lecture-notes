@@ -1,0 +1,1694 @@
+% !TeX program = xelatex
+\documentclass[notheorems]{beamer}
+
+\mode<presentation>
+{
+  \usetheme{Antibes}
+  \setbeamertemplate{footline}[frame number]{}
+  \setbeamertemplate{navigation symbols}{}
+}
+
+\usepackage{amsmath}
+\usepackage{yhmath}
+\usepackage{xeCJK}
+\setCJKsansfont[ItalicFont={Microsoft YaHei}]{Microsoft YaHei}
+
+\usepackage{ragged2e}
+\justifying\let\raggedright\justifying
+
+\makeatletter
+\newenvironment<>{proofs}[1][\proofname]{
+    \par
+    \def\insertproofname{#1\@addpunct{.}}
+    \usebeamertemplate{proof begin}#2}
+  {\usebeamertemplate{proof end}}
+
+  \newenvironment<>{solution}[1][Solution.]{
+    \par
+    \def\insertproofname{#1\@addpunct{.}}
+    \usebeamertemplate{proof begin}#2}
+  {\usebeamertemplate{proof end}}
+
+  \newtheorem*{definition}{Definition}
+  \newtheorem{example}{Example}[section]
+  \newtheorem{theorem}{Theorem}[section]
+  \newtheorem{property}{Property}[section]
+\makeatother
+
+\setbeamertemplate{theorems}[numbered]
+
+\setbeamertemplate{section in toc}[sections numbered]
+\setbeamertemplate{subsection in toc}[subsections numbered]
+
+\numberwithin{equation}{section}
+\numberwithin{equation}{subsection}
+
+\usefonttheme[onlymath]{serif}
+\providecommand{\Arg}{\operatorname{Arg}}
+\providecommand{\Ln}{\operatorname{Ln}}
+\providecommand{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand{\dif}{\mathop{}\!\mathrm{d}}
+
+\title{Chapter 3: Complex Integration}
+\author{Taotao Wang, Associate Professor}
+\institute{College of Electronics and Information Engineering, Shenzhen University}
+
+\begin{document}
+
+\everymath{\displaystyle}
+
+\begin{frame}
+	\titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+	\tableofcontents
+\end{frame}
+
+% =====================================================================
+\section{Concept of Complex Integration}
+
+\begin{frame}
+	\frametitle{Outline}
+	\tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item \textbf{Definition of Complex Integration}
+		      \begin{enumerate}[1)]
+			      \item Directed Curves
+		      \end{enumerate}
+	\end{enumerate}
+	\begin{definition}
+		Let $C$ be a smooth (or piecewise smooth（分段光滑）) curve in the plane. If one of the two directions along $C$ is chosen as the positive direction（正方向）, $C$ is called a directed curve（有向曲线）.
+	\end{definition}
+	\begin{minipage}[c]{0.58\linewidth}
+		If the positive direction of $C$ is from $A$ to $B$, then the direction from $B$ to $A$ is the negative direction of $C$; the curve with this direction is denoted by $C^-$.
+	\end{minipage}\hfill
+	\begin{minipage}[c]{0.38\linewidth}
+		\begin{figure}
+			\includegraphics[width=\linewidth]{Figure_3_1_1.jpg}
+		\end{figure}
+	\end{minipage}
+\end{frame}
+
+\begin{frame}
+	For a simple closed curve, the counterclockwise direction is usually taken as positive and the clockwise direction as negative.
+
+	If a closed curve is the boundary of a domain, its positive direction is defined as follows:
+
+	\begin{minipage}[c]{0.58\linewidth}
+		When a point $P$ moves along the boundary in the positive direction, the part of the domain near $P$ always lies on the left of $P$.
+	\end{minipage}\hfill
+	\begin{minipage}[c]{0.38\linewidth}
+		\begin{figure}
+			\includegraphics[width=\linewidth]{Figure_3_1_2.jpg}
+		\end{figure}
+	\end{minipage}
+
+	Hence the positive direction of the outer boundary of a domain is counterclockwise, and that of an inner boundary is clockwise.
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		      \begin{enumerate}[1)]
+			      \setcounter{enumii}{1}
+			      \item Definition of Complex Integration
+		      \end{enumerate}
+	\end{enumerate}
+	\begin{definition}
+		Let $f(z)$ be defined in a domain $D$, and let $C$ be a smooth directed curve in $D$ from $A$ to $B$. Divide $C$ arbitrarily into $n$ arcs by the points
+		\[A=z_0,z_1,z_2,\cdots,z_{k-1},z_k,\cdots,z_n=B.\]
+		Choose an arbitrary point $\zeta_k$ on each arc $\wideparen{z_{k-1}z_k}$ $(k=1,2,\cdots,n)$ (see the figure on the next slide) and form the sum
+		\[S_n=\sum_{k=1}^{n}f(\zeta_k)(z_k-z_{k-1})=\sum_{k=1}^{n}f(\zeta_k)\Delta z_k,\]
+		where $\Delta z_k=z_k-z_{k-1}$.
+	\end{definition}
+\end{frame}
+
+\begin{frame}
+	\begin{definition}[Cont.]
+		Let $\Delta s_k$ be the length of the arc $\wideparen{z_{k-1}z_k}$ and $\delta=\max_{1\leq k\leq n}\Delta s_k$. If, as $n\to\infty$ and $\delta\to 0$, $S_n$ has a unique limit no matter how $C$ is divided and how the points $\zeta_k$ are chosen, this limit is called the integral（积分） of $f(z)$ along $C$ and is denoted by
+		\[\int_C f(z)\dif z=\lim_{\delta\to 0}\sum_{k=1}^n f(\zeta_k)\Delta z_k.\]
+	\end{definition}
+	\begin{figure}
+		\includegraphics[height=0.36\textheight]{Figure_3_1_3.jpg}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		      Remarks on the definition:
+		      \begin{enumerate}[i)]
+			      \item Each term $f(\zeta_k)\Delta z_k$ is a small step $\Delta z_k$ along $C$, rotated and stretched by the complex number $f(\zeta_k)$; $S_n$ adds these steps head to tail. For $f(z)\equiv1$ the steps simply add up to $B-A$, so $\int_C \dif z=B-A$.
+			      \item If $C$ is a closed curve, the integral along $C$ is written as $\oint_C f(z)\dif z$.
+			      \item If $C$ is the interval $a\leq x\leq b$ of the real axis and $f(z)=u(x)$ is real-valued, the definition reduces to the definite integral $\int_a^b u(x)\dif x$ of a real function of one variable.
+		      \end{enumerate}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{1}
+		\item \textbf{Existence and Computation of Complex Integrals}
+	\end{enumerate}
+	\begin{theorem}
+		If $f(z)=u(x,y)+iv(x,y)$ is continuous on a smooth curve $C$, then $\int_C f(z)\dif z$ exists, and
+		\[\int_C f(z)\dif z=\int_C u\dif x-v\dif y+i\int_C v\dif x+u\dif y.\]
+		The right-hand side consists of two line integrals of the second kind（第二类曲线积分）.
+	\end{theorem}
+	\begin{proofs}<2->
+		Let $z_k=x_k+iy_k$ and $\zeta_k=\xi_k+i\eta_k$. Then
+		\[\Delta z_k=z_k-z_{k-1}=(x_k-x_{k-1})+i(y_k-y_{k-1})=\Delta x_k+i\Delta y_k.\]
+	\end{proofs}
+\end{frame}
+
+\begin{frame}
+	\begin{proofs}[\proofname\ (Cont.)]
+		Hence
+		\begin{align*}
+			\sum_{k=1}^n f(\zeta_k)\Delta z_k & =\sum_{k=1}^n \big[u(\xi_k,\eta_k)+iv(\xi_k,\eta_k)\big](\Delta x_k+i\Delta y_k)     \\
+			                                  & =\sum_{k=1}^n \big[u(\xi_k,\eta_k)\Delta x_k-v(\xi_k,\eta_k)\Delta y_k\big]          \\
+			                                  & \quad+i\sum_{k=1}^n \big[v(\xi_k,\eta_k)\Delta x_k+u(\xi_k,\eta_k)\Delta y_k\big].
+		\end{align*}
+	\end{proofs}
+\end{frame}
+
+\begin{frame}
+	\begin{proof}[\proofname\ (Cont.)]
+		Since $u$ and $v$ are continuous, the existence theorem for line integrals shows that, as $n\to\infty$ and the maximum arc length tends to zero, both sums on the right have limits, regardless of how $C$ is divided and how the points $(\xi_k,\eta_k)$ are chosen. So the left-hand side has a limit as well:
+		\begin{align*}
+			\boxed{\sum_{k=1}^n f(\zeta_k)\Delta z_k} & =\boxed{\sum_{k=1}^n \big[u\Delta x_k-v\Delta y_k\big]}+i\boxed{\sum_{k=1}^n \big[v\Delta x_k+u\Delta y_k\big]} \\
+			\downarrow\quad                            & \qquad\qquad\quad\downarrow\qquad\qquad\qquad\qquad\quad\downarrow                                              \\
+			\boxed{\int_C f(z)\dif z}                  & =\boxed{\int_C u\dif x-v\dif y}+i\boxed{\int_C v\dif x+u\dif y}.
+		\end{align*}
+	\end{proof}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		      Notes:
+		      \begin{enumerate}[i)]
+			      \item The formula is easy to remember: multiply $f(z)=u+iv$ by $\dif z=\dif x+i\dif y$ formally:
+			            \begin{align*}
+				            \int_C f(z)\dif z & =\int_C (u+iv)(\dif x+i\dif y)                     \\
+				                              & =\int_C u\dif x-v\dif y+i\int_C v\dif x+u\dif y.
+			            \end{align*}
+			      \item If $C$ is given by the parametric equation（参数方程） $z=z(t)=x(t)+iy(t)$ $(\alpha\leq t\leq\beta)$, where $t=\alpha$ and $t=\beta$ correspond to the initial and terminal points, and $f(z)$ is continuous on $C$, then
+			            \[f\big(z(t)\big)=u\big(x(t),y(t)\big)+iv\big(x(t),y(t)\big).\]
+		      \end{enumerate}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		      \begin{enumerate}
+			      \item []
+			            Substituting $\dif x=x'(t)\dif t$ and $\dif y=y'(t)\dif t$,
+			            \begin{align*}
+				            \int_C f(z)\dif z & =\int_C u\dif x-v\dif y+i\int_C v\dif x+u\dif y                                                              \\
+				                              & =\int_\alpha^\beta \Big\{u\big[x(t),y(t)\big]x'(t)-v\big[x(t),y(t)\big]y'(t)\Big\}\dif t                     \\
+				                              & \quad+i\int_\alpha^\beta \Big\{v\big[x(t),y(t)\big]x'(t)+u\big[x(t),y(t)\big]y'(t)\Big\}\dif t               \\
+				                              & =\int_\alpha^\beta \Big\{u\big[x(t),y(t)\big]+iv\big[x(t),y(t)\big]\Big\}\big\{x'(t)+iy'(t)\big\}\dif t.
+			            \end{align*}
+			            Therefore
+			            \[\boxed{\int_C f(z)\dif z=\int_\alpha^\beta f\big[z(t)\big]z'(t)\dif t.}\]
+		      \end{enumerate}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		      \begin{enumerate}[i)]
+			      \setcounter{enumii}{2}
+			      \item If $C$ is a piecewise smooth curve formed by the smooth curves $C_1,C_2,\cdots,C_n$ joined end to end, then
+			            \[\int_C f(z)\dif z=\int_{C_1} f(z)\dif z+\int_{C_2} f(z)\dif z+\cdots+\int_{C_n} f(z)\dif z.\]
+		      \end{enumerate}
+		      Commonly used parametric equations:
+		      \begin{enumerate}[i)]
+			      \item Line segment from $z_1$ to $z_2$: $z=(1-t)z_1+tz_2=z_1+t(z_2-z_1)$, $0\leq t\leq 1$.
+			      \item Circle with center $z_0$ and radius $r$ (counterclockwise): $z=z_0+re^{i\theta}$, $0\leq\theta\leq 2\pi$.
+		      \end{enumerate}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Compute $\int_C z\dif z$, where $C$ is the line segment from the origin to the point $3+4i$.
+	\end{example}
+	\begin{solution}<2->
+		The segment is $x=3t$, $y=4t$ $(0\leq t\leq 1)$, i.e.\ $z=(3+4i)t$, so $\dif z=(3+4i)\dif t$ and
+		\[\int_C z\dif z=\int_0^1 (3+4i)^2 t\dif t=(3+4i)^2 \int_0^1 t\dif t=\frac{(3+4i)^2}{2}=-\frac{7}{2}+12i.\]
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{solution}[Solution\ (Cont.)]
+		Moreover,
+		\[\int_C z\dif z=\int_C (x+iy)(\dif x+i\dif y)=\int_C x\dif x-y\dif y+i\int_C y\dif x+x\dif y.\]
+		Both line integrals are independent of the path, because the integrands are exact differentials:
+		\[x\dif x-y\dif y=\dif\Big(\frac{x^2-y^2}{2}\Big),\qquad y\dif x+x\dif y=\dif(xy).\]
+		Therefore, for every path $C$ from the origin to $3+4i$,
+		\[\int_C z\dif z=\frac{(3+4i)^2}{2}.\]
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Compute $\int_C \operatorname{Re}z\dif z$, where $C$ is
+		\begin{enumerate}
+			\item the line segment from the origin to $1+i$;
+			\item the arc of the parabola $y=x^2$ from the origin to $1+i$;
+			\item the broken line from the origin along the real axis to $1$ and then vertically to $1+i$.
+		\end{enumerate}
+	\end{example}
+	\begin{solution}<2->
+		\begin{enumerate}
+			\item \begin{minipage}[t]{0.58\linewidth}
+				      The path is $z(t)=t+it$ $(0\leq t\leq 1)$, so $\operatorname{Re}z=t$ and $\dif z=(1+i)\dif t$. Hence
+				      \[\int_C \operatorname{Re}z\dif z=\int_0^1 (1+i)t\dif t=\frac{1}{2}(1+i).\]
+			      \end{minipage}\hfill
+			      \begin{minipage}[t]{0.3\linewidth}
+				      \begin{figure}
+					      \includegraphics[width=\linewidth]{Figure_3_1_4.jpg}
+				      \end{figure}
+			      \end{minipage}
+		\end{enumerate}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{solution}[Solution\ (Cont.)]
+		\begin{enumerate}
+			\setcounter{enumi}{1}
+			\item \begin{minipage}[t]{0.58\linewidth}
+				      The path is $z(t)=t+it^2$ $(0\leq t\leq 1)$, so $\operatorname{Re}z=t$ and $\dif z=(1+2ti)\dif t$. Hence
+				      \begin{align*}
+					      \int_C \operatorname{Re}z\dif z & =\int_0^1 t(1+2ti)\dif t                                           \\
+					                                      & =\left.\left(\frac{t^2}{2}+\frac{2i}{3}t^3\right)\right|_0^1 \\
+					                                      & =\frac{1}{2}+\frac{2}{3}i.
+				      \end{align*}
+			      \end{minipage}\hfill
+			      \begin{minipage}[t]{0.34\linewidth}
+				      \begin{figure}
+					      \includegraphics[width=\linewidth]{Figure_3_1_5.jpg}
+				      \end{figure}
+			      \end{minipage}
+		\end{enumerate}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{solution}[Solution\ (Cont.)]
+		\begin{enumerate}
+			\setcounter{enumi}{2}
+			\item The path consists of two line segments.\\
+			      On the segment of the real axis, $z(t)=t$ $(0\leq t\leq 1)$, so $\operatorname{Re}z=t$ and $\dif z=\dif t$.\\
+			      On the segment from $1$ to $1+i$, $z(t)=1+it$ $(0\leq t\leq 1)$, so $\operatorname{Re}z=1$ and $\dif z=i\dif t$.
+
+			      \begin{minipage}[c]{0.58\linewidth}
+				      \[\int_C \operatorname{Re}z\dif z=\int_0^1 t\dif t+\int_0^1 1\cdot i\dif t=\frac{1}{2}+i.\]
+			      \end{minipage}\hfill
+			      \begin{minipage}[c]{0.34\linewidth}
+				      \begin{figure}
+					      \includegraphics[width=\linewidth]{Figure_3_1_6.jpg}
+				      \end{figure}
+			      \end{minipage}
+		\end{enumerate}
+		The three paths have the same endpoints but give three different values: the integral of $\operatorname{Re}z$ depends on the path.
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Compute $\oint_C \abs{z}\dif z$, where $C$ is the circle $\abs{z}=2$ (counterclockwise).
+	\end{example}
+	\begin{solution}<2->
+		The path is $z=2e^{i\theta}$ $(0\leq\theta\leq 2\pi)$, so $\dif z=2ie^{i\theta}\dif\theta$ and $\abs{z}=2$ on $C$. Hence
+		\[\oint_C \abs{z}\dif z=\int_0^{2\pi} 2\cdot 2ie^{i\theta}\dif\theta=4i\int_0^{2\pi} (\cos\theta+i\sin\theta)\dif\theta=0.\]
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Compute $\oint_C \frac{1}{(z-z_0)^{n+1}}\dif z$, where $n$ is an integer and $C$ is the counterclockwise circle with center $z_0$ and radius $r$.
+	\end{example}
+	\begin{solution}<2->
+		\begin{minipage}[c]{0.62\linewidth}
+			The path is $z=z_0+re^{i\theta}$ $(0\leq\theta\leq 2\pi)$, so $\dif z=ire^{i\theta}\dif\theta$ and
+			\begin{align*}
+				\oint_C \frac{1}{(z-z_0)^{n+1}}\dif z & =\int_0^{2\pi} \frac{ire^{i\theta}}{r^{n+1}e^{i(n+1)\theta}}\dif\theta \\
+				                                      & =\frac{i}{r^n}\int_0^{2\pi} e^{-in\theta}\dif\theta.
+			\end{align*}
+		\end{minipage}\hfill
+		\begin{minipage}[c]{0.32\linewidth}
+			\begin{figure}
+				\includegraphics[width=\linewidth]{Figure_3_1_7.jpg}
+			\end{figure}
+		\end{minipage}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{solution}[Solution\ (Cont.)]
+		When $n=0$,
+		\[\oint_C \frac{1}{z-z_0}\dif z=i\int_0^{2\pi}\dif\theta=2\pi i.\]
+		When $n\neq 0$,
+		\[\oint_C \frac{1}{(z-z_0)^{n+1}}\dif z=\frac{i}{r^n}\int_0^{2\pi}(\cos n\theta-i\sin n\theta)\dif\theta=0.\]
+		So
+		\[\boxed{\oint_{\abs{z-z_0}=r}\frac{1}{(z-z_0)^{n+1}}\dif z=\begin{cases}
+					2\pi i, & n=0,     \\
+					0,      & n\neq 0.
+				\end{cases}}\]
+	\end{solution}
+	\textcolor{blue}{Important conclusion}: the value does not depend on the center or the radius of the circle.
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{2}
+		\item \textbf{Properties of Complex Integrals}\\
+		      Complex integrals have the same basic properties as line integrals of real functions:
+		      \begin{enumerate}[1)]
+			      \item $\int_C f(z)\dif z=-\int_{C^-}f(z)\dif z$;
+			      \item $\int_C kf(z)\dif z=k\int_C f(z)\dif z$ ($k$ is a complex constant);
+			      \item $\int_C \big[f(z)\pm g(z)\big]\dif z=\int_C f(z)\dif z\pm\int_C g(z)\dif z$;
+			      \item If $C$ has length $L$ and $\abs{f(z)}\leq M$ on $C$, then
+			            \[\abs{\int_C f(z)\dif z}\leq\int_C \abs{f(z)}\dif s\leq ML. \tag*{(integral estimation inequality)}\]
+		      \end{enumerate}
+		      Property 4) is the integral estimation inequality（积分估值不等式）: $\abs{\sum f(\zeta_k)\Delta z_k}\leq\sum\abs{f(\zeta_k)}\abs{\Delta z_k}$ and $\abs{\Delta z_k}\leq\Delta s_k$.
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Let $C$ be the line segment from $i$ to $2+i$. Prove that
+		\[\abs{\int_C \frac{1}{z^2}\dif z}\leq 2.\]
+	\end{example}
+	\begin{solution}<2->
+		The segment is $z=(1-t)i+t(2+i)=2t+i$ $(0\leq t\leq 1)$, and its length is $L=2$. On $C$,
+		\[\abs{\frac{1}{z^2}}=\frac{1}{\abs{2t+i}^2}=\frac{1}{4t^2+1}\leq 1,\]
+		so $M=1$, and by the estimation inequality $\abs{\int_C \frac{1}{z^2}\dif z}\leq ML=2$.
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{3}
+		\item \textbf{Summary and Thinking}\\
+		      In this part we learned the definition, the existence condition, the computation, and the properties of complex integrals. \textcolor{blue}{A complex integral is essentially a pair of line integrals, so it has exactly the same properties as the line integrals of calculus.} The key skill is the general method of computing a complex integral by parametrizing the path:
+		      \[\int_C f(z)\dif z=\int_\alpha^\beta f\big[z(t)\big]z'(t)\dif t.\]
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{example}[Question]
+		Is the complex integral $\int_C f(z)\dif z$ consistent with the definite integral of a real function of one variable?
+	\end{example}
+	\begin{solution}<2->
+		If $C$ is the interval $[\alpha,\beta]$ of the real axis, then $\int_C f(z)\dif z=\int_\alpha^\beta f(x)\dif x$; when $f(x)$ is real-valued, this is the ordinary definite integral.
+
+		In general, however, the integral of $f(z)$ from $\alpha$ to $\beta$ cannot simply be written as $\int_\alpha^\beta f(z)\dif z$: it is a line integral, and its value may depend on the path. It must be written as $\int_C f(z)\dif z$ with the path $C$ specified.
+	\end{solution}
+\end{frame}
+
+% =====================================================================
+\section{Cauchy's Theorem for Simply Connected Domains}
+
+\begin{frame}
+	\frametitle{Outline}
+	\tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item \textbf{Motivation}
+		      \begin{enumerate}[i)]
+			      \item Example 1.1: the integrand $f(z)=z$ is analytic in the whole plane, and the integral is independent of the path. Consequently, the integral of $f(z)=z$ along every closed curve is zero.
+			      \item Example 1.4 with $n=0$: the integrand $f(z)=\frac{1}{z-z_0}$ is analytic everywhere except at $z_0$, the center of $C$, and $\oint_C \frac{1}{z-z_0}\dif z=2\pi i\neq 0$. Here the domain where $f(z)$ is analytic, the plane with $z_0$ removed, is not simply connected.
+			      \item Example 1.2: the integrand $f(z)=\operatorname{Re}z=x$ does not satisfy the Cauchy--Riemann equations ($u_x=1\neq v_y=0$), so it is analytic nowhere, and the integral depends on the path.
+		      \end{enumerate}
+		      \textcolor{blue}{So whether an integral depends on the path seems to be decided by the analyticity of the integrand and the connectivity of the domain.}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{1}
+		\item \textbf{Cauchy's Theorem for Simply Connected Domains (Cauchy--Goursat Theorem（柯西--古萨定理）)}
+	\end{enumerate}
+	\begin{theorem}
+		If $f(z)$ is analytic in a simply connected domain $B$, then
+		\[\oint_C f(z)\dif z=0\]
+		for every closed curve $C$ lying in $B$.
+	\end{theorem}
+	\begin{minipage}[c]{0.5\linewidth}
+		The curve $C$ in the theorem need not be simple: it may cross itself.
+	\end{minipage}\hfill
+	\begin{minipage}[c]{0.42\linewidth}
+		\begin{figure}
+			\includegraphics[width=\linewidth]{Figure_3_2_1.jpg}
+		\end{figure}
+	\end{minipage}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		      Why is the theorem plausible? Assume in addition that $f'(z)$ is continuous, and let $C$ be a simple closed curve bounding the region $D\subset B$. Then $u$ and $v$ have continuous partial derivatives, and Green's formula（格林公式） $\oint_C P\dif x+Q\dif y=\iint_D (Q_x-P_y)\dif x\dif y$ gives
+		      \begin{align*}
+			      \oint_C u\dif x-v\dif y & =\iint_D (-v_x-u_y)\dif x\dif y=0, \\
+			      \oint_C v\dif x+u\dif y & =\iint_D (u_x-v_y)\dif x\dif y=0,
+		      \end{align*}
+		      because $u_x=v_y$ and $u_y=-v_x$ (Cauchy--Riemann equations). Hence $\oint_C f(z)\dif z=0$.
+
+		      This was Cauchy's original argument; Goursat later showed that the assumption ``$f'(z)$ is continuous'' is not needed.
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		      Remarks on the theorem:
+		      \begin{enumerate}[i)]
+			      \item If $C$ is the boundary of a domain $B$ and $f(z)$ is analytic on the closed domain $\overline{B}=B+C$ (that is, analytic in some larger domain $B'$ containing $\overline{B}$), then $\oint_C f(z)\dif z=0$.
+			      \item If $C$ is the boundary of $B$, $f(z)$ is analytic in $B$ and continuous on $\overline{B}=B+C$, the theorem is still valid.
+		      \end{enumerate}
+	\end{enumerate}
+	\begin{figure}
+		\includegraphics[width=0.3\linewidth]{Figure_3_2_2.jpg}\hfill
+		\includegraphics[width=0.3\linewidth]{Figure_3_2_3.jpg}\hfill
+		\includegraphics[width=0.3\linewidth]{Figure_3_2_4.jpg}
+		\caption{Left: the theorem ($C$ lies in $B$). Middle: remark i) ($f$ analytic in $B'\supset\overline{B}$). Right: remark ii) ($f$ analytic in $B$, continuous on $B+C$).}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{2}
+		\item \textbf{Examples}
+	\end{enumerate}
+	\begin{example}
+		Compute $\oint_{\abs{z}=1} \frac{1}{2z-3}\dif z$.
+	\end{example}
+	\begin{solution}<2->
+		The only singular point of $f(z)=\frac{1}{2z-3}$ is $z=\frac{3}{2}$, which lies outside $\abs{z}\leq 1$. So $f(z)$ is analytic on the closed disk $\abs{z}\leq 1$, and by Cauchy's theorem
+		\[\oint_{\abs{z}=1} \frac{1}{2z-3}\dif z=0.\]
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Compute $\oint_{\abs{z-i}=\frac{1}{2}} \frac{1}{z(z^2+1)}\dif z$.
+	\end{example}
+	\begin{solution}<2->
+		By partial fractions,
+		\[\frac{1}{z(z^2+1)}=\frac{1}{z}-\frac{1}{2}\left(\frac{1}{z+i}+\frac{1}{z-i}\right).\]
+		The functions $\frac{1}{z}$ and $\frac{1}{z+i}$ are analytic on $\abs{z-i}\leq\frac{1}{2}$ (their singular points $0$ and $-i$ lie outside), so their integrals vanish by Cauchy's theorem.
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{solution}[Solution\ (Cont.)]
+		Write $C:\abs{z-i}=\frac{1}{2}$. Then
+		\begin{align*}
+			\oint_C \frac{\dif z}{z(z^2+1)} & =\underbrace{\oint_C \frac{\dif z}{z}-\frac{1}{2}\oint_C \frac{\dif z}{z+i}}_{=0}-\frac{1}{2}\oint_C \frac{\dif z}{z-i} \\
+			                                & =-\frac{1}{2}\cdot 2\pi i=-\pi i,
+		\end{align*}
+		where the last integral equals $2\pi i$ by Example 1.4 (with $z_0=i$, $n=0$).
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{3}
+		\item \textbf{Summary and Thinking}\\
+		      In this part we focused on Cauchy's theorem for simply connected domains:\\
+		      \textcolor{blue}{If $f(z)$ is analytic in a simply connected domain $B$, then}
+		      \[\textcolor{blue}{\oint_C f(z)\dif z=0}\]
+		      \textcolor{blue}{for every closed curve $C$ lying in $B$.}\\
+		      Pay attention to the conditions under which the theorem holds.
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{example}[Question]
+		What should we pay attention to when applying Cauchy's theorem?
+	\end{example}
+	\begin{solution}<2->
+		\begin{enumerate}[i)]
+			\item The condition ``simply connected domain'' cannot be dropped.\\
+			      Counterexample: $f(z)=\frac{1}{z}$ is analytic in the annulus $\frac{1}{2}<\abs{z}<\frac{3}{2}$, but $\oint_{\abs{z}=1}\frac{1}{z}\dif z=2\pi i\neq 0$.
+			\item The converse of the theorem is false.\\
+			      \textcolor{red}{From $\oint_C f(z)\dif z=0$ we cannot conclude that $f(z)$ is analytic inside $C$.}\\
+			      Counterexample: $\oint_{\abs{z}=1}\frac{1}{z^2}\dif z=0$ (Example 1.4 with $n=1$), but $\frac{1}{z^2}$ is not analytic at $z=0$.
+		\end{enumerate}
+	\end{solution}
+\end{frame}
+
+% =====================================================================
+\section{Cauchy's Theorem for Multiply Connected Domains}
+
+\begin{frame}
+	\frametitle{Outline}
+	\tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item \textbf{Motivation}\\
+		      Consider $\oint_{\abs{z}=2}\frac{1}{z-1}\dif z$.
+
+		      The circle $\abs{z}=2$ surrounds the singular point $z=1$, so Cauchy's theorem does not apply, and Example 1.4 does not apply directly either, because $z=1$ is not the center of the circle.
+
+		      The integrand is analytic in the ring-shaped region between $\abs{z}=2$ and a small circle $\abs{z-1}=\rho$. We expect the integral to equal $\oint_{\abs{z-1}=\rho}\frac{1}{z-1}\dif z=2\pi i$.
+
+		      \textcolor{blue}{We want to extend Cauchy's theorem to multiply connected domains.}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{1}
+		\item \textbf{Cauchy's Theorem for Multiply Connected Domains}
+		      \begin{enumerate}[1)]
+			      \item Principle of Deformation of Paths\\
+			            Let $f(z)$ be analytic in a multiply connected domain $D$, and let $C$ and $C_1$ be two counterclockwise simple closed curves in $D$ such that $C_1$ lies inside $C$ and the region $D_1$ between $C$ and $C_1$ lies in $D$.\\
+			            Draw two non-intersecting cuts $\wideparen{AA'}$ and $\wideparen{BB'}$ joining $C$ to $C_1$.
+			            \begin{figure}
+				            \includegraphics[height=0.42\textheight]{Figure_3_3_1.jpg}
+			            \end{figure}
+		      \end{enumerate}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		      \begin{minipage}[c]{0.56\linewidth}
+			      Add the points $E$, $E'$, $F$, $F'$ as in the figure. Then $AEBB'E'A'A$ (red) and $AA'F'B'BFA$ (green) are closed curves.
+
+			      Each of them, together with its interior, lies in a simply connected part of $D$.
+		      \end{minipage}\hfill
+		      \begin{minipage}[c]{0.4\linewidth}
+			      \begin{figure}
+				      \includegraphics[width=\linewidth]{Figure_3_3_2.jpg}
+			      \end{figure}
+		      \end{minipage}
+
+		      So by Cauchy's theorem
+		      \[\oint_{AEBB'E'A'A}f(z)\dif z=0,\qquad \oint_{AA'F'B'BFA}f(z)\dif z=0,\]
+		      where
+		      \begin{align*}
+			      AEBB'E'A'A & =AEB+BB'+B'E'A'+A'A, \\
+			      AA'F'B'BFA & =AA'+A'F'B'+B'B+BFA.
+		      \end{align*}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		      Add the two integrals. The arcs $AEB$ and $BFA$ together form $C$, the arcs $B'E'A'$ and $A'F'B'$ together form $C_1^-$, and each cut is traversed once in each direction:
+		      \begin{align*}
+			      0 & =\oint_{C}f(z)\dif z+\oint_{C_1^-}f(z)\dif z                                                                                  \\
+			        & \quad+\int_{\wideparen{AA'}}f(z)\dif z+\int_{\wideparen{A'A}}f(z)\dif z+\int_{\wideparen{BB'}}f(z)\dif z+\int_{\wideparen{B'B}}f(z)\dif z.
+		      \end{align*}
+		      The integrals along the cuts cancel in pairs, so
+		      \[\oint_{C}f(z)\dif z+\oint_{C_1^-}f(z)\dif z=0,\quad\text{that is,}\quad \oint_{C}f(z)\dif z=\oint_{C_1}f(z)\dif z.\]
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		      Let $\Gamma=C+C_1^-$ be the composite closed curve（复合闭路） formed by $C$ (counterclockwise) and $C_1$ (clockwise); $\Gamma$ is the positively oriented boundary of $D_1$. Then
+		      \[\oint_{\Gamma}f(z)\dif z=0 \iff \oint_{C}f(z)\dif z=\oint_{C_1}f(z)\dif z.\]
+		      \textcolor{blue}{Principle of deformation of paths（闭路变形原理）}: the integral of an analytic function along a closed curve does not change when the curve is deformed continuously in the domain, as long as the curve never passes through a point where $f(z)$ is not analytic.
+		      \begin{figure}
+			      \includegraphics[height=0.3\textheight]{Figure_3_3_2.jpg}
+		      \end{figure}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		      \begin{enumerate}[1)]
+			      \setcounter{enumii}{1}
+			      \item Cauchy's Theorem for Multiply Connected Domains（复合闭路定理）
+		      \end{enumerate}
+	\end{enumerate}
+	\begin{theorem}
+		Let $C$ be a simple closed curve in a domain $D$, and let $C_1, C_2, \cdots, C_n$ be simple closed curves inside $C$, none of which intersects or contains another. Suppose the region inside $C$ and outside all the $C_k$, together with its boundary, lies in $D$. If $f(z)$ is analytic in $D$, then
+		\begin{enumerate}
+			\item \begin{minipage}[t]{0.52\linewidth}
+				      $\oint_{C}f(z)\dif z=\sum_{k=1}^{n}\oint_{C_k}f(z)\dif z$,\\
+				      where $C$ and all the $C_k$ are counterclockwise;
+			      \end{minipage}\hfill
+			      \begin{minipage}[t]{0.4\linewidth}
+				      \begin{figure}
+					      \includegraphics[width=\linewidth]{Figure_3_3_3.jpg}
+				      \end{figure}
+			      \end{minipage}
+		\end{enumerate}
+	\end{theorem}
+\end{frame}
+
+\begin{frame}
+	\addtocounter{theorem}{-1}
+	\begin{theorem}[Cont.]
+		\begin{enumerate}
+			\setcounter{enumi}{1}
+			\item \begin{minipage}[t]{0.52\linewidth}
+				      $\oint_{\Gamma}f(z)\dif z=0$, where $\Gamma=C+C_1^-+C_2^-+\cdots+C_n^-$ is the composite closed curve formed by $C$ (counterclockwise) and all the $C_k$ (clockwise), i.e.\ the positively oriented boundary of the region.
+			      \end{minipage}\hfill
+			      \begin{minipage}[t]{0.4\linewidth}
+				      \begin{figure}
+					      \includegraphics[width=\linewidth]{Figure_3_3_3.jpg}
+				      \end{figure}
+			      \end{minipage}
+		\end{enumerate}
+	\end{theorem}
+	The proof is the same as for the principle of deformation of paths: cut the region into simply connected pieces.
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{2}
+		\item \textbf{Examples}
+	\end{enumerate}
+	\begin{example}
+		Compute $\oint_{\Gamma}\frac{2z-1}{z^2-z}\dif z$, where $\Gamma$ is any positively oriented simple closed curve enclosing the closed disk $\abs{z}\leq 1$.
+	\end{example}
+	\begin{solution}<2->
+		\begin{minipage}[c]{0.52\linewidth}
+			The function $\frac{2z-1}{z^2-z}=\frac{2z-1}{z(z-1)}$ has two singular points, $z=0$ and $z=1$, and both lie inside $\Gamma$.
+		\end{minipage}\hfill
+		\begin{minipage}[c]{0.4\linewidth}
+			\begin{figure}
+				\includegraphics[width=\linewidth]{Figure_3_3_4.jpg}
+			\end{figure}
+		\end{minipage}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{solution}[Solution\ (Cont.)]
+		\begin{minipage}[c]{0.62\linewidth}
+			Inside $\Gamma$, draw two counterclockwise circles $C_1$ and $C_2$ that neither intersect nor contain each other, with $C_1$ enclosing only $z=0$ and $C_2$ enclosing only $z=1$. Note that $\frac{2z-1}{z^2-z}=\frac{1}{z}+\frac{1}{z-1}$.
+		\end{minipage}\hfill
+		\begin{minipage}[c]{0.32\linewidth}
+			\begin{figure}
+				\includegraphics[width=\linewidth]{Figure_3_3_5.jpg}
+			\end{figure}
+		\end{minipage}
+
+		By Cauchy's theorem for multiply connected domains,
+		\begin{align*}
+			\oint_{\Gamma}\frac{2z-1}{z^2-z}\dif z & =\oint_{C_1}\frac{2z-1}{z^2-z}\dif z+\oint_{C_2}\frac{2z-1}{z^2-z}\dif z                                           \\
+			                                       & =\oint_{C_1}\frac{\dif z}{z}+\oint_{C_1}\frac{\dif z}{z-1}+\oint_{C_2}\frac{\dif z}{z}+\oint_{C_2}\frac{\dif z}{z-1} \\
+			                                       & =2\pi i+0+0+2\pi i=4\pi i.
+		\end{align*}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Compute $\oint_{\Gamma}\frac{e^z}{z}\dif z$, where $\Gamma$ consists of the counterclockwise circle $C_1:\abs{z}=2$ and the clockwise circle $C_2:\abs{z}=1$.
+	\end{example}
+	\begin{solution}<2->
+		\begin{minipage}[c]{0.54\linewidth}
+			$C_1$ and $C_2$ bound the annulus $1<\abs{z}<2$, and $\Gamma$ is its positively oriented boundary (a composite closed curve). The function $\frac{e^z}{z}$ is analytic on the closed annulus $1\leq\abs{z}\leq2$ (its only singular point $z=0$ lies outside).
+
+			By Cauchy's theorem for multiply connected domains, $\oint_{\Gamma}\frac{e^z}{z}\dif z=0$.
+		\end{minipage}\hfill
+		\begin{minipage}[c]{0.4\linewidth}
+			\begin{figure}
+				\includegraphics[width=\linewidth]{Figure_3_3_6.jpg}
+			\end{figure}
+		\end{minipage}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Compute $\oint_{\Gamma}\frac{1}{(z-a)^{n+1}}\dif z$, where $\Gamma$ is any positively oriented simple closed curve enclosing $a$, and $n$ is an integer.
+	\end{example}
+	\begin{solution}<2->
+		\begin{minipage}[c]{0.54\linewidth}
+			Since $a$ lies inside $\Gamma$, we can choose $\rho>0$ so small that the circle $\Gamma_1:\abs{z-a}=\rho$ lies inside $\Gamma$.
+
+			The function $\frac{1}{(z-a)^{n+1}}$ is analytic in the region bounded by $\Gamma$ and $\Gamma_1$ and on its boundary.
+		\end{minipage}\hfill
+		\begin{minipage}[c]{0.4\linewidth}
+			\begin{figure}
+				\includegraphics[width=\linewidth]{Figure_3_3_7.jpg}
+			\end{figure}
+		\end{minipage}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{solution}[Solution\ (Cont.)]
+		By Cauchy's theorem for multiply connected domains, and with $z=a+\rho e^{i\theta}$ $(0\leq\theta\leq 2\pi)$ on $\Gamma_1$,
+		\begin{align*}
+			\oint_{\Gamma}\frac{\dif z}{(z-a)^{n+1}} & =\oint_{\Gamma_1}\frac{\dif z}{(z-a)^{n+1}}=\int_{0}^{2\pi}\frac{i\rho e^{i\theta}}{(\rho e^{i\theta})^{n+1}}\dif\theta \\
+			                                         & =\frac{i}{\rho^n}\int_{0}^{2\pi}e^{-in\theta}\dif\theta.
+		\end{align*}
+		So, as in Example 1.4,
+		\[\boxed{\oint_{\Gamma}\frac{1}{(z-a)^{n+1}}\dif z=\begin{cases}
+					2\pi i, & n=0,     \\
+					0,      & n\neq 0.
+				\end{cases}}\]
+	\end{solution}
+	\textcolor{blue}{This result is very convenient: $\Gamma$ need not be a circle and $a$ need not be a center; it is enough that $a$ lies inside $\Gamma$.}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Compute $\frac{1}{2\pi i}\oint_{\Gamma}\frac{1}{(z-z_0)^n}\dif z$, where $\Gamma$ is any positively oriented simple closed curve enclosing $z_0$, and $n$ is a positive integer.
+	\end{example}
+	\begin{solution}<2->
+		By the previous example with $a=z_0$ and $n$ replaced by $n-1$,
+		\[\oint_{\Gamma}\frac{1}{(z-z_0)^{n}}\dif z=\begin{cases}
+				2\pi i, & n-1=0,     \\
+				0,      & n-1\neq 0.
+			\end{cases}\]
+		Hence
+		\[\frac{1}{2\pi i}\oint_{\Gamma}\frac{1}{(z-z_0)^n}\dif z=\begin{cases}
+				1, & n=1,     \\
+				0, & n\neq 1.
+			\end{cases}\]
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Prove that $\oint_C (z-\alpha)^n\dif z=0$ for every integer $n\neq-1$, where $C$ is any simple closed curve not passing through $\alpha$.
+	\end{example}
+	\begin{solution}<2->
+		\begin{enumerate}
+			\item If $n\geq 0$, $(z-\alpha)^n$ is a polynomial, analytic in the whole plane, so $\oint_C (z-\alpha)^n\dif z=0$ by Cauchy's theorem.
+			\item If $n\leq -2$ and $\alpha$ lies outside $C$, then $(z-\alpha)^n$ is analytic on and inside $C$, so the integral is again $0$.
+			\item If $n\leq -2$ and $\alpha$ lies inside $C$, write $(z-\alpha)^n=\frac{1}{(z-\alpha)^{m+1}}$ with $m=-n-1\geq 1$. Since $m\neq 0$, Example 3.3 gives $\oint_C (z-\alpha)^n\dif z=0$.
+		\end{enumerate}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{3}
+		\item \textbf{Summary and Thinking}\\
+		      Cauchy's theorem is the core of complex integration; mastering it and applying it flexibly is the main difficulty of this chapter.\\
+		      A frequently used result:
+		      \[\oint_{\Gamma}\frac{1}{(z-a)^{n+1}}\dif z=\begin{cases}
+				      2\pi i, & n=0,     \\
+				      0,      & n\neq 0,
+			      \end{cases}\]
+		      where $\Gamma$ is any positively oriented simple closed curve enclosing $a$.
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{example}[Question]
+		How is Cauchy's theorem for multiply connected domains used in computing integrals? What should we pay attention to?
+	\end{example}
+	\begin{solution}<2->
+		It is the main tool for integrals along closed curves: a complicated closed curve can be replaced by small circles around the singular points inside it, and the integral splits into integrals along these circles.
+
+		Pay attention to the directions of the curves: the outer boundary is counterclockwise and the inner boundaries are clockwise.
+	\end{solution}
+\end{frame}
+
+% =====================================================================
+\section{Antiderivatives}
+
+\begin{frame}
+	\frametitle{Outline}
+	\tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item \textbf{Main Theorems and Definitions}
+		      \begin{enumerate}[1)]
+			      \item Two Main Theorems
+		      \end{enumerate}
+	\end{enumerate}
+	\begin{theorem}
+		If $f(z)$ is analytic in a simply connected domain $B$, then the integral $\int_C f(z)\dif z$ along a curve $C$ in $B$ depends only on the initial point and the terminal point of $C$, not on the path.
+	\end{theorem}
+	\begin{proof}<2->
+		Let $C_1$ and $C_2$ be two paths in $B$ from $z_0$ to $z_1$. Then $C_1+C_2^-$ is a closed curve in $B$, so by Cauchy's theorem
+		\[\int_{C_1}f(z)\dif z-\int_{C_2}f(z)\dif z=\oint_{C_1+C_2^-}f(z)\dif z=0.\qedhere\]
+	\end{proof}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		      \begin{figure}
+			      \includegraphics[width=0.9\linewidth]{Figure_3_4_1.jpg}
+		      \end{figure}
+		      So we may write
+		      \[\int_{C_1}f(z)\dif z=\int_{C_2}f(z)\dif z=\int_{z_0}^{z_1}f(z)\dif z.\]
+		      If $z_0$ is fixed and $z_1=z$ varies in $B$, this defines a single-valued function in $B$:
+		      \[F(z)=\int_{z_0}^{z}f(\zeta)\dif\zeta.\]
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{theorem}
+		If $f(z)$ is analytic in a simply connected domain $B$, then $F(z)=\int_{z_0}^{z}f(\zeta)\dif\zeta$ is analytic in $B$, and $F'(z)=f(z)$.
+	\end{theorem}
+	\begin{proofs}<2->
+		\begin{minipage}[c]{0.64\linewidth}
+			We use the definition of the derivative.
+
+			Let $z$ be any point of $B$, and let $K$ be a small disk centered at $z$ and contained in $B$.
+		\end{minipage}\hfill
+		\begin{minipage}[c]{0.3\linewidth}
+			\begin{figure}
+				\includegraphics[width=\linewidth]{Figure_3_4_2.jpg}
+			\end{figure}
+		\end{minipage}
+	\end{proofs}
+\end{frame}
+
+\begin{frame}
+	\begin{proofs}[\proofname\ (Cont.)]
+		Take $\abs{\Delta z}$ so small that $z+\Delta z$ lies in $K$. By the definition of $F$,
+		\[F(z+\Delta z)-F(z)=\int_{z_0}^{z+\Delta z}f(\zeta)\dif\zeta-\int_{z_0}^{z}f(\zeta)\dif\zeta.\]
+		\begin{minipage}[c]{0.64\linewidth}
+			Since the integrals do not depend on the path, we let the path of $\int_{z_0}^{z+\Delta z}$ go from $z_0$ to $z$ along the path of $\int_{z_0}^{z}$, and then from $z$ to $z+\Delta z$ along the line segment.
+		\end{minipage}\hfill
+		\begin{minipage}[c]{0.3\linewidth}
+			\begin{figure}
+				\includegraphics[width=\linewidth]{Figure_3_4_3.jpg}
+			\end{figure}
+		\end{minipage}
+	\end{proofs}
+\end{frame}
+
+\begin{frame}
+	\begin{proofs}[\proofname\ (Cont.)]
+		Then $F(z+\Delta z)-F(z)=\int_{z}^{z+\Delta z}f(\zeta)\dif\zeta$.
+
+		Since $f(z)$ does not depend on $\zeta$, $\int_{z}^{z+\Delta z}f(z)\dif\zeta=f(z)\int_{z}^{z+\Delta z}\dif\zeta=f(z)\Delta z$. Hence
+		\begin{align*}
+			\frac{F(z+\Delta z)-F(z)}{\Delta z}-f(z) & =\frac{1}{\Delta z}\left[\int_z^{z+\Delta z}f(\zeta)\dif\zeta-f(z)\Delta z\right] \\
+			                                         & =\frac{1}{\Delta z}\int_{z}^{z+\Delta z}\big[f(\zeta)-f(z)\big]\dif\zeta.
+		\end{align*}
+	\end{proofs}
+\end{frame}
+
+\begin{frame}
+	\begin{proofs}[\proofname\ (Cont.)]
+		Since $f(z)$ is analytic in $B$, it is continuous at $z$: for every $\varepsilon>0$ there is $\delta>0$ (with the disk $\abs{\zeta-z}<\delta$ inside $K$) such that $\abs{f(\zeta)-f(z)}<\varepsilon$ whenever $\abs{\zeta-z}<\delta$.
+
+		If $\abs{\Delta z}<\delta$, every point $\zeta$ of the segment from $z$ to $z+\Delta z$ satisfies $\abs{\zeta-z}<\delta$, and the segment has length $\abs{\Delta z}$. By the integral estimation inequality,
+		\begin{align*}
+			\abs{\frac{F(z+\Delta z)-F(z)}{\Delta z}-f(z)} & =\frac{1}{\abs{\Delta z}}\abs{\int_{z}^{z+\Delta z}\big[f(\zeta)-f(z)\big]\dif\zeta} \\
+			                                               & \leq\frac{1}{\abs{\Delta z}}\cdot\varepsilon\cdot\abs{\Delta z}=\varepsilon.
+		\end{align*}
+	\end{proofs}
+\end{frame}
+
+\begin{frame}
+	\begin{proof}[\proofname\ (Cont.)]
+		Therefore
+		\[\lim_{\Delta z\to 0}\frac{F(z+\Delta z)-F(z)}{\Delta z}=f(z),\]
+		that is, $F'(z)=f(z)$ for every $z\in B$, and $F(z)$ is analytic in $B$.
+	\end{proof}
+	\textcolor{blue}{This theorem is the complex analogue of the fundamental theorem of calculus, $\frac{\dif}{\dif x}\int_a^x f(t)\dif t=f(x)$.}
+
+	Note that the proof used only two facts: $f$ is continuous, and its integrals in $B$ do not depend on the path. (We will use this in Morera's theorem.)
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		      \begin{enumerate}[1)]
+			      \setcounter{enumii}{1}
+			      \item Antiderivatives
+			            \begin{itemize}
+				            \item If $\varphi'(z)=f(z)$ in a domain $B$, then $\varphi(z)$ is called an antiderivative（原函数） of $f(z)$ in $B$.
+				            \item By Theorem 4.2, $F(z)=\int_{z_0}^{z}f(\zeta)\dif\zeta$ is an antiderivative of $f(z)$.
+				            \item Any two antiderivatives of $f(z)$ differ by a constant.
+			            \end{itemize}
+		      \end{enumerate}
+	\end{enumerate}
+	\begin{proof}
+		Let $G(z)$ and $H(z)$ be two antiderivatives of $f(z)$. Then
+		\[\big[G(z)-H(z)\big]'=G'(z)-H'(z)=f(z)-f(z)\equiv 0,\]
+		so $G(z)-H(z)=c$ for some constant $c$ (a function with zero derivative in a domain is constant).
+	\end{proof}
+	Hence, if $f(z)$ has an antiderivative $F(z)$ in $B$, it has infinitely many antiderivatives $F(z)+c$ ($c$ an arbitrary constant).
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		      \begin{enumerate}[1)]
+			      \setcounter{enumii}{2}
+			      \item Indefinite Integrals\\
+			            The set of all antiderivatives $F(z)+c$ ($c$ an arbitrary constant) of $f(z)$ is called the indefinite integral（不定积分） of $f(z)$, written as
+			            \[\int f(z)\dif z=F(z)+c.\]
+		      \end{enumerate}
+	\end{enumerate}
+	\begin{theorem}[Analogue of the Newton--Leibniz formula（牛顿--莱布尼茨公式）]
+		If $f(z)$ is analytic in a simply connected domain $B$ and $F(z)$ is an antiderivative of $f(z)$, then for any $z_0,z_1\in B$,
+		\[\int_{z_0}^{z_1}f(z)\dif z=F(z_1)-F(z_0).\]
+	\end{theorem}
+\end{frame}
+
+\begin{frame}
+	\begin{proof}
+		By Theorem 4.2, $\int_{z_0}^{z}f(\zeta)\dif\zeta$ is an antiderivative of $f(z)$, so
+		\[\int_{z_0}^{z}f(\zeta)\dif\zeta=F(z)+c.\]
+		Setting $z=z_0$, the left-hand side is $0$, so $c=-F(z_0)$. Hence $\int_{z_0}^{z}f(\zeta)\dif\zeta=F(z)-F(z_0)$, and with $z=z_1$,
+		\[\int_{z_0}^{z_1}f(z)\dif z=F(z_1)-F(z_0).\qedhere\]
+	\end{proof}
+	With this theorem, integrals of analytic functions can be computed exactly as in calculus: find an antiderivative and substitute the endpoints.
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{1}
+		\item \textbf{Examples}
+	\end{enumerate}
+	\begin{example}
+		Compute $\int_{z_0}^{z_1}z\dif z$.
+	\end{example}
+	\begin{solution}<2->
+		$f(z)=z$ is analytic in the whole plane, and $\frac{1}{2}z^2$ is an antiderivative. By the Newton--Leibniz formula,
+		\[\int_{z_0}^{z_1}z\dif z=\left.\frac{1}{2}z^2\right|_{z_0}^{z_1}=\frac{1}{2}(z_1^2-z_0^2).\]
+		(Compare Example 1.1: $\frac{1}{2}(3+4i)^2$ is the case $z_0=0$, $z_1=3+4i$.)
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Compute $\int_{0}^{\pi i}z\cos z^2\dif z$.
+	\end{example}
+	\begin{solution}<2->
+		$z\cos z^2$ is analytic in the whole plane, so
+		\begin{align*}
+			\int_{0}^{\pi i}z\cos z^2\dif z & =\frac{1}{2}\int_{0}^{\pi i}\cos z^2\dif (z^2)=\left.\frac{1}{2}\sin z^2\right|_{0}^{\pi i} \\
+			                                & =\frac{1}{2}\sin(-\pi^2)=-\frac{1}{2}\sin\pi^2.
+		\end{align*}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Compute $\int_{1}^{1+i}ze^z\dif z$.
+	\end{example}
+	\begin{solution}<2->
+		By integration by parts, $\int ze^z\dif z=ze^z-\int e^z\dif z=(z-1)e^z+c$, so $(z-1)e^z$ is an antiderivative of $ze^z$, and
+		\[\int_{1}^{1+i}ze^z\dif z=(z-1)e^z\Big|_{1}^{1+i}=ie^{1+i}=ie(\cos 1+i\sin 1).\]
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Compute $\int_{1}^{i}\frac{\ln(z+1)}{z+1}\dif z$ along the arc of the circle $\abs{z}=1$ in the first quadrant ($\operatorname{Re}z\geq 0$, $\operatorname{Im}z\geq 0$), where $\ln$ denotes the principal value.
+	\end{example}
+	\begin{solution}<2->
+		The path lies in the half-plane $\operatorname{Re}z>-1$, a simply connected domain in which $\frac{\ln(z+1)}{z+1}$ is analytic and has the antiderivative $\frac{1}{2}\ln^2(z+1)$.
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{solution}[Solution\ (Cont.)]
+		Since $\ln 2$ is real and $\ln(1+i)=\ln\sqrt{2}+i\arg(1+i)=\frac{1}{2}\ln 2+\frac{\pi}{4}i$,
+		\begin{align*}
+			\int_{1}^{i}\frac{\ln(z+1)}{z+1}\dif z & =\left.\frac{\ln^2(z+1)}{2}\right|_{1}^{i}=\frac{1}{2}\big[\ln^2 (1+i)-\ln^2 2\big] \\
+			                                       & =\frac{1}{2}\left[\left(\frac{1}{2}\ln 2+\frac{\pi}{4}i\right)^2-\ln^2 2\right]     \\
+			                                       & =-\frac{\pi^2}{32}-\frac{3}{8}\ln^2 2+\frac{\pi\ln 2}{8}i.
+		\end{align*}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{2}
+		\item \textbf{Summary and Thinking}\\
+		      This part introduced antiderivatives and the Newton--Leibniz formula for analytic functions. Compare them with the corresponding results in calculus to understand them better.
+		      \[\textcolor{blue}{F(z)=\int_{z_0}^{z}f(\zeta)\dif\zeta,\qquad \int f(z)\dif z=F(z)+c,}\]
+		      \[\textcolor{blue}{\int_{z_0}^{z_1}f(z)\dif z=F(z_1)-F(z_0).}\]
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{example}[Question]
+		What are the similarities and differences between the Newton--Leibniz formula for analytic functions in a simply connected domain and the Newton--Leibniz formula for definite integrals of real functions?
+	\end{example}
+	\begin{solution}<2->
+		\textcolor{red}{The statements and the results are similar.}
+
+		In complex integration, $f(z)$ must be analytic in a simply connected domain; the endpoints $z_0$, $z_1$ are complex numbers, and the path is a curve $C$ in the domain.
+
+		In real integration, $f(x)$ need only be continuous on the interval $[a,b]$; the endpoints $a$, $b$ are real numbers.
+
+		\textcolor{red}{The requirements on the function differ greatly: analytic versus continuous.}
+	\end{solution}
+\end{frame}
+
+% =====================================================================
+\section{Cauchy's Integral Formula}
+
+\begin{frame}
+	\frametitle{Outline}
+	\tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item \textbf{Motivation}\\
+		      Let $B$ be a simply connected domain, $z_0\in B$, and let $f(z)$ be analytic in $B$. Then $\frac{f(z)}{z-z_0}$ is in general not analytic at $z_0$, so $\oint_C \frac{f(z)}{z-z_0}\dif z$ is in general not zero, where $C$ is a closed curve in $B$ around $z_0$.
+
+		      By the principle of deformation of paths, the value does not change when $C$ is deformed. So take $C$ to be the small circle $\abs{z-z_0}=\delta$.
+
+		      Since $f(z)$ is continuous, its values on $C$ approach $f(z_0)$ as $\delta\to0$, so we expect
+		      \[\oint_C \frac{f(z)}{z-z_0}\dif z=\oint_C \frac{f(z_0)}{z-z_0}\dif z=f(z_0)\oint_C \frac{1}{z-z_0}\dif z=2\pi if(z_0).\]
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{1}
+		\item \textbf{Cauchy's Integral Formula}
+	\end{enumerate}
+	\begin{theorem}
+		Let $f(z)$ be analytic in a domain $D$, and let $C$ be a positively oriented simple closed curve in $D$ whose interior lies entirely in $D$. Then for every point $z_0$ inside $C$,
+
+		\begin{minipage}[c]{0.55\linewidth}
+			\[f(z_0)=\frac{1}{2\pi i}\oint_C \frac{f(z)}{z-z_0}\dif z.\]
+			This is Cauchy's integral formula（柯西积分公式）.
+		\end{minipage}\hfill
+		\begin{minipage}[c]{0.4\linewidth}
+			\begin{figure}
+				\includegraphics[width=\linewidth]{Figure_3_5_1.jpg}
+			\end{figure}
+		\end{minipage}
+	\end{theorem}
+\end{frame}
+
+\begin{frame}
+	\begin{proofs}
+		Since $f(z)$ is continuous at $z_0$, for every $\varepsilon>0$ there is $\delta>0$ such that $\abs{f(z)-f(z_0)}<\varepsilon$ whenever $\abs{z-z_0}<\delta$.
+
+		\begin{minipage}[c]{0.64\linewidth}
+			Let $K:\abs{z-z_0}=R$ be a positively oriented circle with $R<\delta$, lying inside $C$. By the principle of deformation of paths and Example 1.4,
+		\end{minipage}\hfill
+		\begin{minipage}[c]{0.3\linewidth}
+			\begin{figure}
+				\includegraphics[width=\linewidth]{Figure_3_5_2.jpg}
+			\end{figure}
+		\end{minipage}
+		\begin{align*}
+			\oint_C \frac{f(z)}{z-z_0}\dif z & =\oint_K \frac{f(z)}{z-z_0}\dif z=\oint_K \frac{f(z_0)}{z-z_0}\dif z+\oint_K \frac{f(z)-f(z_0)}{z-z_0}\dif z \\
+			                                 & =2\pi if(z_0)+\oint_K \frac{f(z)-f(z_0)}{z-z_0}\dif z.
+		\end{align*}
+	\end{proofs}
+\end{frame}
+
+\begin{frame}
+	\begin{proof}[\proofname\ (Cont.)]
+		On $K$ we have $\abs{z-z_0}=R$ and $\abs{f(z)-f(z_0)}<\varepsilon$, so by the estimation inequality
+		\[\abs{\oint_K \frac{f(z)-f(z_0)}{z-z_0}\dif z}\leq\oint_K \frac{\abs{f(z)-f(z_0)}}{\abs{z-z_0}}\dif s<\frac{\varepsilon}{R}\cdot 2\pi R=2\pi\varepsilon.\]
+		By the previous slide this integral equals $\oint_C \frac{f(z)}{z-z_0}\dif z-2\pi if(z_0)$, which does not depend on $K$. A fixed number whose modulus is less than $2\pi\varepsilon$ for every $\varepsilon>0$ must be $0$. Hence
+		\[\oint_C \frac{f(z)}{z-z_0}\dif z=2\pi if(z_0).\qedhere\]
+	\end{proof}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		      \textcolor{blue}{Remarks on Cauchy's integral formula}:
+		      \begin{enumerate}[i)]
+			      \item The value of an analytic function at any point inside $C$ is determined by its values on the boundary $C$. \textcolor{red}{(Another special property of analytic functions.)}
+			      \item The formula gives a way to compute certain integrals along closed curves, and it also gives an integral representation of analytic functions. \textcolor{red}{(A powerful tool for studying analytic functions.)}
+			      \item Mean value formula（平均值公式）: the value of an analytic function at the center of a circle equals its average over the circle. Indeed, for $C:z=z_0+Re^{i\theta}$ we have $\dif z=iRe^{i\theta}\dif\theta$, so
+			            \begin{align*}
+				            f(z_0) & =\frac{1}{2\pi i}\int_0^{2\pi}\frac{f(z_0+Re^{i\theta})}{Re^{i\theta}}\,iRe^{i\theta}\dif\theta \\
+				                   & =\frac{1}{2\pi}\int_{0}^{2\pi}f(z_0+Re^{i\theta})\dif\theta.
+			            \end{align*}
+		      \end{enumerate}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{2}
+		\item \textbf{Examples}
+	\end{enumerate}
+	\begin{example}
+		Compute $\oint_{\abs{z}=2}\frac{e^z}{z-1}\dif z$.
+	\end{example}
+	\begin{solution}<2->
+		$e^z$ is analytic in the whole plane and $z=1$ lies inside $\abs{z}=2$. By Cauchy's integral formula with $f(z)=e^z$ and $z_0=1$,
+		\[\oint_{\abs{z}=2}\frac{e^z}{z-1}\dif z=2\pi i\cdot e^z\big|_{z=1}=2\pi ei.\]
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Compute $\oint_{\abs{z-i}=\frac{1}{2}}\frac{1}{z(z^2+1)}\dif z$ again, this time by Cauchy's integral formula.
+	\end{example}
+	\begin{solution}<2->
+		Write $\frac{1}{z(z^2+1)}=\frac{f(z)}{z-i}$ with $f(z)=\frac{1}{z(z+i)}$. $f(z)$ is analytic on and inside $\abs{z-i}=\frac{1}{2}$, and $z_0=i$ lies inside the circle, so
+		\begin{align*}
+			\oint_{\abs{z-i}=\frac{1}{2}}\frac{\dif z}{z(z^2+1)} & =\oint_{\abs{z-i}=\frac{1}{2}}\frac{\frac{1}{z(z+i)}}{z-i}\dif z=2\pi i\cdot\left.\frac{1}{z(z+i)}\right|_{z=i} \\
+			                                                     & =2\pi i\cdot\frac{1}{2i^2}=-\pi i,
+		\end{align*}
+		which agrees with Example 2.2.
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Let $C$ be the positively oriented circle $x^2+y^2=3$ and $f(z)=\oint_C\frac{3\xi^2+7\xi+1}{\xi-z}\dif\xi$. Find $f'(1+i)$.
+	\end{example}
+	\begin{solution}<2->
+		For $z$ inside $C$, Cauchy's integral formula (with $\xi$ as the integration variable) gives
+		\[f(z)=2\pi i\,(3\xi^2+7\xi+1)\big|_{\xi=z}=2\pi i(3z^2+7z+1).\]
+		So $f'(z)=2\pi i(6z+7)$ inside $C$. Since $\abs{1+i}=\sqrt{2}<\sqrt{3}$, the point $1+i$ lies inside $C$, and
+		\[f'(1+i)=2\pi i(13+6i)=2\pi(-6+13i).\]
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Compute $\oint_{C}\frac{\sin\frac{\pi z}{4}}{z^2-1}\dif z$, where $C$ is (1) $\abs{z+1}=\frac{1}{2}$;\quad (2) $\abs{z-1}=\frac{1}{2}$;\quad (3) $\abs{z}=2$.
+	\end{example}
+	\begin{solution}<2->
+		\begin{enumerate}
+			\item Only $z=-1$ lies inside $C$, and $\frac{\sin\frac{\pi z}{4}}{z-1}$ is analytic on and inside $C$:
+			      \begin{align*}
+				      \oint_{\abs{z+1}=\frac{1}{2}}\frac{\sin\frac{\pi z}{4}}{z^2-1}\dif z & =\oint_{\abs{z+1}=\frac{1}{2}}\frac{\frac{\sin\frac{\pi z}{4}}{z-1}}{z+1}\dif z=2\pi i\cdot\left.\frac{\sin\frac{\pi z}{4}}{z-1}\right|_{z=-1} \\
+				                                                                           & =2\pi i\cdot\frac{-\frac{\sqrt{2}}{2}}{-2}=\frac{\sqrt{2}}{2}\pi i.
+			      \end{align*}
+		\end{enumerate}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{solution}[Solution\ (Cont.)]
+		\begin{enumerate}
+			\setcounter{enumi}{1}
+			\item Only $z=1$ lies inside $C$:
+			      \begin{align*}
+				      \oint_{\abs{z-1}=\frac{1}{2}}\frac{\sin\frac{\pi z}{4}}{z^2-1}\dif z & =\oint_{\abs{z-1}=\frac{1}{2}}\frac{\frac{\sin\frac{\pi z}{4}}{z+1}}{z-1}\dif z=2\pi i\cdot\left.\frac{\sin\frac{\pi z}{4}}{z+1}\right|_{z=1} \\
+				                                                                           & =2\pi i\cdot\frac{\frac{\sqrt{2}}{2}}{2}=\frac{\sqrt{2}}{2}\pi i.
+			      \end{align*}
+			\item Both $z=\pm1$ lie inside $\abs{z}=2$. By Cauchy's theorem for multiply connected domains and parts (1), (2),
+			      \begin{align*}
+				      \oint_{\abs{z}=2}\frac{\sin\frac{\pi z}{4}}{z^2-1}\dif z & =\oint_{\abs{z+1}=\frac{1}{2}}\frac{\sin\frac{\pi z}{4}}{z^2-1}\dif z+\oint_{\abs{z-1}=\frac{1}{2}}\frac{\sin\frac{\pi z}{4}}{z^2-1}\dif z \\
+				                                                               & =\frac{\sqrt{2}}{2}\pi i+\frac{\sqrt{2}}{2}\pi i=\sqrt{2}\pi i.
+			      \end{align*}
+		\end{enumerate}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Compute $\oint_{\abs{z}=1}\frac{e^z}{z}\dif z$, and use the result to prove
+		\[\int_0^\pi e^{\cos\theta}\cos(\sin\theta)\dif\theta=\pi.\]
+	\end{example}
+	\begin{solution}<2->
+		By Cauchy's integral formula,
+		\[\oint_{\abs{z}=1}\frac{e^z}{z}\dif z=2\pi i\cdot e^z\big|_{z=0}=2\pi i.\]
+		On the other hand, parametrize the circle by $z=e^{i\theta}$ $(-\pi\leq\theta\leq\pi)$, so $\dif z=ie^{i\theta}\dif\theta$.
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{solution}[Solution\ (Cont.)]
+		Since $e^{e^{i\theta}}=e^{\cos\theta+i\sin\theta}=e^{\cos\theta}\big[\cos(\sin\theta)+i\sin(\sin\theta)\big]$,
+		\begin{align*}
+			\oint_{\abs{z}=1}\frac{e^z}{z}\dif z & =\int_{-\pi}^{\pi}\frac{e^{e^{i\theta}}}{e^{i\theta}}\cdot ie^{i\theta}\dif\theta=i\int_{-\pi}^{\pi}e^{e^{i\theta}}\dif\theta                                               \\
+			                                     & =i\int_{-\pi}^{\pi}e^{\cos\theta}\cos(\sin\theta)\dif\theta-\underbrace{\int_{-\pi}^{\pi}e^{\cos\theta}\sin(\sin\theta)\dif\theta}_{=0\text{ (odd integrand)}} \\
+			                                     & =2i\int_{0}^{\pi}e^{\cos\theta}\cos(\sin\theta)\dif\theta\qquad\text{(even integrand)}.
+		\end{align*}
+		Comparing with $\oint_{\abs{z}=1}\frac{e^z}{z}\dif z=2\pi i$ gives $\int_{0}^{\pi}e^{\cos\theta}\cos(\sin\theta)\dif\theta=\pi$.
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{3}
+		\item \textbf{Summary and Thinking}\\
+		      \textcolor{blue}{Cauchy's integral formula}:
+		      \[f(z_0)=\frac{1}{2\pi i}\oint_C \frac{f(z)}{z-z_0}\dif z,\quad\text{i.e.}\quad \oint_C \frac{f(z)}{z-z_0}\dif z=2\pi if(z_0).\]
+		      The second form is the one used to compute integrals: split off the factor $\frac{1}{z-z_0}$ whose zero of the denominator lies inside $C$, and check that the remaining factor $f(z)$ is analytic on and inside $C$.
+	\end{enumerate}
+\end{frame}
+
+% =====================================================================
+\section{Higher-order Derivatives}
+
+\begin{frame}
+	\frametitle{Outline}
+	\tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item \textbf{Main Theorem}
+	\end{enumerate}
+	\begin{theorem}
+		The derivative of an analytic function is again analytic. Its $n$th-order derivative is given by the higher-order derivative formula（高阶导数公式）
+		\[f^{(n)}(z_0)=\frac{n!}{2\pi i}\oint_C \frac{f(z)}{(z-z_0)^{n+1}}\dif z,\quad n=1,2,\cdots,\]
+		where $C$ is any positively oriented simple closed curve which, together with its interior, lies in the domain $D$ where $f(z)$ is analytic, and $z_0$ is any point inside $C$.
+	\end{theorem}
+	Formally, it is obtained by differentiating Cauchy's integral formula $n$ times with respect to $z_0$ under the integral sign.
+\end{frame}
+
+\begin{frame}
+	\begin{proofs}
+		First consider $n=1$, i.e.\ we prove
+		\[f'(z_0)=\frac{1}{2\pi i}\oint_C \frac{f(z)}{(z-z_0)^2}\dif z.\]
+		By the definition of the derivative,
+		\[f'(z_0)=\lim_{\Delta z\to 0}\frac{f(z_0+\Delta z)-f(z_0)}{\Delta z}.\]
+		By Cauchy's integral formula (for $\abs{\Delta z}$ small, $z_0+\Delta z$ is also inside $C$),
+		\[f(z_0)=\frac{1}{2\pi i}\oint_C \frac{f(z)}{z-z_0}\dif z,\qquad f(z_0+\Delta z)=\frac{1}{2\pi i}\oint_C \frac{f(z)}{z-z_0-\Delta z}\dif z.\]
+	\end{proofs}
+\end{frame}
+
+\begin{frame}
+	\begin{proofs}[\proofname\ (Cont.)]
+		Thus
+		\begin{align*}
+			\frac{f(z_0+\Delta z)-f(z_0)}{\Delta z} & =\frac{1}{2\pi i\Delta z}\left[\oint_C \frac{f(z)}{z-z_0-\Delta z}\dif z-\oint_C \frac{f(z)}{z-z_0}\dif z\right] \\
+			                                        & =\frac{1}{2\pi i}\oint_C \frac{f(z)}{(z-z_0)(z-z_0-\Delta z)}\dif z                                         \\
+			                                        & =\frac{1}{2\pi i}\oint_C \frac{f(z)}{(z-z_0)^2}\dif z+I,
+		\end{align*}
+		where
+		\[I=\frac{1}{2\pi i}\oint_C \frac{\Delta z\,f(z)}{(z-z_0)^2(z-z_0-\Delta z)}\dif z.\]
+		It remains to show that $I\to0$ as $\Delta z\to0$.
+	\end{proofs}
+\end{frame}
+
+\begin{frame}
+	\begin{proofs}[\proofname\ (Cont.)]
+		Since $f(z)$ is analytic, it is continuous on $C$ and hence bounded: $\abs{f(z)}\leq M$ on $C$ for some $M>0$.
+
+		\begin{minipage}[c]{0.64\linewidth}
+			Let $d$ be the shortest distance from $z_0$ to the points of $C$, and take $\abs{\Delta z}<\frac{1}{2}d$.
+		\end{minipage}\hfill
+		\begin{minipage}[c]{0.3\linewidth}
+			\begin{figure}
+				\includegraphics[width=\linewidth]{Figure_3_6_1.jpg}
+			\end{figure}
+		\end{minipage}
+
+		Then for $z$ on $C$,
+		\[\abs{z-z_0}\geq d,\qquad \abs{z-z_0-\Delta z}\geq\abs{z-z_0}-\abs{\Delta z}>\frac{d}{2}.\]
+
+		Hence, on $C$,
+		\[\frac{\abs{\Delta z}\,\abs{f(z)}}{\abs{z-z_0}^2\,\abs{z-z_0-\Delta z}}<\frac{\abs{\Delta z}\,M}{d^2\cdot\frac{d}{2}}=\frac{2M}{d^3}\abs{\Delta z}.\]
+	\end{proofs}
+\end{frame}
+
+\begin{frame}
+	\begin{proofs}[\proofname\ (Cont.)]
+		By the integral estimation inequality,
+		\[\abs{I}\leq\frac{1}{2\pi}\oint_C \frac{\abs{\Delta z}\,\abs{f(z)}}{\abs{z-z_0}^2\,\abs{z-z_0-\Delta z}}\dif s<\frac{1}{2\pi}\cdot\frac{2M}{d^3}\abs{\Delta z}\cdot L=\abs{\Delta z}\frac{ML}{\pi d^3},\]
+		where $L$ is the length of $C$. So $I\to0$ as $\Delta z\to 0$, and
+		\[f'(z_0)=\lim_{\Delta z\to 0}\frac{f(z_0+\Delta z)-f(z_0)}{\Delta z}=\frac{1}{2\pi i}\oint_C \frac{f(z)}{(z-z_0)^2}\dif z.\]
+		Applying the same method to $\lim_{\Delta z\to 0}\frac{f'(z_0+\Delta z)-f'(z_0)}{\Delta z}$, we obtain
+		\[f''(z_0)=\frac{2!}{2\pi i}\oint_C \frac{f(z)}{(z-z_0)^3}\dif z.\]
+	\end{proofs}
+\end{frame}
+
+\begin{frame}
+	\begin{proof}[\proofname\ (Cont.)]
+		In the same way, mathematical induction gives
+		\[f^{(n)}(z_0)=\frac{n!}{2\pi i}\oint_C \frac{f(z)}{(z-z_0)^{n+1}}\dif z.\qedhere\]
+	\end{proof}
+	\textcolor{blue}{In practice the formula is used in the opposite direction: not to find derivatives by integration, but to find integrals by differentiation:}
+	\[\oint_C \frac{f(z)}{(z-z_0)^{n+1}}\dif z=\frac{2\pi i}{n!}f^{(n)}(z_0).\]
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{1}
+		\item \textbf{Examples}
+	\end{enumerate}
+	\begin{example}
+		Compute the following integrals, where $C:\abs{z}=r>1$ is counterclockwise:\\
+		(1) $\oint_C \frac{\cos\pi z}{(z-1)^5}\dif z$;\qquad (2) $\oint_C \frac{e^z}{(z^2+1)^2}\dif z$.
+	\end{example}
+	\begin{solution}<2->
+		\begin{enumerate}
+			\item $\frac{\cos\pi z}{(z-1)^5}$ is not analytic at $z=1$ inside $C$, but $\cos\pi z$ is analytic on and inside $C$. By the higher-order derivative formula with $n=4$,
+			      \[\oint_C \frac{\cos\pi z}{(z-1)^5}\dif z=\frac{2\pi i}{4!}(\cos\pi z)^{(4)}\Big|_{z=1}=\frac{2\pi i}{24}\pi^4\cos\pi=-\frac{\pi^5 i}{12}.\]
+		\end{enumerate}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{solution}[Solution\ (Cont.)]
+		\begin{enumerate}
+			\setcounter{enumi}{1}
+			\item $\frac{e^z}{(z^2+1)^2}$ is not analytic at $z=\pm i$, both inside $C$.
+
+			      \begin{minipage}[c]{0.6\linewidth}
+				      Inside $C$, draw small counterclockwise circles $C_1$ and $C_2$ centered at $z=i$ and $z=-i$, which neither intersect nor contain each other.
+
+				      The function $\frac{e^z}{(z^2+1)^2}$ is analytic in the region bounded by $C$, $C_1$, and $C_2$ and on its boundary.
+			      \end{minipage}\hfill
+			      \begin{minipage}[c]{0.34\linewidth}
+				      \begin{figure}
+					      \includegraphics[width=\linewidth]{Figure_3_6_2.jpg}
+				      \end{figure}
+			      \end{minipage}
+		\end{enumerate}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{solution}[Solution\ (Cont.)]
+		By Cauchy's theorem for multiply connected domains,
+		\[\oint_C \frac{e^z}{(z^2+1)^2}\dif z=\oint_{C_1} \frac{e^z}{(z^2+1)^2}\dif z+\oint_{C_2} \frac{e^z}{(z^2+1)^2}\dif z.\]
+		By the higher-order derivative formula with $n=1$, and $\left[\frac{e^z}{(z+i)^2}\right]'=\frac{(z+i-2)e^z}{(z+i)^3}$,
+		\begin{align*}
+			\oint_{C_1} \frac{e^z}{(z^2+1)^2}\dif z & =\oint_{C_1} \frac{\frac{e^z}{(z+i)^2}}{(z-i)^2}\dif z=\frac{2\pi i}{1!}\left.\left[\frac{e^z}{(z+i)^2}\right]'\right|_{z=i} \\
+			                                        & =2\pi i\cdot\frac{(2i-2)e^i}{(2i)^3}=\frac{(1-i)e^i}{2}\pi.
+		\end{align*}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{solution}[Solution\ (Cont.)]
+		Similarly,
+		\begin{align*}
+			\oint_{C_2} \frac{e^z}{(z^2+1)^2}\dif z & =\oint_{C_2} \frac{\frac{e^z}{(z-i)^2}}{(z+i)^2}\dif z=\frac{2\pi i}{1!}\left.\left[\frac{e^z}{(z-i)^2}\right]'\right|_{z=-i} \\
+			                                        & =-\frac{(1+i)e^{-i}}{2}\pi.
+		\end{align*}
+		So, using $1+i=i(1-i)$ and $e^i-ie^{-i}=(1-i)(\cos 1-\sin 1)$,
+		\begin{align*}
+			\oint_C \frac{e^z}{(z^2+1)^2}\dif z & =\frac{\pi}{2}\big[(1-i)e^i-(1+i)e^{-i}\big]=\frac{\pi}{2}(1-i)(e^i-ie^{-i}) \\
+			                                    & =\frac{\pi}{2}(1-i)^2(\cos 1-\sin 1)=i\pi(\sin 1-\cos 1)                   \\
+			                                    & =i\pi\sqrt{2}\sin\left(1-\frac{\pi}{4}\right).
+		\end{align*}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Compute $\oint_C \frac{1}{(z-2)^2 z^3}\dif z$, where $C$ is (1) $\abs{z-3}=2$;\quad (2) $\abs{z-1}=3$.
+	\end{example}
+	\begin{solution}<2->
+		The function $\frac{1}{(z-2)^2 z^3}$ has two singular points, $z=2$ and $z=0$.
+		\begin{enumerate}
+			\item Only $z=2$ lies inside $\abs{z-3}=2$ ($z=0$ is at distance $3$ from the center). Hence
+			      \begin{align*}
+				      \oint_C \frac{1}{(z-2)^2 z^3}\dif z & =\oint_C \frac{\frac{1}{z^3}}{(z-2)^2}\dif z=\frac{2\pi i}{1!}\left.\left(\frac{1}{z^3}\right)'\right|_{z=2} \\
+				                                          & =2\pi i\cdot\left(-\frac{3}{16}\right)=-\frac{3\pi i}{8}.
+			      \end{align*}
+		\end{enumerate}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{solution}[Solution\ (Cont.)]
+		\begin{enumerate}
+			\setcounter{enumi}{1}
+			\item Both $z=0$ and $z=2$ lie inside $\abs{z-1}=3$.\\
+			      Inside $C$, draw simple closed curves $C_1$ around $0$ and $C_2$ around $2$ that neither intersect nor contain each other. By Cauchy's theorem for multiply connected domains and the higher-order derivative formula,
+			      \begin{align*}
+				      \oint_C \frac{\dif z}{(z-2)^2 z^3} & =\oint_{C_1} \frac{\frac{1}{(z-2)^2}}{z^3}\dif z+\oint_{C_2} \frac{\frac{1}{z^3}}{(z-2)^2}\dif z                                         \\
+				                                         & =\frac{2\pi i}{2!}\left.\left[\frac{1}{(z-2)^2}\right]''\right|_{z=0}+\frac{2\pi i}{1!}\left.\left(\frac{1}{z^3}\right)'\right|_{z=2} \\
+				                                         & =\pi i\cdot\frac{6}{16}+2\pi i\cdot\left(-\frac{3}{16}\right)=\frac{3\pi i}{8}-\frac{3\pi i}{8}=0.
+			      \end{align*}
+		\end{enumerate}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{example}[Morera's Theorem（莫雷拉定理）]
+		Let $f(z)$ be continuous in a simply connected domain $B$, and suppose that the integral of $f(z)$ along every closed curve in $B$ is zero. Prove that $f(z)$ is analytic in $B$.
+	\end{example}
+	\begin{proofs}<2->
+		Fix $z_0\in B$. Since the integral along every closed curve in $B$ is zero, $\int_{z_0}^{z}f(\zeta)\dif\zeta$ does not depend on the path, so
+		\[F(z)=\int_{z_0}^{z}f(\zeta)\dif\zeta\]
+		is a single-valued function in $B$.
+	\end{proofs}
+\end{frame}
+
+\begin{frame}
+	\begin{proof}[\proofname\ (Cont.)]
+		The proof of Theorem 4.2 used only the continuity of $f$ and the path independence of its integrals. Both hold here, so the same argument gives $F'(z)=f(z)$ in $B$.
+
+		Hence $F(z)$ is analytic in $B$. Since the derivative of an analytic function is again analytic (Theorem 6.1), $f(z)=F'(z)$ is analytic in $B$.
+	\end{proof}
+	Morera's theorem is a converse of Cauchy's theorem (for continuous functions in a simply connected domain).
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{2}
+		\item \textbf{Summary and Thinking}\\
+		      The higher-order derivative formula is one of the most important formulas of complex integration. It shows that \textcolor{blue}{the derivative of an analytic function is again analytic}, which reveals an essential difference between analytic functions and functions of a real variable.\\
+		      \textcolor{blue}{Higher-order derivative formula:}
+		      \[f^{(n)}(z_0)=\frac{n!}{2\pi i}\oint_C \frac{f(z)}{(z-z_0)^{n+1}}\dif z.\]
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{example}[Question]
+		What is the difference between the derivatives of an analytic function and those of a real function?
+	\end{example}
+	\begin{solution}<2->
+		The higher-order derivative formula shows that if $f(z)$ is analytic in a domain $D$, then it has derivatives of all orders in $D$, and all of them are analytic in $D$.
+
+		\textcolor{red}{This is fundamentally different from real functions}: a real function that is differentiable on an interval need not have a second derivative. For example, $f(x)=x\abs{x}$ has $f'(x)=2\abs{x}$, which is not differentiable at $x=0$.
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{example}[Question]
+		How do we compute an integral along a simple closed curve $C$?
+	\end{example}
+	\begin{solution}<2->
+		\begin{enumerate}
+			\item $f(z)$ not analytic (contains $\overline{z}$, $\abs{z}$, $\operatorname{Re}z$, \dots): parametrize $C$, $\oint_C f\dif z=\int_\alpha^\beta f[z(t)]z'(t)\dif t$.
+			\item $f(z)$ analytic on and inside $C$: the integral is $0$ (Cauchy's theorem).
+		\end{enumerate}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{solution}[Solution\ (Cont.)]
+		\begin{enumerate}
+			\setcounter{enumi}{2}
+			\item $f(z)=\frac{g(z)}{(z-z_0)^{n+1}}$, $g$ analytic on and inside $C$, $z_0$ inside $C$: the integral is $\frac{2\pi i}{n!}g^{(n)}(z_0)$ (Cauchy's integral formula for $n=0$, the higher-order derivative formula for $n\geq1$).
+			\item Several singular points inside $C$: surround each by a small circle (Cauchy's theorem for multiply connected domains) or use partial fractions, then apply (2) and (3) to each piece.
+		\end{enumerate}
+	\end{solution}
+\end{frame}
+
+% =====================================================================
+\section{Relations Between Analytic Functions and Harmonic Functions}
+
+\begin{frame}
+	\frametitle{Outline}
+	\tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item \textbf{Harmonic Functions}
+	\end{enumerate}
+	\begin{definition}
+		If a real function $\varphi(x,y)$ of two variables has continuous second-order partial derivatives in a domain $D$ and satisfies Laplace's equation（拉普拉斯方程）
+		\[\frac{\partial^2 \varphi}{\partial x^2}+\frac{\partial^2 \varphi}{\partial y^2}=0,\]
+		then $\varphi(x,y)$ is called a harmonic function（调和函数） in $D$.
+	\end{definition}
+	\textcolor{blue}{Harmonic functions have important applications in fluid mechanics, electrostatics, and electromagnetic field theory: for example, the electrostatic potential in a charge-free region and the steady-state temperature in a plate are harmonic.}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{1}
+		\item \textbf{Relations Between Analytic Functions and Harmonic Functions}
+		      \begin{enumerate}[1)]
+			      \item Relation
+		      \end{enumerate}
+	\end{enumerate}
+	\begin{theorem}
+		If $f(z)=u+iv$ is analytic in a domain $D$, then its real part $u$ and imaginary part $v$ are harmonic in $D$.
+	\end{theorem}
+	\begin{proofs}<2->
+		Since $f(z)=u+iv$ is analytic in $D$, it satisfies the Cauchy--Riemann equations
+		\[\frac{\partial u}{\partial x}=\frac{\partial v}{\partial y},\quad\frac{\partial u}{\partial y}=-\frac{\partial v}{\partial x}.\]
+	\end{proofs}
+\end{frame}
+
+\begin{frame}
+	\begin{proof}[\proofname\ (Cont.)]
+		Differentiating the first equation with respect to $x$ and the second with respect to $y$,
+		\[\frac{\partial^2 u}{\partial x^2}=\frac{\partial^2 v}{\partial y\partial x},\quad\frac{\partial^2 u}{\partial y^2}=-\frac{\partial^2 v}{\partial x\partial y}.\]
+		By the higher-order derivative formula, $f'(z)$, $f''(z)$, $\cdots$ exist and are analytic, so $u$ and $v$ have continuous partial derivatives of all orders; in particular
+		\[\frac{\partial^2 v}{\partial y\partial x}=\frac{\partial^2 v}{\partial x\partial y}.\]
+		Adding the two equations gives $\frac{\partial^2 u}{\partial x^2}+\frac{\partial^2 u}{\partial y^2}=0$, and similarly $\frac{\partial^2 v}{\partial x^2}+\frac{\partial^2 v}{\partial y^2}=0$. So $u$ and $v$ are harmonic.
+	\end{proof}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		      \begin{enumerate}[1)]
+			      \setcounter{enumii}{1}
+			      \item Conjugate Harmonic Functions\\
+			            Let $u(x,y)$ be harmonic in a domain $D$. A harmonic function $v(x,y)$ such that $u+iv$ is analytic in $D$ is called a conjugate harmonic function（共轭调和函数） of $u(x,y)$.
+
+			            Equivalently, $v$ is a conjugate harmonic function of $u$ if and only if $u$ and $v$ satisfy the Cauchy--Riemann equations in $D$:
+			            \[\frac{\partial u}{\partial x}=\frac{\partial v}{\partial y},\quad\frac{\partial u}{\partial y}=-\frac{\partial v}{\partial x}.\]
+			            \textcolor{blue}{The imaginary part of an analytic function is a conjugate harmonic function of its real part.}
+		      \end{enumerate}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		      \begin{enumerate}[1)]
+			      \setcounter{enumii}{2}
+			      \item Partial Integration Method（偏积分法）\\
+			            If a harmonic function $u(x,y)$ is given, we can use the Cauchy--Riemann equations to find its conjugate harmonic function $v(x,y)$ by integrating partial derivatives, and thus form the analytic function $u+iv$.
+		      \end{enumerate}
+	\end{enumerate}
+	\begin{example}
+		Prove that $u(x,y)=y^3-3x^2y$ is harmonic, find a conjugate harmonic function $v(x,y)$, and find the analytic function $f(z)=u+iv$.
+	\end{example}
+\end{frame}
+
+\begin{frame}
+	\begin{solution}
+		\[\frac{\partial u}{\partial x}=-6xy,\quad\frac{\partial^2 u}{\partial x^2}=-6y,\qquad\frac{\partial u}{\partial y}=3y^2-3x^2,\quad\frac{\partial^2 u}{\partial y^2}=6y.\]
+		So $\frac{\partial^2 u}{\partial x^2}+\frac{\partial^2 u}{\partial y^2}=0$, and $u(x,y)$ is harmonic.
+
+		From $\frac{\partial v}{\partial y}=\frac{\partial u}{\partial x}=-6xy$, integrating with respect to $y$,
+		\[v(x,y)=\int (-6xy)\dif y=-3xy^2+g(x),\qquad\text{so}\qquad \frac{\partial v}{\partial x}=-3y^2+g'(x),\]
+		where $g(x)$ is a function of $x$ alone.
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{solution}[Solution\ (Cont.)]
+		From $\frac{\partial v}{\partial x}=-\frac{\partial u}{\partial y}=-3y^2+3x^2$,
+		\[-3y^2+g'(x)=-3y^2+3x^2,\]
+		so $g'(x)=3x^2$, $g(x)=x^3+c$, and
+		\[v(x,y)=x^3-3xy^2+c\quad(c\text{ a real constant}).\]
+		The analytic function is
+		\[f(z)=u+iv=y^3-3x^2y+i\left(x^3-3xy^2+c\right),\]
+		which can be written as $f(z)=i\left(z^3+c\right)$, because $iz^3=i(x+iy)^3=(y^3-3x^2y)+i(x^3-3xy^2)$.
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		      \begin{enumerate}[1)]
+			      \setcounter{enumii}{3}
+			      \item Indefinite Integral Method（不定积分法）\\
+			            Given a harmonic function $u(x,y)$ or $v(x,y)$, we can find the analytic function by an indefinite integral.
+
+			            Since $f(z)=u+iv$ is analytic, so is $f'(z)$, and by the Cauchy--Riemann equations
+			            \[f'(z)=u_x+iv_x=u_x-iu_y=v_y+iv_x.\]
+			            Express $u_x-iu_y$ (or $v_y+iv_x$) as a function of $z$:
+			            \[f'(z)=u_x-iu_y=U(z),\qquad f'(z)=v_y+iv_x=V(z).\]
+		      \end{enumerate}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\item []
+		      \begin{enumerate}
+			      \item []
+			            Integrating gives\\[1ex]
+			            \begin{minipage}[t]{0.48\linewidth}
+				            \centering
+				            $\boxed{f(z)=\int U(z)\dif z+c}$\\[1ex]
+				            \textcolor{blue}{when the real part $u$ is known;}
+			            \end{minipage}\hfill
+			            \begin{minipage}[t]{0.48\linewidth}
+				            \centering
+				            $\boxed{f(z)=\int V(z)\dif z+c}$\\[1ex]
+				            \textcolor{red}{when the imaginary part $v$ is known.}
+			            \end{minipage}
+		      \end{enumerate}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Find the analytic function $f(z)$ of Example 7.1 by the indefinite integral method, where its real part is $u(x,y)=y^3-3x^2y$.
+	\end{example}
+	\begin{solution}<2->
+		\begin{align*}
+			f'(z) & =U(z)=u_x-iu_y=-6xy-i\left(3y^2-3x^2\right) \\
+			      & =3i\left(x^2+2xyi-y^2\right)=3iz^2,
+		\end{align*}
+		so $f(z)=\int 3iz^2\dif z=iz^3+c_1$.
+
+		Since the real part of $f(z)$ is given exactly, $c_1$ cannot contribute a real part: $c_1=ic$ is purely imaginary ($c$ real). So $f(z)=i\left(z^3+c\right)$.
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{example}
+		Find the analytic function $f(z)=u+iv$ such that $u+v=(x-y)\left(x^2+4xy+y^2\right)-2(x+y)$.
+	\end{example}
+	\begin{solution}<2->
+		Differentiating both sides,
+		\begin{align*}
+			u_x+v_x & =\left(x^2+4xy+y^2\right)+(x-y)(2x+4y)-2  \\
+			        & =3x^2+6xy-3y^2-2,                         \\
+			u_y+v_y & =-\left(x^2+4xy+y^2\right)+(x-y)(4x+2y)-2 \\
+			        & =3x^2-6xy-3y^2-2.
+		\end{align*}
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{solution}[Solution\ (Cont.)]
+		By the Cauchy--Riemann equations, $u_x=v_y$ and $u_y=-v_x$, so
+		\[v_y+v_x=3x^2+6xy-3y^2-2,\qquad v_y-v_x=3x^2-6xy-3y^2-2.\]
+		Adding and subtracting the two equations,
+		\[v_y=3x^2-3y^2-2,\qquad v_x=6xy.\]
+		Hence
+		\begin{align*}
+			f'(z) & =v_y+iv_x=3x^2-3y^2-2+6xyi=3z^2-2, \\
+			f(z)  & =\int \left(3z^2-2\right)\dif z=z^3-2z+c.
+		\end{align*}
+		Finally, $z^3-2z$ already satisfies the given condition, so the constant $c=a+bi$ must satisfy $a+b=0$: $f(z)=z^3-2z+(1-i)a$, $a$ real.
+	\end{solution}
+\end{frame}
+
+\begin{frame}
+	\begin{enumerate}
+		\setcounter{enumi}{2}
+		\item \textbf{Summary and Thinking}\\
+		      In this section we learned the concept of harmonic functions, the relation between analytic and harmonic functions, and conjugate harmonic functions.
+
+		      Notes:
+		      \begin{enumerate}[1)]
+			      \item If $u$ and $v$ are both harmonic, $u+iv$ need not be analytic. For example, $u=x$ and $v=-y$ are harmonic, but $u+iv=\overline{z}$ is analytic nowhere.
+			      \item $v$ is called a conjugate harmonic function of $u$ when $u_x=v_y$ and $v_x=-u_y$. The order of $u$ and $v$ cannot be reversed: if $v$ is a conjugate harmonic function of $u$, then $-u$ (not $u$) is a conjugate harmonic function of $v$.
+		      \end{enumerate}
+	\end{enumerate}
+\end{frame}
+
+\end{document}
