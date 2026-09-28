@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>复积分的黎曼和</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>
+.below{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:12px;align-items:start}
+.big{font-family:var(--math);font-size:19px;margin:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" id="nav" aria-label="演示目录"></nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 3 章 §3.1 复积分的定义 · 例 1.1–1.5</p>
+    <h1>复积分 = 小步 Δz 经 f 伸缩旋转后首尾相接</h1>
+    <p class="lede">把路径 C 分成 n 小段，每段的小步 Δz<sub>k</sub> 乘上 f(ζ<sub>k</sub>)（一个复数：伸缩 + 旋转），再在右边首尾相接。n 越大，折线的终点 S<sub>n</sub> 越接近积分值 ∫<sub>C</sub> f(z) dz（圆环标出）。</p>
+  </header>
+
+  <div class="row" style="margin-bottom:10px">
+    <label for="preset" class="hint" style="font-size:13px">例题</label>
+    <select id="preset"></select>
+    <button class="btn primary" id="play" type="button">▶ n 从 1 增加到 60</button>
+  </div>
+
+  <div class="planes">
+    <div class="stage"><span class="tag" id="ztag">z 平面：路径 C 与分点</span><canvas id="zp" aria-label="z 平面"></canvas><div class="status" id="status" aria-live="polite"></div></div>
+    <div class="stage"><span class="tag">w 平面：f(ζₖ)Δzₖ 首尾相接</span><canvas id="wp" aria-label="w 平面"></canvas></div>
+  </div>
+
+  <div class="below">
+    <div class="card">
+      <div class="slider"><label for="n">分段数 n</label><input type="range" id="n" min="1" max="80" step="1" value="8"><output id="n-out" for="n"></output></div>
+      <div class="row" id="nrow" hidden><div class="slider" style="flex:1"><label for="m">整数 n（例 1.4）</label><input type="range" id="m" min="-2" max="3" step="1" value="0"><output id="m-out" for="m"></output></div></div>
+      <div class="row"><span class="hint" style="font-size:13px">ζₖ 取在</span>
+        <div class="seg" role="radiogroup" aria-label="取点方式">
+          <input type="radio" name="mode" id="md-l" value="left"><label for="md-l">段的起点</label>
+          <input type="radio" name="mode" id="md-m" value="mid" checked><label for="md-m">中点</label>
+          <input type="radio" name="mode" id="md-r" value="right"><label for="md-r">终点</label>
+          <input type="radio" name="mode" id="md-x" value="rand"><label for="md-x">随机</label>
+        </div></div>
+      <p class="hint">取点方式不同，S<sub>n</sub> 不同；但 n → ∞ 时都趋于同一个极限。这正是定义中“与分法、取法无关”的意思。</p>
+    </div>
+    <div class="card" id="readout" aria-live="polite"></div>
+  </div>
+</div>
+<script src="assets/plane.js"></script>
+<script src="assets/integ.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,$,MATH_FONT,SANS_FONT}=CF;const {Path,riemann,integrate,piText,numText,r4,length}=CF3;
+const O={x:0,y:0},A1={x:1,y:1};
+const P0=[
+  {id:'ex11',name:'例 1.1：∫ z dz，线段 0 → 3 + 4i',f:z=>z,fl:'z',path:Path.seg(O,{x:3,y:4}),zc:{x:1.5,y:2},zr:3,wc:{x:-1.5,y:6},wr:7.5,exact:'(3 + 4i)²/2 = −7/2 + 12i'},
+  {id:'ex12a',name:'例 1.2(1)：∫ Re z dz，线段 0 → 1 + i',f:z=>({x:z.x,y:0}),fl:'Re z',path:Path.seg(O,A1),zc:{x:.5,y:.5},zr:.8,wc:{x:.35,y:.5},wr:.75,exact:'(1 + i)/2'},
+  {id:'ex12b',name:'例 1.2(2)：∫ Re z dz，抛物线 y = x²',f:z=>({x:z.x,y:0}),fl:'Re z',path:t=>({x:t,y:t*t}),zc:{x:.5,y:.5},zr:.8,wc:{x:.35,y:.5},wr:.75,exact:'1/2 + (2/3)i'},
+  {id:'ex12c',name:'例 1.2(3)：∫ Re z dz，折线 0 → 1 → 1 + i',f:z=>({x:z.x,y:0}),fl:'Re z',path:Path.poly([O,{x:1,y:0},A1]),zc:{x:.5,y:.5},zr:.8,wc:{x:.35,y:.5},wr:.75,exact:'1/2 + i'},
+  {id:'ex13',name:'例 1.3：∮ |z| dz，圆周 |z| = 2',f:z=>({x:C.abs(z),y:0}),fl:'|z|',path:Path.circle(O,2),zc:O,zr:2.6,wc:O,wr:5,exact:'0',closed:true},
+  {id:'ex14',name:'例 1.4：∮ dz/(z − z₀)ⁿ⁺¹，圆周 |z − z₀| = 1',f:null,fl:'',path:Path.circle(O,1),zc:O,zr:1.5,wc:{x:0,y:3},wr:4.2,closed:true,m:true},
+  {id:'ex15',name:'例 1.5：|∫ dz/z²| ≤ ML，线段 i → 2 + i',f:z=>C.inv(C.sq(z)),fl:'1/z²',path:Path.seg({x:0,y:1},{x:2,y:1}),zc:{x:1,y:.8},zr:1.4,wc:{x:0,y:0},wr:2.4,ml:{M:1,L:2}},
+];
+const S={p:P0[0],n:8,mode:'mid',m:0,seed:7};
+const sel=$('#preset');P0.forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.name;sel.appendChild(o);});
+const q=CF.hash.get('p');if(q&&P0.find(p=>p.id===q))S.p=P0.find(p=>p.id===q);sel.value=S.p.id;
+const fOf=()=>S.p.m?(z=>CF3.pow(z,-(S.m+1))):S.p.f;
+const fLabel=()=>S.p.m?(S.m===0?'1/z':S.m===-1?'1':S.m===-2?'z':'1/z'+['','','²','³','⁴'][S.m+1]):S.p.fl;
+const ZP=new CF.Plane($('#zp'),{range:S.p.zr,center:S.p.zc,maxVh:0.6,render:drawZ});
+const WP=new CF.Plane($('#wp'),{range:S.p.wr,center:S.p.wc,maxVh:0.6,render:drawW,names:['Re w','Im w']});
+let R=null,exact=null;
+function compute(){R=riemann(fOf(),S.p.path,S.n,S.mode,S.seed);exact=integrate(fOf(),S.p.path,6000);}
+function drawZ(P){
+  const V=P.V;P.grid({unit:false});
+  const pts=CF3.sample(S.p.path,400);P.path(pts,V.axis,3,{alpha:.5});
+  R.terms.forEach((t,k)=>{P.arrow(R.pts[k],R.pts[k+1],k%2?V.z1:V.z2,2.5);});
+  R.pts.forEach(p=>P.dot(p,V.ink,S.n>40?2.5:3.5));
+  R.terms.forEach(t=>{const X=P.toS(t.zeta),c=P.ctx;c.save();c.fillStyle=V.w;c.beginPath();c.moveTo(X.X,X.Y-5);c.lineTo(X.X+5,X.Y);c.lineTo(X.X,X.Y+5);c.lineTo(X.X-5,X.Y);c.closePath();c.fill();c.restore();});
+  if(S.p.m)CF3.singular(P,O,V.w,'z₀');
+  const a=S.p.path(0),b=S.p.path(1);P.wlabel(a,S.p.closed?'起点 = 终点':'A',V.ink,{dx:-12,dy:14,size:15});if(!S.p.closed)P.wlabel(b,'B',V.ink,{dx:12,dy:-12,size:15});
+}
+function drawW(P){
+  const V=P.V;P.grid({unit:false});
+  if(S.p.ml){P.circle(O,S.p.ml.M*S.p.ml.L,V.target,2,[6,5]);P.wlabel({x:0,y:-S.p.ml.M*S.p.ml.L},'半径 ML = 2',V.target,{dy:16,font:'600 13px '+SANS_FONT});}
+  R.terms.forEach((t,k)=>P.arrow(t.from,C.add(t.from,t.term),k%2?V.z1:V.z2,S.n>40?1.8:2.5));
+  if(exact){const E=P.toS(exact),c=P.ctx;c.save();c.strokeStyle=V.target;c.lineWidth=3;c.beginPath();c.arc(E.X,E.Y,11,0,CF.TAU);c.stroke();c.restore();P.wlabel(exact,'∫C f dz',V.target,{dx:16,dy:-14,align:'left',size:15});}
+  P.dot(R.sum,V.w,6);P.wlabel(R.sum,'Sₙ',V.w,{dx:-14,dy:14,size:16});
+  P.dot(O,V.ink,3.5);
+}
+function update(){
+  compute();ZP.draw();WP.draw();
+  $('#ztag').textContent='z 平面：f(z) = '+fLabel()+'，n = '+S.n;
+  const err=exact?C.abs(C.sub(R.sum,exact)):NaN;
+  const ex=S.p.m?(S.m===0?'2πi':'0'):S.p.exact;
+  let ml='';if(S.p.ml)ml=`<tr><td>|Sₙ|</td><td>${r4(C.abs(R.sum))} ≤ ML = 2</td></tr><tr><td>|∫C f dz|</td><td>${r4(C.abs(exact))} ≤ 2 ✓</td></tr>`;
+  $('#readout').innerHTML=`<h2>f(z) = ${fLabel()}</h2><table class="rt"><tbody>
+    <tr><td class="cw">Sₙ = Σ f(ζₖ)Δzₖ</td><td class="cw">${numText(R.sum)}</td></tr>
+    <tr><td class="ct">∫C f(z) dz</td><td class="ct">${ex}　<small>≈ ${numText(exact)}</small></td></tr>
+    <tr><td>|Sₙ − ∫|</td><td>${r4(err)}</td></tr>${ml}</tbody></table>
+    <div class="why">${S.p.m?`<p class="note">${S.m===0?'n = 0：每一步 f(ζ)Δz = Δz/(z − z₀) ≈ i·Δθ 都指向同一方向（竖直向上），首尾相接成一条长 2π 的竖线，所以积分是 2πi。':'n ≠ 0：各步的方向绕了 '+Math.abs(S.m)+' 圈，首尾相接围成闭合的多边形，回到原点，所以积分是 0。'}</p>`:
+      S.p.id==='ex13'?'<p class="note">|z| = 2 是常数，每一步就是 2Δz；绕圆一圈的 Δz 首尾相接回到原点，所以积分是 0。</p>':
+      S.p.id.startsWith('ex12')?'<p class="note">切换例 1.2 的三条路径：起点、终点相同，积分值不同。Re z 不解析，积分与路径有关。</p>':
+      S.p.ml?'<p class="note">每一步 |f(ζₖ)Δzₖ| ≤ M·|Δzₖ|，折线总长不超过 ML，终点 Sₙ 不可能跑出半径 ML 的圆（估值不等式）。</p>':
+      '<p class="note">f(z) = z 解析，积分与路径无关，等于 (3 + 4i)²/2。</p>'}</div>`;
+}
+const nb=CF.bindRange('#n',v=>String(v),v=>{S.n=v;update();});
+CF.bindRange('#m',v=>String(v),v=>{S.m=v;update();});
+CF.bindSeg('mode',v=>{S.mode=v;S.seed=(S.seed*48271)%2147483647;update();});
+function setPreset(id){S.p=P0.find(p=>p.id===id);ZP.range=S.p.zr;ZP.center=S.p.zc;WP.range=S.p.wr;WP.center=S.p.wc;$('#nrow').hidden=!S.p.m;update();}
+sel.addEventListener('change',()=>setPreset(sel.value));
+let anim=null;
+$('#play').addEventListener('click',()=>{if(anim)anim.stop();anim=CF.animate(6000,t=>{const v=Math.max(1,Math.round(1+59*t));if(v!==S.n)nb.set(v);},()=>{anim=null;});});
+ZP.resize();WP.resize();setPreset(S.p.id);
+})();
+</script>
+</body>
+</html>

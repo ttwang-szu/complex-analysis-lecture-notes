@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第 3 章课堂演示</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:6px}
+.item{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;text-decoration:none;color:var(--ink)}
+.item:hover,.item:focus-visible{border-color:var(--ink)}
+.item .no{grid-row:span 3;font-family:var(--math);font-size:30px;line-height:1;color:var(--muted)}
+.item h2{margin:0;font-size:17px}
+.item .ref{margin:0;font-size:12.5px;color:var(--muted)}
+.item .d{margin:0;font-size:14px}
+.foot{margin-top:18px;max-width:76ch;color:var(--muted);font-size:13px;display:grid;gap:4px}.foot p{margin:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 3 章 复积分</p>
+    <h1>第 3 章课堂演示</h1>
+    <p class="lede">五个可交互的演示，按课件顺序排列。完整的 HTML 课件见 <a href="../CF_Chapter3.html">CF_Chapter3.html</a>，演示已嵌入在相应页面中。</p>
+  </header>
+  <div class="list">
+    <a class="item" href="01-riemann-sum.html"><span class="no">1</span><h2>黎曼和：小步首尾相接</h2><p class="ref">§3.1 · 例 1.1–1.5</p><p class="d">每一小步 Δzₖ 被 f(ζₖ) 伸缩旋转后首尾相接；n 增大时终点逼近积分值。看清为什么 ∮ dz/(z − z₀) = 2πi，以及估值不等式 |∫| ≤ ML。</p></a>
+    <a class="item" href="02-path-dependence.html"><span class="no">2</span><h2>积分与路径有关吗</h2><p class="ref">§3.2 动机 · §3.4 定理 4.1、原函数</p><p class="d">拖动两条同起点同终点的路径：z、z²、eᶻ 的积分不变且等于 F(B) − F(A)；Re z、z̄ 随路径改变；1/z 夹住原点时相差 2πi。</p></a>
+    <a class="item" href="03-contour-deform.html"><span class="no">3</span><h2>闭路变形与复合闭路</h2><p class="ref">§3.2–3.3 · 例 2.1–2.3、3.1、5.4、6.1、6.2</p><p class="d">随意拖动闭曲线：不越过奇点，积分不变；积分 = 曲线内各奇点“贡献”之和。八个课件例题可直接切换。</p></a>
+    <a class="item" href="04-cauchy-formula.html"><span class="no">4</span><h2>柯西积分公式</h2><p class="ref">§3.5 平均值公式 · §3.6 高阶导数公式</p><p class="d">圆周上的值决定圆内的值：z₀ 在圆心时是简单平均，在圆内任意处由柯西积分给出，在圆外积分为 0；n 阶导数同理。</p></a>
+    <a class="item" href="05-harmonic.html"><span class="no">5</span><h2>调和函数与共轭调和函数</h2><p class="ref">§3.7 · 例 7.1</p><p class="d">u 的热图与 u、v 两族正交等值线；拖动圆比较圆心值与圆周平均值。x² + y² 作为反例：Δu ≠ 0。</p></a>
+  </div>
+  <div class="foot">
+    <p>离线使用：把整个 <code>html</code> 文件夹一起拷到教室电脑上，双击 <code>CF_Chapter3.html</code>（课件）或 <code>demos/index.html</code>（演示目录）即可，不需要联网。</p>
+  </div>
+</div>
+</body>
+</html>

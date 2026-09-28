@@ -29,8 +29,15 @@ This repository contains lecture slides, LaTeX source files, and supplementary r
 │       ├── demos/                # 8 个交互演示及公共资源 assets/
 │       └── tools/                # tex2html.py 与本章的 demos_config.py
 ├── Chapter3/
-│   ├── CF_Chapter3.tex
-│   └── CF_Chapter3.pdf
+│   ├── pdf/                      # PDF 版：LaTeX 源文件、PDF 与插图
+│   │   ├── CF_Chapter3.tex
+│   │   ├── CF_Chapter3.pdf
+│   │   └── Figure_3_*.jpg
+│   └── html/                     # HTML 版（结构同第 1 章）
+│       ├── CF_Chapter3.html
+│       ├── figures/
+│       ├── demos/                # 5 个交互演示及公共资源 assets/
+│       └── tools/                # tex2html.py 与本章的 demos_config.py
 ├── Chapter4/
 │   ├── CF_Chapter4.tex
 │   └── CF_Chapter4.pdf
@@ -83,15 +90,16 @@ xelatex 01_Modular_Arithmetic.tex
 
 连续编译两次可以正确更新目录、引用和页码等信息。
 
-### HTML 课件（第 1、2 章）| HTML Slides (Chapters 1–2)
+### HTML 课件（第 1–3 章）| HTML Slides (Chapters 1–3)
 
-`ChapterN/html/CF_ChapterN.html` 是各章的 HTML 版课件（目前有第 1、2 章），一个 frame 对应一页，页码与 PDF 一致，并在相关页面嵌入了交互演示。全部资源（含 KaTeX）都在本地，双击即可离线打开；拷贝时请复制整个 `html` 文件夹。
+`ChapterN/html/CF_ChapterN.html` 是各章的 HTML 版课件（目前有第 1–3 章），一个 frame 对应一页，页码与 PDF 一致，并在相关页面嵌入了交互演示。全部资源（含 KaTeX）都在本地，双击即可离线打开；拷贝时请复制整个 `html` 文件夹。
 
 修改 `pdf/CF_ChapterN.tex` 之后，运行对应章节的脚本重新生成 HTML（演示入口写在同目录的 `demos_config.py` 中）：
 
 ```bash
 python Chapter1/html/tools/tex2html.py
 python Chapter2/html/tools/tex2html.py
+python Chapter3/html/tools/tex2html.py
 ```
 
 操作：→ / 空格 / 点击为下一步，← 为上一步，F 全屏，输入页码后按回车跳页；演示打开后按 Esc 返回。

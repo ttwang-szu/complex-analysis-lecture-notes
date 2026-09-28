@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>调和函数与共轭调和函数</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>
+.verdict{margin:0;font-size:15px;font-weight:600}.verdict.ok{color:var(--target)}.verdict.no{color:var(--w)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:middle;margin-right:5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" id="nav" aria-label="演示目录"></nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 3 章 §3.7 解析函数与调和函数 · 例 7.1、7.2</p>
+    <h1>调和函数：圆心的值 = 圆周上的平均值</h1>
+    <p class="lede">底色是 u(x, y) 的大小（红高蓝低），实线是 u 的等值线，虚线是共轭调和函数 v 的等值线，两族处处正交。拖动圆，比较圆心处的 u 和圆周上 u 的平均值：调和函数二者相等（平均值公式取实部），所以调和函数在区域内部没有最高点和最低点。</p>
+  </header>
+  <div class="layout">
+    <div class="stage-col">
+      <div class="stage"><span class="tag" id="tag">z 平面</span><canvas id="zp" aria-label="z 平面"></canvas></div>
+      <div class="legend"><span><i style="border-color:var(--ink)"></i>u = 常数</span><span><i style="border-color:var(--violet);border-top-style:dashed"></i>v = 常数</span></div>
+      <p class="hint">拖动圆心（黑点）或圆周上的小方块（改半径）。</p>
+    </div>
+    <div class="panel">
+      <div class="card">
+        <h2>u(x, y)</h2>
+        <div class="seg" role="radiogroup" aria-label="函数" id="useg"></div>
+        <label class="check"><input type="checkbox" id="showv" checked>显示 v 的等值线</label>
+      </div>
+      <div class="card" id="readout" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+<script src="assets/plane.js"></script>
+<script src="assets/integ.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,TAU,$}=CF;const {heat,blit,contours,drawContours,rgb,mix,numText,r4}=CF3;
+const U={
+  sq:{l:'x² − y²',u:(x,y)=>x*x-y*y,v:(x,y)=>2*x*y,vl:'2xy',fl:'z²',lv:[-3,-2,-1,-.5,0,.5,1,2,3]},
+  ex71:{l:'y³ − 3x²y',u:(x,y)=>y*y*y-3*x*x*y,v:(x,y)=>x*x*x-3*x*y*y,vl:'x³ − 3xy²',fl:'i z³（例 7.1）',lv:[-4,-2,-1,-.3,0,.3,1,2,4]},
+  exp:{l:'eˣ cos y',u:(x,y)=>Math.exp(x)*Math.cos(y),v:(x,y)=>Math.exp(x)*Math.sin(y),vl:'eˣ sin y',fl:'eᶻ',lv:[-4,-2,-1,-.4,0,.4,1,2,4]},
+  inv:{l:'x/(x² + y²)',u:(x,y)=>x/(x*x+y*y),v:(x,y)=>-y/(x*x+y*y),vl:'−y/(x² + y²)',fl:'1/z（在 z ≠ 0 处）',lv:[-3,-1.5,-.8,-.4,0,.4,.8,1.5,3],sing:true},
+  bad:{l:'x² + y²',u:(x,y)=>x*x+y*y,v:null,fl:null,lv:[.25,1,2,3,4,6]},
+};
+const S={k:CF.hash.get('u')||'ex71',c:{x:.6,y:.4},R:.8,showV:true};
+const seg=$('#useg');Object.entries(U).forEach(([k,o])=>seg.insertAdjacentHTML('beforeend',`<input type="radio" name="u" id="u-${k}" value="${k}"${k===S.k?' checked':''}><label for="u-${k}" class="mr">${o.l}</label>`));
+const ZP=new CF.Plane($('#zp'),{range:2,maxVh:0.74,aspect:.85,render:draw});
+ZP.addHandle({get:()=>S.c,set:p=>{S.c=p;update();}});
+ZP.addHandle({get:()=>C.add(S.c,{x:S.R,y:0}),set:p=>{S.R=Math.max(.1,Math.min(1.6,C.dist(p,S.c)));update();}});
+let off=null,offKey='';
+function draw(P){
+  const V=P.V,o=U[S.k],key=S.k+P.W+'x'+P.H+V.surface;
+  if(key!==offKey){const hi=rgb(V.w),lo=rgb(V.z1),mid=rgb(V.surface),sc=o.lv[o.lv.length-1];
+    off=heat(P,p=>{const u=o.u(p.x,p.y);if(!isFinite(u))return mid;const t=Math.max(-1,Math.min(1,u/sc));return t>0?mix(mid,hi,.7*t):mix(mid,lo,-.7*t);},3);offKey=key;}
+  blit(P,off);P.grid({unit:false,labels:true});
+  drawContours(P,contours(P,o.u,o.lv,160),V.ink,1.6,{alpha:.75});
+  if(S.showV&&o.v)drawContours(P,contours(P,o.v,o.lv,160),V.violet,1.6,{dash:[5,4]});
+  if(o.sing)CF3.singular(P,{x:0,y:0},V.w,'0');
+  P.circle(S.c,S.R,V.ink,3);
+  const h=P.toS(C.add(S.c,{x:S.R,y:0})),c=P.ctx;c.save();c.fillStyle=V.ink;c.fillRect(h.X-5,h.Y-5,10,10);c.restore();
+  P.dot(S.c,V.ink,6);
+}
+function update(){
+  ZP.draw();const o=U[S.k];
+  let avg=0;const K=720;for(let k=0;k<K;k++){const p=C.add(S.c,C.polar(S.R,TAU*(k+.5)/K));avg+=o.u(p.x,p.y);}avg/=K;
+  const u0=o.u(S.c.x,S.c.y),h=1e-3,x=S.c.x,y=S.c.y;
+  const lap=(o.u(x+h,y)+o.u(x-h,y)+o.u(x,y+h)+o.u(x,y-h)-4*u0)/(h*h);
+  const enc=o.sing&&C.abs(S.c)<S.R;const eq=Math.abs(avg-u0)<1e-3*Math.max(1,Math.abs(u0));
+  $('#tag').textContent='u = '+o.l;
+  $('#readout').innerHTML=`<h2>u = ${o.l}${o.v?'，v = '+o.vl:''}</h2><table class="rt"><tbody>
+    <tr><td>Δu = uₓₓ + u_yy（在圆心）</td><td>${r4(Math.abs(lap)<5e-3?0:lap)}</td></tr>
+    <tr><td class="cw">u(圆心)</td><td class="cw">${r4(u0)}</td></tr>
+    <tr><td class="ct">圆周上 u 的平均值</td><td class="ct">${r4(avg)}</td></tr>
+    ${o.fl?`<tr><td>f = u + iv</td><td>${o.fl}</td></tr>`:''}</tbody></table>
+    ${enc?'<p class="verdict no">圆内含有奇点 z = 0：u 在圆内不调和，平均值公式不适用。</p>':
+      `<p class="verdict ${eq?'ok':'no'}">${eq?'相等：圆心的值 = 圆周上的平均值':'不相等'}</p>`}
+    <div class="why"><p class="note">${o.v?'u、v 满足 C–R 方程 uₓ = v_y，u_y = −vₓ，因此 u + iv 解析，两族等值线正交；由 f(z₀) = (1/2π)∫ f(z₀ + Re^{iθ}) dθ 取实部，得到 u 的平均值公式。':'x² + y² 的 Δu = 4 ≠ 0，不是调和函数：圆周上的平均值总比圆心大（它在原点有最小值）。它也就不是任何解析函数的实部。'}</p></div>`.replace('e^{iθ}','e<sup>iθ</sup>');
+}
+CF.bindSeg('u',v=>{S.k=v;update();});
+$('#showv').addEventListener('change',e=>{S.showV=e.target.checked;update();});
+ZP.resize();update();
+})();
+</script>
+</body>
+</html>

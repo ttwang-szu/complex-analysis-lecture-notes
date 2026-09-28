@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>积分与路径有关吗</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>
+.verdict{margin:0;font-size:15px;font-weight:600}.verdict.ok{color:var(--target)}.verdict.no{color:var(--w)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" id="nav" aria-label="演示目录"></nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 3 章 §3.2 动机、§3.4 定理 4.1 与原函数 · 例 1.1、1.2</p>
+    <h1>积分与路径有关吗？</h1>
+    <p class="lede">起点 A、终点 B 相同的两条路径 C₁（蓝）、C₂（橙）。拖动两条路径中间的控制点改变路径，看两个积分值是否相同。两者之差就是沿闭曲线 C₁ + C₂⁻（阴影围成的区域边界）的积分。</p>
+  </header>
+  <div class="layout">
+    <div class="stage-col">
+      <div class="stage"><span class="tag" id="tag">z 平面</span><canvas id="zp" aria-label="z 平面"></canvas><div class="status" id="status" aria-live="polite"></div></div>
+      <p class="hint">拖动 A、B（黑点）和两个控制点（空心圆）。</p>
+    </div>
+    <div class="panel">
+      <div class="card">
+        <h2>被积函数</h2>
+        <div class="seg" role="radiogroup" aria-label="被积函数" id="fseg"></div>
+        <p class="hint" id="fnote"></p>
+      </div>
+      <div class="card" id="readout" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+<script src="assets/plane.js"></script>
+<script src="assets/integ.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,TAU,$,SANS_FONT}=CF;const {Path,integrate,numText,piText,winding,sample}=CF3;
+const F={
+  z:{l:'z',f:z=>z,an:true,F:z=>C.scale(C.sq(z),.5),Fl:'z²/2',note:'z 在整个平面解析（单连通）：积分与路径无关，等于 F(B) − F(A)，F(z) = z²/2。'},
+  z2:{l:'z²',f:C.sq,an:true,F:z=>C.scale(C.mul(C.sq(z),z),1/3),Fl:'z³/3',note:'z² 处处解析：积分只取决于起点与终点。'},
+  exp:{l:'eᶻ',f:CF3.exp,an:true,F:CF3.exp,Fl:'eᶻ',note:'eᶻ 处处解析，原函数是 eᶻ。'},
+  re:{l:'Re z',f:z=>({x:z.x,y:0}),an:false,note:'Re z 不满足 C–R 方程，处处不解析：改变路径，积分值就变（例 1.2）。'},
+  conj:{l:'z̄',f:C.conj,an:false,note:'z̄ 处处不解析：两条路径的积分之差 = ∮ z̄ dz = 2i ×（围成的面积）。'},
+  inv:{l:'1/z',f:C.inv,an:true,sing:true,note:'1/z 在去掉原点的平面上解析，但这个区域不是单连通的。只要两条路径不把原点夹在中间，积分就相等；夹住原点时相差 ±2πi。'},
+};
+const S={fn:CF.hash.get('fn')||'re',A:{x:0,y:0},B:{x:1,y:1},M1:{x:1.1,y:-.2},M2:{x:-.3,y:1.3}};
+if(S.fn==='inv'){S.A={x:1.4,y:0};S.B={x:-1.4,y:0};S.M1={x:0,y:2.4};S.M2={x:0,y:1.2};}
+const seg=$('#fseg');Object.entries(F).forEach(([k,v])=>{seg.insertAdjacentHTML('beforeend',`<input type="radio" name="fn" id="f-${k}" value="${k}"${k===S.fn?' checked':''}><label for="f-${k}" class="mr">${v.l}</label>`);});
+const ZP=new CF.Plane($('#zp'),{range:2,center:{x:.2,y:.5},maxVh:0.72,aspect:.85,render:draw});
+['A','B','M1','M2'].forEach(k=>ZP.addHandle({get:()=>S[k],set:p=>{S[k]=p;update();}}));
+const p1=()=>Path.quad(S.A,S.M1,S.B),p2=()=>Path.quad(S.A,S.M2,S.B);
+function loopPts(){const a=sample(p1(),200),b=sample(p2(),200).reverse();return a.concat(b);}
+function draw(P){
+  const V=P.V;P.grid({unit:false});
+  const loop=loopPts();P.fillPoly(loop,V.fill2);
+  const f=F[S.fn];if(f.sing)CF3.singular(P,{x:0,y:0},V.w,'奇点 0');
+  P.path(sample(p1(),200),V.z1,3.5);P.path(sample(p2(),200),V.z2,3.5);
+  CF3.pathArrows(P,p1(),V.z1,2);CF3.pathArrows(P,p2(),V.z2,2);
+  for(const k of['M1','M2']){const Q=P.toS(S[k]),c=P.ctx;c.save();c.strokeStyle=k==='M1'?V.z1:V.z2;c.lineWidth=2.5;c.fillStyle=V.surface;c.beginPath();c.arc(Q.X,Q.Y,7,0,TAU);c.fill();c.stroke();c.restore();}
+  P.line(S.A,S.M1,V.z1,1,[3,4],.6);P.line(S.M1,S.B,V.z1,1,[3,4],.6);P.line(S.A,S.M2,V.z2,1,[3,4],.6);P.line(S.M2,S.B,V.z2,1,[3,4],.6);
+  P.dot(S.A,V.ink,6);P.dot(S.B,V.ink,6);P.wlabel(S.A,'A',V.ink,{dx:-12,dy:14});P.wlabel(S.B,'B',V.ink,{dx:12,dy:-12});
+  const m1=p1()(.5),m2=p2()(.5);P.wlabel(m1,'C₁',V.z1,{dx:14,dy:-12,size:17});P.wlabel(m2,'C₂',V.z2,{dx:-14,dy:-12,size:17});
+}
+function update(){
+  ZP.draw();const f=F[S.fn],I1=integrate(f.f,p1(),3000),I2=integrate(f.f,p2(),3000);
+  let rows=`<tr><td class="c1">∫C₁ f dz</td><td class="c1">${I1?numText(I1):'经过奇点'}</td></tr><tr><td class="c2">∫C₂ f dz</td><td class="c2">${I2?numText(I2):'经过奇点'}</td></tr>`;
+  let verdict='';
+  if(I1&&I2){const d=C.sub(I1,I2),pd=piText(d);
+    rows+=`<tr><td>差 = ∮ f dz</td><td>${numText(d)}${pd&&/π/.test(pd)?'　= '+pd:''}</td></tr>`;
+    if(f.F)rows+=`<tr><td class="ct">F(B) − F(A)</td><td class="ct">${numText(C.sub(f.F(S.B),f.F(S.A)))}　<small>F = ${f.Fl}</small></td></tr>`;
+    if(f.sing){const w=winding(loopPts().concat([loopPts()[0]]),{x:0,y:0});rows+=`<tr><td>C₁ + C₂⁻ 绕原点</td><td>${w} 圈　<small>差 = ${w}·2πi</small></td></tr>`;}
+    const same=C.abs(d)<1e-4;verdict=`<p class="verdict ${same?'ok':'no'}">${same?'两条路径的积分相等':'两条路径的积分不相等'}</p>`;}
+  $('#readout').innerHTML=`<h2>f(z) = ${f.l}</h2><table class="rt"><tbody>${rows}</tbody></table>${verdict}`;
+  $('#fnote').textContent=f.note;$('#tag').textContent='z 平面：f(z) = '+f.l;
+}
+CF.bindSeg('fn',v=>{S.fn=v;update();});
+ZP.resize();update();
+})();
+</script>
+</body>
+</html>

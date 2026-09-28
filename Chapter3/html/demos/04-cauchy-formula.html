@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>柯西积分公式</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>
+.below{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:12px;align-items:start}
+.verdict{margin:0;font-size:15px;font-weight:600}.verdict.no{color:var(--w)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" id="nav" aria-label="演示目录"></nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 3 章 §3.5 柯西积分公式、平均值公式 · §3.6 高阶导数公式</p>
+    <h1>边界上的值决定内部的值</h1>
+    <p class="lede">在圆周 C 上取一些点，右边画出它们的像 f(z)。z₀ 在圆心时，这些像的平均值（重心）恰好是 f(z₀)：平均值公式。z₀ 移到圆内别处，简单平均不再等于 f(z₀)，但柯西积分 <span class="m">(1/2πi)∮ f(z)/(z − z₀) dz</span> 仍然给出 f(z₀)；z₀ 移到圆外，积分变成 0。</p>
+  </header>
+  <div class="row" style="margin-bottom:10px">
+    <span class="hint" style="font-size:13px">f(z) =</span>
+    <div class="seg" role="radiogroup" aria-label="函数" id="fseg"></div>
+    <button class="btn" id="center" type="button">z₀ 回到圆心</button>
+  </div>
+  <div class="planes">
+    <div class="stage"><span class="tag">z 平面：圆周 C 与 z₀</span><canvas id="zp" aria-label="z 平面"></canvas><div class="status" id="status" aria-live="polite"></div></div>
+    <div class="stage"><span class="tag">w 平面：f 在 C 上的值</span><canvas id="wp" aria-label="w 平面"></canvas></div>
+  </div>
+  <p class="hint" style="margin-top:6px">拖动 z₀（红点）、圆心（黑点）、圆周上的小方块（改半径）。</p>
+  <div class="below">
+    <div class="card">
+      <div class="slider"><label for="n">导数阶数 n</label><input type="range" id="n" min="0" max="3" step="1" value="0"><output id="n-out" for="n"></output></div>
+      <div class="slider"><label for="k">圆周上的点数</label><input type="range" id="k" min="4" max="48" step="1" value="16"><output id="k-out" for="k"></output></div>
+      <p class="hint">n ≥ 1 时比较的是高阶导数公式 f⁽ⁿ⁾(z₀) = n!/(2πi) ∮ f(z)/(z − z₀)ⁿ⁺¹ dz。</p>
+    </div>
+    <div class="card" id="readout" aria-live="polite"></div>
+  </div>
+</div>
+<script src="assets/plane.js"></script>
+<script src="assets/integ.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,TAU,$,SANS_FONT}=CF;const {Path,integrate,numText,sample,exp,sin,cos,pow}=CF3;
+const three={x:3,y:0};
+const F={
+  exp:{l:'eᶻ',d:n=>exp},
+  z3:{l:'z³',d:n=>[z=>pow(z,3),z=>C.scale(C.sq(z),3),z=>C.scale(z,6),z=>({x:6,y:0})][n]},
+  sin:{l:'sin z',d:n=>[sin,cos,z=>C.scale(sin(z),-1),z=>C.scale(cos(z),-1)][n]},
+  rat:{l:'1/(z − 3)',d:n=>z=>C.scale(pow(C.sub(z,three),-(n+1)),[1,-1,2,-6][n]),sing:three},
+};
+const S={fn:'exp',c:{x:0,y:0},R:1.2,z0:{x:0,y:0},n:0,K:16};
+if(F[CF.hash.get('fn')])S.fn=CF.hash.get('fn');
+if(CF.hash.has('n')){S.n=Math.max(0,Math.min(3,+CF.hash.get('n')||0));$('#n').value=S.n;}
+if(S.n>0)S.z0={x:.4,y:.3};
+const seg=$('#fseg');Object.entries(F).forEach(([k,v])=>seg.insertAdjacentHTML('beforeend',`<input type="radio" name="fn" id="f-${k}" value="${k}"${k===S.fn?' checked':''}><label for="f-${k}" class="mr">${v.l}</label>`));
+const ZP=new CF.Plane($('#zp'),{range:2.4,maxVh:0.58,render:drawZ});
+const WP=new CF.Plane($('#wp'),{range:3,maxVh:0.58,render:drawW,names:['Re w','Im w']});
+ZP.addHandle({get:()=>S.z0,set:p=>{S.z0=p;update();}});
+ZP.addHandle({get:()=>C.add(S.c,{x:S.R,y:0}),set:p=>{S.R=Math.max(.2,Math.min(2.2,C.dist(p,S.c)));update();}});
+ZP.addHandle({get:()=>S.c,set:p=>{const d=C.sub(p,S.c);S.c=p;S.z0=C.add(S.z0,d);update();}});
+const f0=()=>F[S.fn].d(0);
+const circ=()=>Path.circle(S.c,S.R);
+const pts=()=>{const a=[];for(let k=0;k<S.K;k++)a.push(C.add(S.c,C.polar(S.R,TAU*k/S.K)));return a;};
+const hue=k=>`hsl(${Math.round(360*k/S.K)} 70% 48%)`;
+function drawZ(P){
+  const V=P.V;P.grid();
+  if(F[S.fn].sing)CF3.singular(P,F[S.fn].sing,V.w,'奇点 3');
+  P.path(sample(circ(),240),V.z1,3,{fill:V.fill1});CF3.pathArrows(P,circ(),V.z1,3);
+  pts().forEach((p,k)=>P.dot(p,hue(k),4.5));
+  const h=C.add(S.c,{x:S.R,y:0}),H=P.toS(h),c=P.ctx;c.save();c.fillStyle=V.z1;c.fillRect(H.X-5,H.Y-5,10,10);c.restore();
+  P.dot(S.c,V.ink,4.5);P.dot(S.z0,V.w,7,P.drag);P.wlabel(S.z0,'z₀',V.w,{dx:12,dy:-12});
+}
+let cache=null;
+function drawW(P){
+  const V=P.V;P.grid({unit:false});const f=f0();
+  P.path(sample(circ(),240).map(f),V.z1,2.5);
+  const ws=pts().map(f);ws.forEach((w,k)=>P.dot(w,hue(k),4.5));
+  if(!cache)return;
+  const avg=C.scale(ws.reduce((a,b)=>C.add(a,b),{x:0,y:0}),1/ws.length);
+  if(S.n===0){ws.forEach(w=>P.line(w,avg,V.muted,1,[2,4],.5));P.dot(avg,V.target,8);P.wlabel(avg,'点的平均值',V.target,{dx:12,dy:16,align:'left',font:'600 13px '+SANS_FONT});}
+  if(S.n===0&&cache.fz0){const Q=P.toS(cache.fz0),c=P.ctx;c.save();c.strokeStyle=V.w;c.lineWidth=2.5;c.beginPath();c.arc(Q.X,Q.Y,12,0,TAU);c.stroke();c.restore();P.wlabel(cache.fz0,'f(z₀)',V.w,{dx:14,dy:-14,align:'left',size:15});}
+}
+function update(){
+  const inside=C.dist(S.z0,S.c)<S.R-1e-3,onC=Math.abs(C.dist(S.z0,S.c)-S.R)<.03,fn=F[S.fn];
+  const bad=fn.sing&&C.dist(fn.sing,S.c)<S.R;
+  let val=null;if(!onC){const g=f0(),n=S.n,fact=[1,1,2,6][n];val=integrate(z=>C.mul(g(z),pow(C.sub(z,S.z0),-(n+1))),circ(),4000);val=C.scale(C.div(val,{x:0,y:TAU}),fact);}
+  const dn=fn.d(S.n)(S.z0);cache={fz0:f0()(S.z0)};
+  ZP.draw();WP.draw();
+  const name=S.n===0?'f(z₀)':'f'+['','′','″','‴'][S.n]+'(z₀)';
+  const ws=pts().map(f0()),avg=C.scale(ws.reduce((a,b)=>C.add(a,b),{x:0,y:0}),1/ws.length);
+  let rows=`<tr><td>${S.n===0?'(1/2πi) ∮ f(z)/(z − z₀) dz':S.n+'!/(2πi) ∮ f(z)/(z − z₀)'+['','²','³','⁴'][S.n]+' dz'}</td><td class="cv">${val?numText(val):'—'}</td></tr>
+    <tr><td class="cw">${name}</td><td class="cw">${numText(dn)}</td></tr>`;
+  if(S.n===0)rows+=`<tr><td class="ct">圆周上 ${S.K} 个点的平均值</td><td class="ct">${numText(avg)}</td></tr>`;
+  let msg;
+  if(bad)msg='<p class="verdict no">C 内部有 f 的奇点 z = 3：f 在 C 内不解析，公式不适用，积分值与 f⁽ⁿ⁾(z₀) 不再相等。</p>';
+  else if(onC)msg='<p class="verdict no">z₀ 在圆周上：被积函数在 C 上有奇点，积分没有定义。</p>';
+  else if(!inside)msg='<p class="note">z₀ 在 C 外部：f(z)/(z − z₀)ⁿ⁺¹ 在 C 上及 C 内解析，由柯西定理，积分为 0。</p>';
+  else if(S.n===0&&C.dist(S.z0,S.c)<1e-6)msg='<p class="note">z₀ 是圆心：柯西积分公式化为平均值公式 f(z₀) = (1/2π)∫₀²ᵖ f(z₀ + Re^{iθ}) dθ，圆周上等距点的平均值就是它的近似（点数越多越准）。</p>';
+  else msg=`<p class="note">z₀ 在 C 内部但不是圆心：${S.n===0?'简单平均不再等于 f(z₀)，但柯西积分仍然精确给出 f(z₀)——积分中的权 1/(z − z₀) 让离 z₀ 近的点权重更大。':'高阶导数公式给出 z₀ 处的导数；只用到 f 在 C 上的值。'}</p>`;
+  $('#readout').innerHTML=`<h2>f(z) = ${fn.l}，z₀ ${inside?'在 C 内':onC?'在 C 上':'在 C 外'}</h2><table class="rt"><tbody>${rows}</tbody></table><div class="why">${msg.replace('e^{iθ}','e<sup>iθ</sup>').replace('∫₀²ᵖ','∫₀<sup>2π</sup>')}</div>`;
+}
+CF.bindSeg('fn',v=>{S.fn=v;update();});
+CF.bindRange('#n',v=>String(v),v=>{S.n=v;update();});
+CF.bindRange('#k',v=>String(v),v=>{S.K=v;update();});
+$('#center').addEventListener('click',()=>{S.z0={...S.c};update();});
+ZP.resize();WP.resize();update();
+})();
+</script>
+</body>
+</html>

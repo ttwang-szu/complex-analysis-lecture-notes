@@ -1,0 +1,129 @@
+/* HTML 课件样式：仿 Beamer Antibes 主题，16:9，按窗口等比缩放 */
+:root{
+  --structure:#3333B2; --structure-dark:#1F1F6E; --structure-light:#E6E6F5;
+  --example:#1E7A36; --example-light:#E5F2E8;
+  --slide-bg:#FFFFFF; --stage-bg:#2A2D34; --ink:#111318; --muted:#5B6070;
+  --sans:"Microsoft YaHei","PingFang SC","Noto Sans SC",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--stage-bg);font-family:var(--sans);color:var(--ink);overflow:hidden}
+[hidden]{display:none!important}
+
+.deck{position:fixed;inset:0;display:grid;place-items:center}
+.slide{position:absolute;left:50%;top:50%;width:1280px;height:720px;background:var(--slide-bg);
+  transform-origin:center center;display:none;flex-direction:column;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.slide.on{display:flex}
+
+/* 页眉：章标题 / 节标题，像 Antibes 的导航条 */
+.hd{display:flex;flex-direction:column;flex:none}
+.hd .bar1{background:linear-gradient(90deg,var(--structure-dark),var(--structure));color:#fff;font-size:17px;padding:5px 22px;display:flex;justify-content:space-between}
+.hd .bar2{background:var(--structure-light);color:var(--structure-dark);font-size:15px;padding:3px 22px 3px 40px}
+.ft{font-size:26px;color:var(--structure);font-weight:700;padding:14px 40px 0;flex:none}
+.body{flex:1;padding:16px 56px 44px;font-size:28px;line-height:1.5;display:flex;flex-direction:column;justify-content:center;gap:14px;min-height:0}
+.body.top{justify-content:flex-start}
+.pn{position:absolute;right:22px;bottom:12px;font-size:16px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+.item{margin:0}
+.item .no{color:var(--structure);font-weight:700;margin-right:.35em}
+.item b{color:var(--structure)}
+p{margin:0}
+.zh{font-size:.82em;color:#333}
+
+/* 定理类块：带标题栏 */
+.blk{border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.blk>.t{background:var(--structure);color:#fff;padding:6px 18px;font-weight:700;font-size:26px}
+.blk>.c{background:var(--structure-light);padding:12px 20px;display:flex;flex-direction:column;gap:8px}
+.blk.ex>.t{background:var(--example)}
+.blk.ex>.c{background:var(--example-light);font-style:italic}
+.blk.ex>.c .katex{font-style:normal}
+/* 解答 / 证明：Beamer 的 proof 样式，斜体标题 + 结尾方块 */
+.sol{display:flex;flex-direction:column;gap:8px}
+.sol>.t{font-style:italic;color:var(--structure);font-weight:700}
+.sol.qed::after{content:"";align-self:flex-end;width:.55em;height:.55em;border:2px solid var(--structure);margin-top:-6px}
+ol.sub{margin:0;padding-left:1.8em;display:flex;flex-direction:column;gap:8px}
+ol.sub>li::marker{color:var(--structure);font-weight:700}
+.disp{text-align:center;margin:4px 0}
+.katex{font-size:1.02em}
+.katex-display{margin:.2em 0}
+
+figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:0}
+figure img{max-width:100%;object-fit:contain;display:block}
+figcaption{font-size:20px;color:var(--muted)}
+figcaption b{color:var(--structure)}
+
+/* 目录页 */
+.toc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px;font-size:28px}
+.toc li{display:flex;gap:14px;align-items:center;color:#999}
+.toc li .n{display:inline-grid;place-items:center;width:1.5em;height:1.5em;border-radius:50%;background:#ccc;color:#fff;font-size:.75em;font-weight:700}
+.toc li.cur{color:var(--ink);font-weight:700}
+.toc li.cur .n{background:var(--structure)}
+
+/* 分步显示（Beamer 的 <2->） */
+.step{visibility:hidden;opacity:0;transition:opacity .25s}
+.step.shown{visibility:visible;opacity:1}
+
+/* 演示入口按钮 */
+.demo-btn{align-self:flex-start;display:inline-flex;align-items:center;gap:12px;border:2px solid var(--structure);background:#fff;color:var(--structure);
+  font:inherit;font-size:22px;font-weight:700;padding:8px 18px;border-radius:10px;cursor:pointer}
+.demo-btn:hover,.demo-btn:focus-visible{background:var(--structure);color:#fff;outline:none}
+.demo-btn .ic{display:inline-grid;place-items:center;width:1.4em;height:1.4em;border-radius:50%;background:var(--structure);color:#fff;font-size:.75em}
+.demo-btn:hover .ic{background:#fff;color:var(--structure)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center;min-height:0}
+
+/* 演示覆盖层 */
+.overlay{position:fixed;inset:0;background:rgba(10,12,16,.72);display:grid;grid-template-rows:auto 1fr;z-index:10}
+.overlay .obar{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;color:#fff;font-size:15px;gap:12px}
+.overlay .obar button{font:inherit;background:#fff;color:#111;border:0;border-radius:8px;padding:6px 14px;cursor:pointer;font-weight:700}
+.overlay iframe{border:0;width:100%;height:100%;background:#fff}
+
+/* 底部工具条（鼠标靠近时出现） */
+.tools{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);display:flex;gap:6px;align-items:center;background:rgba(20,22,28,.85);color:#fff;
+  border-radius:10px;padding:5px 8px;font-size:14px;opacity:0;transition:opacity .2s;z-index:5}
+.tools:hover,.tools:focus-within,body.show-tools .tools{opacity:1}
+.tools button{font:inherit;background:transparent;color:#fff;border:0;border-radius:6px;padding:4px 10px;cursor:pointer}
+.tools button:hover,.tools button:focus-visible{background:rgba(255,255,255,.18);outline:none}
+.tools .cnt{min-width:5.5em;text-align:center;font-variant-numeric:tabular-nums}
+.progress{position:fixed;left:0;bottom:0;height:3px;background:var(--structure);z-index:4;transition:width .2s}
+@media (prefers-reduced-motion: reduce){.step{transition:none}}
+
+/* ---- 由 tex2html.py 生成的元素 ---- */
+.lst{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.lst>li{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:baseline}
+.lst>li>div{display:flex;flex-direction:column;gap:8px;min-width:0}
+.lst>li.nomark{display:flex;flex-direction:column;gap:8px;grid-template-columns:none;align-items:stretch}
+.lst .mk{display:inline-grid;place-items:center;min-width:1.25em;height:1.25em;padding:0 .25em;border-radius:999px;background:var(--structure);color:#fff;font-size:.72em;font-weight:700;transform:translateY(-.1em)}
+.lst .mk.paren{background:none;color:var(--structure);font-size:1em;padding:0;transform:none}
+.lst .mk.tri{min-width:0;width:0;height:0;padding:0;border-radius:0;background:none;border-left:.5em solid var(--structure);border-top:.3em solid transparent;border-bottom:.3em solid transparent;transform:translateY(-.15em)}
+.lst .lst{margin-top:2px}
+.body b{color:var(--structure)}
+.blk b{color:inherit}
+.imgrow{display:flex;gap:4%;justify-content:center;align-items:center;width:100%}
+.imgrow img{max-width:46%}
+.blank{display:inline-block;width:4.5em;border-bottom:2px solid currentColor;margin:0 .15em}
+.center{text-align:center}
+.demo-btn.corner{position:absolute;right:64px;bottom:34px;z-index:2;font-size:19px;padding:6px 14px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.title-slide{justify-content:center;align-items:center;gap:26px;text-align:center}
+.title-slide .tbox{background:var(--structure);color:#fff;border-radius:12px;padding:26px 60px;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+.title-slide h1{margin:0;font-size:42px;line-height:1.35;font-weight:700}
+.title-slide .au{font-size:28px}
+.title-slide .in{font-size:22px;color:var(--muted)}
+.toc li.all{color:var(--ink)}
+.toc li.all .n{background:var(--structure)}
+.title-slide>.hd{position:absolute;top:0;left:0;right:0}
+
+.toc li a{display:flex;gap:14px;align-items:center;color:inherit;text-decoration:none;border-radius:8px;padding:2px 10px 2px 2px;margin-left:-2px}
+.toc li a:hover,.toc li a:focus-visible{background:var(--structure-light);color:var(--structure-dark);outline:none}
+.toc li a:hover .n{background:var(--structure)}
+.mprow{display:flex;gap:3%;align-items:center;justify-content:space-between;min-height:0;width:100%}
+.mp{display:flex;flex-direction:column;gap:8px;min-width:0}
+.mp.top{align-self:flex-start}
+.mp.bottom{align-self:flex-end}
+.mp figure img{max-width:100%}
+/* 内容块不被压扁：放不下时交给 autofit 缩小字号 */
+.body>*,.sol>*,.blk>.c>*,.lst>li>div>*{flex-shrink:0}
+.tc-blue{color:#2433B8}
+.tc-red{color:#C0262D}
+.tc-green{color:#1E7A36}
+.lst>li>div.mprow{flex-direction:row;gap:3%}

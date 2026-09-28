@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>闭路变形原理</title>
+<link rel="stylesheet" href="assets/demo.css">
+<style>
+.verdict{margin:0;font-size:15px;font-weight:600}.verdict.no{color:var(--w)}
+.big{font-family:var(--math);font-size:20px;margin:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav" id="nav" aria-label="演示目录"></nav>
+  <header class="top">
+    <p class="eyebrow">复变函数 · 第 3 章 §3.2 柯西定理、§3.3 闭路变形与复合闭路定理、§3.5–3.6 例题</p>
+    <h1>闭路变形：积分只看围住了哪些奇点</h1>
+    <p class="lede">拖动闭曲线 C 上的控制点，随意变形。只要曲线不越过奇点（红叉），∮<sub>C</sub> f(z) dz 就不变；一旦把某个奇点“圈进来”或“放出去”，积分就跳一个固定的量——这个量只由该奇点决定。</p>
+  </header>
+  <div class="row" style="margin-bottom:10px">
+    <label for="preset" class="hint" style="font-size:13px">例题</label>
+    <select id="preset"></select>
+    <button class="btn primary" id="morph" type="button">▶ 随机变形</button>
+    <button class="btn" id="reset" type="button">恢复为圆</button>
+  </div>
+  <div class="layout">
+    <div class="stage-col">
+      <div class="stage"><span class="tag" id="tag">z 平面</span><canvas id="zp" aria-label="z 平面"></canvas><div class="status" id="status" aria-live="polite"></div></div>
+      <p class="hint">拖动空心圆点改变曲线形状；拖动曲线中心的十字整体平移。曲线按逆时针（正向）计算。</p>
+    </div>
+    <div class="panel">
+      <div class="card" id="readout" aria-live="polite"></div>
+      <div class="card" id="table" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+<script src="assets/plane.js"></script>
+<script src="assets/integ.js"></script>
+<script>
+(function(){
+"use strict";
+const {C,PI,TAU,$,SANS_FONT}=CF;const {Path,integrate,numText,piText,winding,sample,distToPoly,exp,sin,pow}=CF3;
+const z0={x:0,y:0},I={x:0,y:1};
+const P0=[
+  {id:'m3',name:'§3.3 动机：∮ dz/(z − 1)，|z| = 2',f:z=>C.inv(C.sub(z,{x:1,y:0})),fl:'1/(z − 1)',s:[{x:1,y:0}],c:z0,r:2,range:3},
+  {id:'e21',name:'例 2.1：∮ dz/(2z − 3)，|z| = 1',f:z=>C.inv({x:2*z.x-3,y:2*z.y}),fl:'1/(2z − 3)',s:[{x:1.5,y:0}],c:z0,r:1,range:2.4},
+  {id:'e22',name:'例 2.2 / 5.2：∮ dz/[z(z² + 1)]，|z − i| = 1/2',f:z=>C.inv(C.mul(z,C.add(C.sq(z),{x:1,y:0}))),fl:'1/[z(z² + 1)]',s:[z0,I,{x:0,y:-1}],c:I,r:.5,range:2.2},
+  {id:'q23',name:'例 2.3：∮ dz/z² = 0，但 1/z² 在 0 不解析',f:z=>C.inv(C.sq(z)),fl:'1/z²',s:[z0],c:z0,r:1,range:2.2},
+  {id:'e31',name:'例 3.1：∮ (2z − 1)/(z² − z) dz',f:z=>C.div({x:2*z.x-1,y:2*z.y},C.sub(C.sq(z),z)),fl:'(2z − 1)/(z² − z)',s:[z0,{x:1,y:0}],c:{x:.5,y:0},r:1.3,range:2.4},
+  {id:'e54',name:'例 5.4：∮ sin(πz/4)/(z² − 1) dz，|z| = 2',f:z=>C.div(sin(C.scale(z,PI/4)),C.sub(C.sq(z),{x:1,y:0})),fl:'sin(πz/4)/(z² − 1)',s:[{x:-1,y:0},{x:1,y:0}],c:z0,r:2,range:3},
+  {id:'e61',name:'例 6.1(2)：∮ eᶻ/(z² + 1)² dz，|z| = 2',f:z=>C.div(exp(z),C.sq(C.add(C.sq(z),{x:1,y:0}))),fl:'eᶻ/(z² + 1)²',s:[I,{x:0,y:-1}],c:z0,r:2,range:3,cl:['(1 − i)eⁱ·π/2','−(1 + i)e⁻ⁱ·π/2'],exact:{t:'iπ√2 sin(1 − π/4)',v:{x:0,y:PI*Math.SQRT2*Math.sin(1-PI/4)}}},
+  {id:'e62',name:'例 6.2：∮ dz/[(z − 2)² z³]，|z − 1| = 3',f:z=>C.inv(C.mul(C.sq(C.sub(z,{x:2,y:0})),pow(z,3))),fl:'1/[(z − 2)² z³]',s:[z0,{x:2,y:0}],c:{x:1,y:0},r:3,range:4.2},
+];
+const S={p:P0[0],pts:[],ctr:null};
+const sel=$('#preset');P0.forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.name;sel.appendChild(o);});
+const q=CF.hash.get('p');if(q&&P0.find(p=>p.id===q))S.p=P0.find(p=>p.id===q);sel.value=S.p.id;
+const N=10;
+function circlePts(c,r){const a=[];for(let k=0;k<N;k++)a.push(C.add(c,C.polar(r,TAU*k/N)));return a;}
+const ZP=new CF.Plane($('#zp'),{range:3,maxVh:0.72,aspect:.85,render:draw});
+for(let k=0;k<N;k++)ZP.addHandle({get:()=>S.pts[k],set:p=>{stop();S.pts[k]=p;update();}});
+ZP.addHandle({get:()=>centroid(),set:p=>{stop();const c=centroid(),d=C.sub(p,c);S.pts=S.pts.map(x=>C.add(x,d));update();}});
+function centroid(){let x=0,y=0;S.pts.forEach(p=>{x+=p.x;y+=p.y;});return{x:x/N,y:y/N};}
+const curve=()=>Path.closed(S.pts);
+/* 每个奇点的“贡献”：沿很小的正向圆周积分 */
+const contrib=new Map();
+function contribution(a){const key=S.p.id+a.x+','+a.y;if(!contrib.has(key))contrib.set(key,integrate(S.p.f,Path.circle(a,.04),8000));return contrib.get(key);}
+function draw(P){
+  const V=P.V;P.grid({unit:false});
+  const pts=sample(curve(),600),bad=S.p.s.some(a=>distToPoly(pts,a)<.04);
+  P.path(pts,bad?V.w:V.z1,3.5,{close:true,fill:V.fill1});CF3.pathArrows(P,curve(),bad?V.w:V.z1,4);
+  S.p.s.forEach(a=>{const w=winding(pts,a);CF3.singular(P,a,w?V.w:V.muted);});
+  S.pts.forEach(p=>{const Q=P.toS(p),c=P.ctx;c.save();c.strokeStyle=V.z1;c.lineWidth=2;c.fillStyle=V.surface;c.beginPath();c.arc(Q.X,Q.Y,5.5,0,TAU);c.fill();c.stroke();c.restore();});
+  const g=P.toS(centroid()),c=P.ctx;c.save();c.strokeStyle=V.ink;c.lineWidth=2;c.beginPath();c.moveTo(g.X-7,g.Y);c.lineTo(g.X+7,g.Y);c.moveTo(g.X,g.Y-7);c.lineTo(g.X,g.Y+7);c.stroke();c.restore();
+}
+function update(){
+  ZP.draw();$('#tag').textContent='z 平面：f(z) = '+S.p.fl;
+  const pts=sample(curve(),600),bad=S.p.s.some(a=>distToPoly(pts,a)<.04);
+  if(bad){$('#readout').innerHTML=`<h2>∮C f(z) dz</h2><p class="verdict no">曲线经过奇点，积分没有定义。继续拖动，让曲线离开奇点。</p>`;}
+  else{const I0=integrate(S.p.f,curve(),6000);let p=piText(I0);if(!p&&S.p.exact&&C.abs(C.sub(I0,S.p.exact.v))<1e-3)p=S.p.exact.t;
+    $('#readout').innerHTML=`<h2>∮C f(z) dz，f(z) = ${S.p.fl}</h2><p class="big">${p?p+'　':''}<span class="hint">≈ ${numText(I0)}</span></p>`;}
+  let rows='',sum={x:0,y:0};
+  S.p.s.forEach((a,k)=>{const w=winding(pts,a),c=contribution(a);sum=C.add(sum,C.scale(c,w));
+    const pc=piText(c)||(S.p.cl&&S.p.cl[k]);rows+=`<tr${w?' class="on"':''}><td>${CF.cplxText(a)}</td><td>${w?'在内部':'在外部'}</td><td>${pc||numText(c)}</td></tr>`;});
+  let ps=piText(sum);if(!ps&&S.p.exact&&C.abs(C.sub(sum,S.p.exact.v))<1e-3)ps=S.p.exact.t;
+  $('#table').innerHTML=`<h2>各奇点的贡献（绕奇点的小正向圆周上的积分）</h2><table class="rt"><thead><tr><th>奇点</th><th>相对 C</th><th>贡献 ∮|z−a|=ε f dz</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="why"><p>∮C f dz = 内部各奇点贡献之和 = ${ps||numText(sum)}</p><p class="note">这就是复合闭路定理：大曲线上的积分 = 每个奇点周围小圆上的积分之和。没有奇点在内部时，积分为 0（柯西定理）。</p></div>`;
+}
+let anim=null;function stop(){if(anim){anim.stop();anim=null;}}
+function setPreset(id){stop();S.p=P0.find(p=>p.id===id);S.pts=circlePts(S.p.c,S.p.r);ZP.range=S.p.range;ZP.center=S.p.c;update();}
+sel.addEventListener('change',()=>setPreset(sel.value));
+$('#reset').addEventListener('click',()=>setPreset(S.p.id));
+$('#morph').addEventListener('click',()=>{stop();const from=S.pts.map(p=>({...p})),c=centroid();
+  const to=from.map((p,k)=>{const d=C.sub(p,c),f=.55+.9*Math.random();return C.add(c,C.scale(d,f));});
+  anim=CF.animate(2200,t=>{const u=CF.ease(t);S.pts=from.map((p,k)=>CF3.lin(p,to[k],u));update();},()=>{anim=null;});});
+setPreset(S.p.id);ZP.resize();
+})();
+</script>
+</body>
+</html>
