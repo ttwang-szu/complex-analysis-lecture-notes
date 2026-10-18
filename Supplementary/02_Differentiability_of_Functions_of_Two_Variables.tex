@@ -1,0 +1,310 @@
+\documentclass[UTF8,11pt]{ctexart}
+
+\usepackage[a4paper,margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+
+\definecolor{courseblue}{RGB}{43,49,139}
+\hypersetup{colorlinks=true,linkcolor=courseblue,urlcolor=courseblue}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.35em}
+\setlist{itemsep=0.25em,topsep=0.35em}
+
+\pagestyle{fancy}
+\setlength{\headheight}{14pt}
+\fancyhf{}
+\lhead{复变函数补充阅读}
+\rhead{02}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\title{\textcolor{courseblue}{补充阅读 02：二元函数的可微性与增量形式}}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\vspace{-2.2em}
+
+\section{为什么复变函数会用到二元函数的可微性}
+
+复变函数
+\[
+f(z)=u(x,y)+iv(x,y),\qquad z=x+iy,
+\]
+可以看作从 $\R^2$ 到 $\R^2$ 的映射
+\[
+(x,y)\longmapsto (u(x,y),v(x,y)).
+\]
+因此，在研究复函数 $f$ 的可导性之前，需要明确实二元函数
+$u(x,y)$ 和 $v(x,y)$ 的可微性。这里的“可微”不是“两个偏导数存在”的简称，而是要求函数在该点附近能够被一个线性函数统一地近似。
+
+\section{二元函数可微的定义}
+
+设 $g(x,y)$ 定义在 $(x_0,y_0)$ 的某个邻域内。令
+\[
+\Delta g
+=g(x_0+\Delta x,y_0+\Delta y)-g(x_0,y_0),
+\qquad
+r=\sqrt{(\Delta x)^2+(\Delta y)^2}.
+\]
+如果存在与 $\Delta x,\Delta y$ 无关的常数 $A,B$，使得
+\[
+\Delta g=A\Delta x+B\Delta y+R(\Delta x,\Delta y),
+\]
+并且
+\[
+\lim_{(\Delta x,\Delta y)\to(0,0)}
+\frac{R(\Delta x,\Delta y)}{r}=0,
+\]
+那么称 $g$ 在 $(x_0,y_0)$ \textbf{可微}。
+
+余项也常写成 $o(r)$，于是定义可以简写为
+\[
+\boxed{\Delta g=A\Delta x+B\Delta y+o(r).}
+\]
+其中 $A\Delta x+B\Delta y$ 是增量 $\Delta g$ 的\textbf{线性主部}，也就是函数在该点的一阶近似。
+
+上述极限的含义是：对任意 $\varepsilon>0$，存在 $\delta>0$，使得
+\[
+0<r<\delta
+\quad\Longrightarrow\quad
+\abs{R(\Delta x,\Delta y)}\leq\varepsilon r.
+\]
+这个估计对所有趋近方向同时成立，因而比只沿坐标轴考察函数更强。
+
+\section{线性主部为什么由偏导数给出}
+
+如果 $g$ 在 $(x_0,y_0)$ 可微，那么取 $\Delta y=0$ 可得
+\[
+\frac{g(x_0+\Delta x,y_0)-g(x_0,y_0)}{\Delta x}
+=A+\frac{R(\Delta x,0)}{\Delta x}.
+\]
+由于此时 $r=\abs{\Delta x}$，余项之比趋于 $0$，所以
+\[
+A=g_x(x_0,y_0).
+\]
+同理，取 $\Delta x=0$ 得到
+\[
+B=g_y(x_0,y_0).
+\]
+因此，二元函数可微时必有
+\[
+\boxed{
+\Delta g
+=g_x(x_0,y_0)\Delta x
++g_y(x_0,y_0)\Delta y
++o(r).
+}
+\]
+其线性主部称为全微分：
+\[
+\mathrm{d}g=g_x\,\mathrm{d}x+g_y\,\mathrm{d}y.
+\]
+
+需要注意，以上结论说明“可微必然推出偏导数存在”，反过来仅有两个偏导数存在，一般不能推出可微。
+
+\section{常用判断方法}
+
+\subsection*{方法一：直接验证定义}
+
+先找出候选线性主部
+\[
+L(\Delta x,\Delta y)=A\Delta x+B\Delta y,
+\]
+再证明
+\[
+\frac{\abs{\Delta g-L(\Delta x,\Delta y)}}{
+\sqrt{(\Delta x)^2+(\Delta y)^2}}
+\longrightarrow0.
+\]
+这一方法最接近定义，适合处理偏导数不连续或表达式中含有绝对值、根式的函数。
+
+\subsection*{方法二：使用连续偏导数判据}
+
+如果 $g_x$ 和 $g_y$ 在 $(x_0,y_0)$ 的某个邻域内存在，并且在
+$(x_0,y_0)$ 连续，那么 $g$ 在该点可微。
+
+这是常用的\textbf{充分条件}。对多项式、指数函数、三角函数及其通常的复合运算，往往可以直接使用这个判据。偏导数连续不是可微的必要条件，因此不能把它当作可微的定义。
+
+\subsection*{判断关系}
+
+在一点处，下列逻辑关系需要区分：
+\[
+\text{一阶偏导数在邻域存在且在该点连续}
+\Longrightarrow
+\text{可微}
+\Longrightarrow
+\begin{cases}
+\text{连续},\\
+\text{一阶偏导数存在}.
+\end{cases}
+\]
+两个反方向一般都不成立。
+
+\section{例子}
+
+\subsection*{例 1：用连续偏导数判据}
+
+设
+\[
+g(x,y)=x^2+xy+3y^2.
+\]
+其偏导数
+\[
+g_x=2x+y,\qquad g_y=x+6y
+\]
+在整个平面连续，所以 $g$ 在 $\R^2$ 上处处可微。在
+$(x_0,y_0)$ 处，
+\[
+\Delta g
+=(2x_0+y_0)\Delta x+(x_0+6y_0)\Delta y
++o(r).
+\]
+
+\subsection*{例 2：偏导数存在但不可微}
+
+定义
+\[
+g(x,y)=
+\begin{cases}
+\sqrt{\abs{xy}},&(x,y)\neq(0,0),\\
+0,&(x,y)=(0,0).
+\end{cases}
+\]
+沿两条坐标轴都有 $g=0$，所以
+\[
+g_x(0,0)=g_y(0,0)=0.
+\]
+如果 $g$ 在原点可微，线性主部只能是 $0$，因而必须有
+\[
+\frac{g(\Delta x,\Delta y)}
+{\sqrt{(\Delta x)^2+(\Delta y)^2}}\longrightarrow0.
+\]
+但沿 $\Delta y=\Delta x\neq0$，
+\[
+\frac{g(\Delta x,\Delta x)}
+{\sqrt{2(\Delta x)^2}}
+=\frac{\abs{\Delta x}}{\sqrt2\abs{\Delta x}}
+=\frac1{\sqrt2}.
+\]
+极限不为 $0$，所以 $g$ 在原点不可微。这个例子表明，仅仅计算出偏导数还不够。
+
+\section{与 Chapter 2 第 22 页证明的连接}
+
+在课件中，假设复函数 $f$ 在 $z=x+iy$ 处可导，并写成
+\[
+f'(z)=a+ib,\qquad
+\rho(\Delta z)=\rho_1+i\rho_2,
+\qquad \rho(\Delta z)\to0.
+\]
+比较实部和虚部得到
+\[
+\Delta u
+=a\Delta x-b\Delta y
++\rho_1\Delta x-\rho_2\Delta y,
+\]
+\[
+\Delta v
+=b\Delta x+a\Delta y
++\rho_2\Delta x+\rho_1\Delta y.
+\]
+下面用两种方法估计 $u$ 的余项。
+
+\noindent\textbf{方法一：Cauchy--Schwarz 不等式。}
+对于
+\[
+\mathbf{a}=(A,B),\qquad
+\mathbf{b}=(X,Y),\qquad
+\mathbf{a}\cdot\mathbf{b}=AX+BY,
+\]
+其中内积 $\mathbf{a}\cdot\mathbf{b}$ 就是对应分量相乘后相加。
+Cauchy--Schwarz 不等式及其展开形式为
+\[
+\begin{aligned}
+\boxed{\abs{\mathbf{a}\cdot\mathbf{b}}
+       \leq\norm{\mathbf{a}}\,\norm{\mathbf{b}}}
+\quad\Longleftrightarrow\quad
+\abs{AX+BY}
+&\leq\sqrt{A^2+B^2}\sqrt{X^2+Y^2}.
+\end{aligned}
+\]
+在这里取
+\[
+\mathbf{a}=(\rho_1,-\rho_2),
+\qquad
+\mathbf{b}=(\Delta x,\Delta y),
+\qquad
+\mathbf{a}\cdot\mathbf{b}
+=\rho_1\Delta x-\rho_2\Delta y,
+\]
+便得到
+\[
+\abs{\rho_1\Delta x-\rho_2\Delta y}
+\leq
+\sqrt{\rho_1^2+\rho_2^2}
+\sqrt{(\Delta x)^2+(\Delta y)^2}
+=\abs{\rho(\Delta z)}r=o(r).
+\]
+
+\noindent\textbf{方法二：三角不等式。}
+由于 $\abs{\Delta x}\leq r$，$\abs{\Delta y}\leq r$，
+\[
+\begin{aligned}
+\abs{\rho_1\Delta x-\rho_2\Delta y}
+&\leq\abs{\rho_1}\abs{\Delta x}
+     +\abs{\rho_2}\abs{\Delta y}\\
+&\leq(\abs{\rho_1}+\abs{\rho_2})r=o(r).
+\end{aligned}
+\]
+最后一步使用了 $\rho_1,\rho_2\to0$。
+
+对 $v$ 的余项，Cauchy--Schwarz 不等式给出
+\[
+\abs{\rho_2\Delta x+\rho_1\Delta y}
+\leq\abs{\rho(\Delta z)}r=o(r).
+\]
+三角不等式则给出
+\[
+\abs{\rho_2\Delta x+\rho_1\Delta y}
+\leq(\abs{\rho_1}+\abs{\rho_2})r=o(r).
+\]
+因此这两个增量都具有“线性主部加 $o(r)$”的形式，从而 $u,v$
+在 $(x,y)$ 可微，并且
+\[
+u_x=a,\qquad u_y=-b,\qquad
+v_x=b,\qquad v_y=a.
+\]
+于是立即得到 Cauchy--Riemann 方程
+\[
+u_x=v_y,\qquad u_y=-v_x.
+\]
+
+\section{自测}
+
+\begin{enumerate}
+  \item 写出 $g(x,y)=e^x\cos y$ 在 $(0,0)$ 处的线性主部。
+  \item 若
+        \[
+        \Delta g=2\Delta x-3\Delta y
+        +(\Delta x)^2+\Delta x\Delta y,
+        \]
+        说明 $g$ 为什么可微，并求 $g_x,g_y$。
+\end{enumerate}
+
+\subsection*{参考答案}
+
+\begin{enumerate}
+  \item $\Delta g=\Delta x+o(r)$，线性主部为 $\Delta x$。
+  \item 余项的绝对值不超过 $r^2+r^2/2$，所以余项为
+        $o(r)$；$g_x=2$，$g_y=-3$。
+\end{enumerate}
+
+\end{document}
