@@ -368,6 +368,29 @@
 			      \[\frac{\partial u}{\partial x}=a,\quad \frac{\partial u}{\partial y}=-b,\quad \frac{\partial v}{\partial x}=b,\quad \frac{\partial v}{\partial y}=a.\]
 			      Hence
 			      \[\frac{\partial u}{\partial x}=\frac{\partial v}{\partial y},\qquad \frac{\partial u}{\partial y}=-\frac{\partial v}{\partial x}.\]
+		\end{enumerate}
+	\end{proofs}
+\end{frame}
+
+\begin{frame}
+	\begin{block}{Technical Note: Equivalent Forms of the Remainder}
+		Let
+		\[r=\sqrt{(\Delta x)^2+(\Delta y)^2},\qquad R(\Delta x,\Delta y)=o(r).\]
+		Then the remainder（余项） can be written as
+		\[R=\varepsilon_1\Delta x+\varepsilon_2\Delta y,
+			\qquad \varepsilon_1,\varepsilon_2\to0.\]
+		For $r>0$, choose the following values, and set both to $0$ at $r=0$:
+		\[\varepsilon_1=\frac{R\Delta x}{r^2},\qquad
+			\varepsilon_2=\frac{R\Delta y}{r^2}.\]
+		Then $\varepsilon_1\Delta x+\varepsilon_2\Delta y=R$, and
+		\[\abs{\varepsilon_1},\abs{\varepsilon_2}\leq\frac{\abs{R}}{r}\to0.\]
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\begin{proofs}[\proofname\ (Cont.)]
+		\begin{enumerate}
+			\setcounter{enumi}{1}
 			\item Sufficiency. Suppose $u$ and $v$ are differentiable at $(x,y)$ and satisfy the Cauchy--Riemann equations. Write
 			      \[f(z+\Delta z)-f(z)=\Delta u+i\Delta v.\]
 		\end{enumerate}
@@ -379,7 +402,7 @@
 		\begin{enumerate}
 			\setcounter{enumi}{1}
 			\item []
-			      Differentiability of $u$ and $v$ gives
+			      By the preceding technical note, differentiability of $u$ and $v$ gives
 			      \begin{align*}
 				      \Delta u & =\frac{\partial u}{\partial x}\Delta x+\frac{\partial u}{\partial y}\Delta y+\varepsilon_1\Delta x+\varepsilon_2\Delta y, \\
 				      \Delta v & =\frac{\partial v}{\partial x}\Delta x+\frac{\partial v}{\partial y}\Delta y+\varepsilon_3\Delta x+\varepsilon_4\Delta y,

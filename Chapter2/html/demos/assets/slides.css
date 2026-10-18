@@ -72,6 +72,17 @@ figcaption b{color:var(--structure)}
 .demo-btn:hover .ic{background:#fff;color:var(--structure)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center;min-height:0}
 
+/* 证明中的补充说明：按需打开，不占用正常翻页顺序 */
+.note-btn{display:inline-flex;align-items:center;margin-left:10px;border:1.5px solid var(--structure);background:#fff;color:var(--structure);
+  font:inherit;font-size:.68em;font-weight:700;padding:3px 10px;border-radius:8px;cursor:pointer;vertical-align:.12em}
+.note-btn:hover,.note-btn:focus-visible{background:var(--structure);color:#fff;outline:none}
+.note-overlay{position:fixed;inset:0;z-index:12;display:grid;place-items:center;background:rgba(10,12,16,.76);padding:32px}
+.note-card{width:min(1120px,calc(100vw - 64px));max-height:calc(100vh - 64px);overflow:auto;background:#fff;border-radius:12px;
+  padding:24px;font-size:25px;line-height:1.45;box-shadow:0 12px 48px rgba(0,0,0,.45)}
+.note-card .note-close{display:block;margin:18px 0 0 auto;border:2px solid var(--structure);background:var(--structure);color:#fff;
+  font:inherit;font-size:20px;font-weight:700;padding:7px 16px;border-radius:9px;cursor:pointer}
+.note-card .note-close:hover,.note-card .note-close:focus-visible{background:#fff;color:var(--structure);outline:none}
+
 /* 演示覆盖层 */
 .overlay{position:fixed;inset:0;background:rgba(10,12,16,.72);display:grid;grid-template-rows:auto 1fr;z-index:10}
 .overlay .obar{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;color:#fff;font-size:15px;gap:12px}

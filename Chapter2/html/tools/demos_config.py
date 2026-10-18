@@ -7,8 +7,6 @@ _E = re.escape
 DEMOS = [
     dict(match=_E('Hence $f(z)=z^2$ is differentiable everywhere'), src='demos/01-difference-quotient.html#embed&fn=z2', label='交互演示：Δz 绕一圈，差商收缩到 2z'),
     dict(match=_E('Figure_2_1.jpg'), src='demos/01-difference-quotient.html#embed&fn=lin', label='交互演示：2x + yi 的差商依赖方向'),
-    dict(match=_E('Analyticity is a neighborhood property'), src='demos/03-cr-heatmap.html#embed&fn=abs2', label='交互演示：只在一点可导 ≠ 解析'),
-    dict(match=_E('Cauchy--Riemann equations（柯西'), src='demos/02-local-linear.html#embed&fn=z2', label='交互演示：C–R 方程 = 局部伸缩 + 旋转'),
     dict(match=_E('where they are analytic'), src='demos/03-cr-heatmap.html#embed&fn=zre', label='交互演示：C–R 方程在哪里成立'),
     dict(match=_E('Prove that $\\overline{z}^2$ is analytic nowhere'), src='demos/03-cr-heatmap.html#embed&fn=conj2', label='交互演示：z̄² 只在原点满足 C–R'),
     dict(match=_E('Find the constants $a$'), src='demos/03-cr-heatmap.html#embed&fn=ex23', label='交互演示：拖动滑块求 a, b, c, d'),
