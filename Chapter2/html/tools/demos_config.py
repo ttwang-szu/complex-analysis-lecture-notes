@@ -17,12 +17,6 @@ DEMOS = [
     dict(match=_E('called a branch（分支）'), src='demos/06-log-branches.html#embed', label='交互演示：Ln z 的值与分支'),
     dict(match=_E('is discontinuous on the negative real axis'), src='demos/06-log-branches.html#embed', label='交互演示：绕原点一圈，主值跳变'),
     dict(match=_E('Unlike the real case'), src='demos/07-sine.html#embed&fn=sin', label='交互演示：|sin z| 无界'),
-    dict(match=_E('Solve the equation $\\sin z=i\\sinh 1$'), src='demos/07-sine.html#embed&fn=sin', label='交互演示：解在热图上的位置'),
-    dict(match=_E('Solve the equation $\\abs{\\tanh z}=1$'), src='demos/07-sine.html#embed&fn=tanh', label='交互演示：|tanh z| = 1 的水平线'),
-    dict(match=_E('coprime integers'), src='demos/08-power.html#embed&p=0', label='交互演示：a^{p/q} 恰有 q 个值'),
-    dict(match=_E('Find the values of $1^{\\sqrt{2}}$ and $i^i$'), src='demos/08-power.html#embed&p=5', label='交互演示：i^i 与 1^{√2} 的所有值'),
-    dict(match=_E('Find the values of $(-3)^{\\sqrt{5}}$'), src='demos/08-power.html#embed&p=4', label='交互演示：(−3)^{√5} 的值'),
-    dict(match=_E('Find the principal argument of $(1+i)^i$'), src='demos/08-power.html#embed&p=6', label='交互演示：所有值幅角相同'),
 ]
 
 # 个别插图在 HTML 版中单独指定最大高度（px），不影响 PDF

@@ -904,6 +904,9 @@
 			            Let $a\neq0$ and let $b$ be any complex number. The power（乘幂） $a^b$ is defined by
 			            \[a^b=e^{b\Ln a}.\]
 			            Since $\Ln a=\ln\abs{a}+i(\arg a+2k\pi)$ is multiple-valued, $a^b$ is multiple-valued in general.
+
+			            Replacing $\Ln a$ with its principal value $\ln a$ gives the principal value of $a^b$:
+			            \[e^{b\ln a}=e^{b[\ln\abs{a}+i\arg a]}.\]
 			            \begin{enumerate}[1)]
 				            \item If $b$ is an integer, then $e^{2kb\pi i}=1$ and
 				                  \[a^b=e^{b[\ln\abs{a}+i(\arg a+2k\pi)]}=e^{b\ln a}\,e^{2kb\pi i}=e^{b\ln a},\]
@@ -958,6 +961,10 @@
 			      \item []
 			            If $a=z$ is a complex variable, we obtain the power function（幂函数） $w=z^b$.
 
+			            For a fixed exponent $b$, replacing $\Ln z$ with $\ln z$ gives the principal branch（主支）
+			            \[w=e^{b\ln z},\qquad -\pi<\arg z<\pi,\]
+			            which is analytic in the cut plane $\mathbb{C}\setminus(-\infty,0]$.
+
 			            For $b=n$ and $b=\frac{1}{n}$, we obtain $w=z^n$ and its inverse, the $n$-th root function $w=z^{\frac{1}{n}}=\sqrt[n]{z}$.
 		      \end{enumerate}
 	\end{enumerate}
@@ -1009,9 +1016,9 @@
 			      \item Analyticity of Power Functions
 			            \begin{enumerate}[1)]
 				            \item $z^n$ is single-valued and analytic in the whole plane, and $(z^n)'=nz^{n-1}$.
-				            \item $z^{\frac{1}{n}}=e^{\frac{1}{n}\Ln z}$ is multiple-valued with $n$ branches. Each branch is analytic in the plane with the origin and the negative real axis removed, and
+				            \item $z^{\frac{1}{n}}=e^{\frac{1}{n}\Ln z}$ is multiple-valued with $n$ branches. Its principal branch is $e^{\frac{1}{n}\ln z}$. Each branch is analytic in the plane with the origin and the negative real axis removed, and
 				                  \[\left(z^{\frac{1}{n}}\right)'=\left(e^{\frac{1}{n}\Ln z}\right)'=\frac{1}{n}z^{\frac{1}{n}-1}.\]
-				            \item For other exponents $b$, $z^b=e^{b\Ln z}$ is multiple-valued (with infinitely many branches if $b$ is irrational or non-real). Each branch is analytic in the same cut plane, and
+				            \item For other exponents $b$, $z^b=e^{b\Ln z}$ is multiple-valued (with infinitely many branches if $b$ is irrational or non-real). Its principal branch is $e^{b\ln z}$. Each branch is analytic in the same cut plane, and
 				                  \[\left(z^b\right)'=bz^{b-1}.\]
 			            \end{enumerate}
 		      \end{enumerate}
@@ -1089,6 +1096,7 @@
 				            \setcounter{enumiii}{2}
 				            \item For a purely imaginary number $iy$,
 				                  \[\cos iy=\frac{e^{-y}+e^{y}}{2}=\cosh y,\qquad \sin iy=\frac{e^{-y}-e^{y}}{2i}=i\sinh y.\]
+				                  Here $\cosh$ and $\sinh$ denote the hyperbolic cosine（双曲余弦） and hyperbolic sine（双曲正弦）, respectively.
 				            \item Hence
 				                  \[\begin{cases}
 						                  \cos(x+iy)=\cos x\cosh y-i\sin x\sinh y, \\
@@ -1108,6 +1116,8 @@
 			            The other trigonometric functions are defined by
 			            \[\tan z=\frac{\sin z}{\cos z},\quad \cot z=\frac{\cos z}{\sin z},\quad \sec z=\frac{1}{\cos z},\quad \csc z=\frac{1}{\sin z}.\]
 			            Their periodicity, parity, and analyticity can be studied in the same way as for $\sin z$ and $\cos z$.
+
+			            All four functions are unbounded on their domains. The absolute values of $\tan z$ and $\sec z$ can become arbitrarily large as $z$ approaches $\frac{\pi}{2}+k\pi$; the same is true of $\cot z$ and $\csc z$ as $z$ approaches $k\pi$.
 		      \end{enumerate}
 	\end{enumerate}
 \end{frame}
@@ -1141,11 +1151,8 @@
 	\begin{solution}<2->
 		Let $z=x+iy$. Then $\sin x\cosh y+i\cos x\sinh y=i\sinh 1$, so
 		\[\sin x\cosh y=0,\qquad \cos x\sinh y=\sinh 1.\]
-		Since $\cosh y\geq1$, $\sin x=0$ and $x=k\pi$. Then $\sinh y=(-1)^k\sinh 1$, so $y=(-1)^k$. Therefore,
-		\[z=\begin{cases}
-				2n\pi+i, \\
-				(2n+1)\pi-i,
-			\end{cases}\qquad n\in\mathbb{Z}.\]
+		Since $\cosh y>0$, $\sin x=0$ and $x=k\pi$. Then $\sinh y=(-1)^k\sinh 1$, so $y=(-1)^k$. Therefore,
+		\[z=k\pi+i(-1)^k,\qquad k\in\mathbb{Z}.\]
 	\end{solution}
 \end{frame}
 

@@ -101,20 +101,13 @@
 
 <section class="slide" data-section="2 Necessary and Sufficient Conditions for Analyticity"><div class="body"><div class="sol"><span class="t">Proof (Cont.)</span><ol class="lst"><li class="nomark"><p>Since $\displaystyle \rho_1,\rho_2\to0$ as $\displaystyle (\Delta x,\Delta y)\to(0,0)$, $\displaystyle u$ and $\displaystyle v$ are differentiable at $\displaystyle (x,y)$, with \[\frac{\partial u}{\partial x}=a,\quad \frac{\partial u}{\partial y}=-b,\quad \frac{\partial v}{\partial x}=b,\quad \frac{\partial v}{\partial y}=a.\] Hence \[\frac{\partial u}{\partial x}=\frac{\partial v}{\partial y},\qquad \frac{\partial u}{\partial y}=-\frac{\partial v}{\partial x}.\]</p></li></ol></div></div></section>
 
-<div class="note-overlay" data-note="remainder" hidden><div class="note-card" role="dialog" aria-modal="true" aria-label="Equivalent forms of the remainder"><div class="blk def"><div class="t">Technical Note: Equivalent Forms of the Remainder</div><div class="c"><p>Let
-\[r=\sqrt{(\Delta x)^2+(\Delta y)^2},\qquad R(\Delta x,\Delta y)=o(r).\]
-Then the remainder（余项） can be written as
-\[R=\varepsilon_1\Delta x+\varepsilon_2\Delta y,
-\qquad \varepsilon_1,\varepsilon_2\to0.\]
-For $\displaystyle r&gt;0$, choose the following values, and set both to $\displaystyle 0$ at $\displaystyle r=0$:
-\[\varepsilon_1=\frac{R\Delta x}{r^2},\qquad
-\varepsilon_2=\frac{R\Delta y}{r^2}.\]
-Then $\displaystyle \varepsilon_1\Delta x+\varepsilon_2\Delta y=R$, and
-\[\abs{\varepsilon_1},\abs{\varepsilon_2}\leq\frac{\abs{R}}{r}\to0.\]</p></div></div><button class="note-close" type="button" data-note-close>Back to proof</button></div></div>
+<section class="slide" data-section="2 Necessary and Sufficient Conditions for Analyticity"><div class="body"><p>Technical Note: Equivalent Forms of the Remainder Let \[r=\sqrt{(\Delta x)^2+(\Delta y)^2},\qquad R(\Delta x,\Delta y)=o(r).\] Then the remainder（余项） can be written as \[R=\varepsilon_1\Delta x+\varepsilon_2\Delta y,
+			\qquad \varepsilon_1,\varepsilon_2\to0.\] For $\displaystyle r&gt;0$, choose the following values, and set both to $\displaystyle 0$ at $\displaystyle r=0$: \[\varepsilon_1=\frac{R\Delta x}{r^2},\qquad
+			\varepsilon_2=\frac{R\Delta y}{r^2}.\] Then $\displaystyle \varepsilon_1\Delta x+\varepsilon_2\Delta y=R$, and \[\abs{\varepsilon_1},\abs{\varepsilon_2}\leq\frac{\abs{R}}{r}\to0.\]</p></div></section>
 
 <section class="slide" data-section="2 Necessary and Sufficient Conditions for Analyticity"><div class="body"><div class="sol"><span class="t">Proof (Cont.)</span><ol class="lst"><li><span class="mk">2</span><div><p>Sufficiency. Suppose $\displaystyle u$ and $\displaystyle v$ are differentiable at $\displaystyle (x,y)$ and satisfy the Cauchy--Riemann equations. Write \[f(z+\Delta z)-f(z)=\Delta u+i\Delta v.\]</p></div></li></ol></div></div></section>
 
-<section class="slide" data-section="2 Necessary and Sufficient Conditions for Analyticity"><div class="body"><div class="sol"><span class="t">Proof (Cont.)</span><ol class="lst"><li class="nomark"><p>Differentiability of $\displaystyle u$ and $\displaystyle v$ gives <button class="note-btn" type="button" data-note-target="remainder">Why this form?</button> \[\begin{aligned}
+<section class="slide" data-section="2 Necessary and Sufficient Conditions for Analyticity"><div class="body"><div class="sol"><span class="t">Proof (Cont.)</span><ol class="lst"><li class="nomark"><p>By the preceding technical note, differentiability of $\displaystyle u$ and $\displaystyle v$ gives \[\begin{aligned}
 				      \Delta u &amp; =\frac{\partial u}{\partial x}\Delta x+\frac{\partial u}{\partial y}\Delta y+\varepsilon_1\Delta x+\varepsilon_2\Delta y, \\
 				      \Delta v &amp; =\frac{\partial v}{\partial x}\Delta x+\frac{\partial v}{\partial y}\Delta y+\varepsilon_3\Delta x+\varepsilon_4\Delta y,
 			      \end{aligned}\] where $\displaystyle \varepsilon_k\to0$ $\displaystyle (k=1,2,3,4)$ as $\displaystyle (\Delta x,\Delta y)\to(0,0)$. Therefore, \[\begin{aligned}
@@ -170,17 +163,9 @@ Then $\displaystyle \varepsilon_1\Delta x+\varepsilon_2\Delta y=R$, and
 <section class="slide" data-section="2 Necessary and Sufficient Conditions for Analyticity"><div class="body"><div class="blk ex"><div class="t">Example 2.7</div><div class="c"><p>Suppose $\displaystyle f'(z)=0$ everywhere in a domain $\displaystyle D$. Prove that $\displaystyle f(z)$ is constant in $\displaystyle D$.</p></div></div>
 <div class="sol qed step"><span class="t">Proof.</span><p>By (2.2.1), \[f'(z)=\frac{\partial u}{\partial x}+i\frac{\partial v}{\partial x}=\frac{\partial v}{\partial y}-i\frac{\partial u}{\partial y}\equiv 0,\] so $\displaystyle \frac{\partial u}{\partial x}=\frac{\partial u}{\partial y}=\frac{\partial v}{\partial x}=\frac{\partial v}{\partial y}\equiv 0$ in $\displaystyle D$. Since $\displaystyle D$ is connected, $\displaystyle u$ and $\displaystyle v$ are constant, and hence $\displaystyle f(z)$ is constant in $\displaystyle D$.</p></div></div></section>
 
-<div class="note-overlay" data-note="implicit-differentiation" hidden><div class="note-card" role="dialog" aria-modal="true" aria-label="Implicit differentiation review"><div class="blk def"><div class="t">Review: Implicit Differentiation（隐函数求导）</div><div class="c"><p>Let a level curve be given by $\displaystyle F(x,y)=c$. If $\displaystyle F_y(x_0,y_0)\neq0$, then locally $\displaystyle y=y(x)$. Differentiating both sides with respect to $\displaystyle x$ gives
-\[F_x+F_y\frac{\mathrm{d}y}{\mathrm{d}x}=0,
-\qquad \frac{\mathrm{d}y}{\mathrm{d}x}=-\frac{F_x}{F_y}.\]</p>
-<p>If $\displaystyle F_y=0$ but $\displaystyle F_x\neq0$, write $\displaystyle x=x(y)$ instead. Then
-\[\frac{\mathrm{d}x}{\mathrm{d}y}=-\frac{F_y}{F_x}=0,\]
-so the tangent is vertical.</p>
-<p>In Example 2.8, apply the rule first to $\displaystyle F=u$ and then to $\displaystyle F=v$.</p></div></div><button class="note-close" type="button" data-note-close>Back to Example 2.8</button></div></div>
-
 <section class="slide" data-section="2 Necessary and Sufficient Conditions for Analyticity"><div class="body"><div class="blk ex"><div class="t">Example 2.8</div><div class="c"><p>Let $\displaystyle f(z)=u+iv$ be analytic with $\displaystyle f'(z)\neq 0$. Prove that the curve families $\displaystyle u(x,y)=c_1$ and $\displaystyle v(x,y)=c_2$ are orthogonal to each other, where $\displaystyle c_1$ and $\displaystyle c_2$ are constants.</p></div></div>
 <div class="sol step"><span class="t">Proof.</span><p>By (2.2.1), $\displaystyle f'(z)=v_y-iu_y\neq 0$, so $\displaystyle u_y$ and $\displaystyle v_y$ are not both zero.</p>
-<p>First suppose $\displaystyle u_y\neq0$ and $\displaystyle v_y\neq0$ at an intersection point. By implicit differentiation, the slopes of the two curves are <button class="note-btn" type="button" data-note-target="implicit-differentiation">Review the rule</button> \[k_1=-\frac{u_x}{u_y},\qquad k_2=-\frac{v_x}{v_y}.\]</p></div></div><button class="demo-btn corner" type="button" data-demo="demos/04-orthogonal.html#embed&amp;fn=z2" data-title="交互演示：两族等值线互相垂直"><span class="ic">▶</span>交互演示：两族等值线互相垂直</button></section>
+<p>First suppose $\displaystyle u_y\neq0$ and $\displaystyle v_y\neq0$ at an intersection point. By implicit differentiation, the slopes of the two curves are \[k_1=-\frac{u_x}{u_y},\qquad k_2=-\frac{v_x}{v_y}.\]</p></div></div><button class="demo-btn corner" type="button" data-demo="demos/04-orthogonal.html#embed&amp;fn=z2" data-title="交互演示：两族等值线互相垂直"><span class="ic">▶</span>交互演示：两族等值线互相垂直</button></section>
 
 <section class="slide" data-section="2 Necessary and Sufficient Conditions for Analyticity"><div class="body"><div class="sol qed"><span class="t">Proof (Cont.)</span><p>By the Cauchy--Riemann equations $\displaystyle u_x=v_y$ and $\displaystyle v_x=-u_y$, \[k_1\cdot k_2=\left(-\frac{u_x}{u_y}\right)\cdot\left(-\frac{v_x}{v_y}\right)=\frac{v_y}{u_y}\cdot\frac{-u_y}{v_y}=-1,\] so the two curves are orthogonal.</p>
 <p>If one of $\displaystyle u_y$ and $\displaystyle v_y$ is zero, say $\displaystyle u_y=0$ and $\displaystyle v_y\neq0$, then $\displaystyle v_x=-u_y=0$. Thus the tangent to $\displaystyle u=c_1$ is vertical and the tangent to $\displaystyle v=c_2$ is horizontal, and the curves are again orthogonal.</p></div></div></section>
@@ -276,43 +261,45 @@ so the tangent is vertical.</p>
 
 <section class="slide" data-section="3 Elementary Functions"><div class="body"><ol class="lst"><li><span class="mk">3</span><div><p><b>Powers $\displaystyle a^b$ and Power Functions</b></p>
 <ol class="lst"><li><span class="mk">1</span><div><p>Definition of $\displaystyle a^b$<br> Let $\displaystyle a\neq0$ and let $\displaystyle b$ be any complex number. The power（乘幂） $\displaystyle a^b$ is defined by \[a^b=e^{b\Ln a}.\] Since $\displaystyle \Ln a=\ln\abs{a}+i(\arg a+2k\pi)$ is multiple-valued, $\displaystyle a^b$ is multiple-valued in general.</p>
+<p>Replacing $\displaystyle \Ln a$ with its principal value $\displaystyle \ln a$ gives the principal value of $\displaystyle a^b$: \[e^{b\ln a}=e^{b[\ln\abs{a}+i\arg a]}.\]</p>
 <ol class="lst"><li><span class="mk paren">1)</span><div><p>If $\displaystyle b$ is an integer, then $\displaystyle e^{2kb\pi i}=1$ and \[a^b=e^{b[\ln\abs{a}+i(\arg a+2k\pi)]}=e^{b\ln a}\,e^{2kb\pi i}=e^{b\ln a},\] so $\displaystyle a^b$ is single-valued.</p></div></li></ol></div></li></ol></div></li></ol></div></section>
 
 <section class="slide" data-section="3 Elementary Functions"><div class="body"><ol class="lst"><li class="nomark"><ol class="lst"><li class="nomark"><ol class="lst"><li><span class="mk paren">2)</span><div><p>If $\displaystyle b=\frac{p}{q}$, where $\displaystyle p$ and $\displaystyle q$ are coprime integers and $\displaystyle q&gt;0$, then \[\begin{aligned}
 					                  a^b &amp; =e^{\frac{p}{q}\ln\abs{a}+i\frac{p}{q}(\arg a+2k\pi)}                                                           \\
 					                      &amp; =e^{\frac{p}{q}\ln\abs{a}}\left[\cos\frac{p}{q}(\arg a+2k\pi)+i\sin\frac{p}{q}(\arg a+2k\pi)\right].
 				                  \end{aligned}\] It has exactly $\displaystyle q$ distinct values, obtained for $\displaystyle k=0,1,\ldots,q-1$.</p></div></li>
-<li><span class="mk paren">3)</span><div><p>If $\displaystyle b$ is irrational or non-real, $\displaystyle a^b$ has infinitely many values.</p></div></li></ol></li></ol></li></ol></div><button class="demo-btn corner" type="button" data-demo="demos/08-power.html#embed&amp;p=0" data-title="交互演示：a^{p/q} 恰有 q 个值"><span class="ic">▶</span>交互演示：a^{p/q} 恰有 q 个值</button></section>
+<li><span class="mk paren">3)</span><div><p>If $\displaystyle b$ is irrational or non-real, $\displaystyle a^b$ has infinitely many values.</p></div></li></ol></li></ol></li></ol></div></section>
 
 <section class="slide" data-section="3 Elementary Functions"><div class="body"><ol class="lst"><li class="nomark"><ol class="lst"><li class="nomark"><p>Special cases:</p>
 <ol class="lst"><li><span class="mk paren">1)</span><div><p>If $\displaystyle b=n$ is a positive integer, \[a^n=e^{n\ln a}=\left(e^{\ln a}\right)^n=\underbrace{a\cdot a\cdots a}_{n\text{ factors}},\] which agrees with the power defined in Chapter 1.</p></div></li>
 <li><span class="mk paren">2)</span><div><p>If $\displaystyle b=\frac{1}{n}$, \[a^{\frac{1}{n}}=\abs{a}^{\frac{1}{n}}\left[\cos\frac{\arg a+2k\pi}{n}+i\sin\frac{\arg a+2k\pi}{n}\right]=\sqrt[n]{a},\] $\displaystyle k=0,1,\ldots,n-1$, which are exactly the $\displaystyle n$ values of the $\displaystyle n$-th root in (1.2.10).</p></div></li></ol></li></ol></li></ol></div></section>
 
 <section class="slide" data-section="3 Elementary Functions"><div class="body"><ol class="lst"><li class="nomark"><ol class="lst"><li class="nomark"><p>If $\displaystyle a=z$ is a complex variable, we obtain the power function（幂函数） $\displaystyle w=z^b$.</p>
+<p>For a fixed exponent $\displaystyle b$, replacing $\displaystyle \Ln z$ with $\displaystyle \ln z$ gives the principal branch（主支） \[w=e^{b\ln z},\qquad -\pi&lt;\arg z&lt;\pi,\] which is analytic in the cut plane $\displaystyle \mathbb{C}\setminus(-\infty,0]$.</p>
 <p>For $\displaystyle b=n$ and $\displaystyle b=\frac{1}{n}$, we obtain $\displaystyle w=z^n$ and its inverse, the $\displaystyle n$-th root function $\displaystyle w=z^{\frac{1}{n}}=\sqrt[n]{z}$.</p></li></ol></li></ol></div></section>
 
 <section class="slide" data-section="3 Elementary Functions"><div class="body"><div class="blk ex"><div class="t">Example 3.7</div><div class="c"><p>Find the values of $\displaystyle 1^{\sqrt{2}}$ and $\displaystyle i^i$.</p></div></div>
 <div class="sol step"><span class="t">Solution.</span><p>\[\begin{aligned}
 			1^{\sqrt{2}} &amp; =e^{\sqrt{2}\Ln 1}=e^{2\sqrt{2}k\pi i}=\cos(2\sqrt{2}k\pi)+i\sin(2\sqrt{2}k\pi)\quad(k\in\mathbb{Z}), \\
 			i^i          &amp; =e^{i\Ln i}=e^{i\left(\frac{\pi}{2}+2k\pi\right)i}=e^{-\left(\frac{\pi}{2}+2k\pi\right)}\quad(k\in\mathbb{Z}).
-		\end{aligned}\] All values of $\displaystyle i^i$ are positive real numbers.</p></div></div><button class="demo-btn corner" type="button" data-demo="demos/08-power.html#embed&amp;p=5" data-title="交互演示：i^i 与 1^{√2} 的所有值"><span class="ic">▶</span>交互演示：i^i 与 1^{√2} 的所有值</button></section>
+		\end{aligned}\] All values of $\displaystyle i^i$ are positive real numbers.</p></div></div></section>
 
 <section class="slide" data-section="3 Elementary Functions"><div class="body"><div class="blk ex"><div class="t">Example 3.8 (Classroom practice)</div><div class="c"><p>Find the values of $\displaystyle (-3)^{\sqrt{5}}$.</p></div></div>
 <div class="sol step"><span class="t">Solution.</span><p>\[\begin{aligned}
 			(-3)^{\sqrt{5}} &amp; =e^{\sqrt{5}\Ln(-3)}=e^{\sqrt{5}[\ln 3+(2k+1)\pi i]}                                                \\
 			                &amp; =3^{\sqrt{5}}\left[\cos\sqrt{5}(2k+1)\pi+i\sin\sqrt{5}(2k+1)\pi\right]\quad(k\in\mathbb{Z}).
-		\end{aligned}\]</p></div></div><button class="demo-btn corner" type="button" data-demo="demos/08-power.html#embed&amp;p=4" data-title="交互演示：(−3)^{√5} 的值"><span class="ic">▶</span>交互演示：(−3)^{√5} 的值</button></section>
+		\end{aligned}\]</p></div></div></section>
 
 <section class="slide" data-section="3 Elementary Functions"><div class="body"><div class="blk ex"><div class="t">Example 3.9</div><div class="c"><p>Find the principal argument of $\displaystyle (1+i)^i$.</p></div></div>
 <div class="sol step"><span class="t">Solution.</span><p>\[\begin{aligned}
 			(1+i)^i &amp; =e^{i\Ln(1+i)}=e^{i\left[\frac{1}{2}\ln 2+i\left(\frac{\pi}{4}+2k\pi\right)\right]} \\
 			        &amp; =e^{-\left(\frac{\pi}{4}+2k\pi\right)}\left[\cos\left(\frac{1}{2}\ln 2\right)+i\sin\left(\frac{1}{2}\ln 2\right)\right]\quad(k\in\mathbb{Z}).
-		\end{aligned}\] All values have modulus $\displaystyle e^{-(\frac{\pi}{4}+2k\pi)}&gt;0$ and the same argument $\displaystyle \frac{1}{2}\ln 2\in(-\pi,\pi]$. Therefore, the principal argument of $\displaystyle (1+i)^i$ is $\displaystyle \frac{1}{2}\ln 2$.</p></div></div><button class="demo-btn corner" type="button" data-demo="demos/08-power.html#embed&amp;p=6" data-title="交互演示：所有值幅角相同"><span class="ic">▶</span>交互演示：所有值幅角相同</button></section>
+		\end{aligned}\] All values have modulus $\displaystyle e^{-(\frac{\pi}{4}+2k\pi)}&gt;0$ and the same argument $\displaystyle \frac{1}{2}\ln 2\in(-\pi,\pi]$. Therefore, the principal argument of $\displaystyle (1+i)^i$ is $\displaystyle \frac{1}{2}\ln 2$.</p></div></div></section>
 
 <section class="slide" data-section="3 Elementary Functions"><div class="body"><ol class="lst"><li class="nomark"><ol class="lst"><li><span class="mk">2</span><div><p>Analyticity of Power Functions</p>
 <ol class="lst"><li><span class="mk paren">1)</span><div><p>$\displaystyle z^n$ is single-valued and analytic in the whole plane, and $\displaystyle (z^n)'=nz^{n-1}$.</p></div></li>
-<li><span class="mk paren">2)</span><div><p>$\displaystyle z^{\frac{1}{n}}=e^{\frac{1}{n}\Ln z}$ is multiple-valued with $\displaystyle n$ branches. Each branch is analytic in the plane with the origin and the negative real axis removed, and \[\left(z^{\frac{1}{n}}\right)'=\left(e^{\frac{1}{n}\Ln z}\right)'=\frac{1}{n}z^{\frac{1}{n}-1}.\]</p></div></li>
-<li><span class="mk paren">3)</span><div><p>For other exponents $\displaystyle b$, $\displaystyle z^b=e^{b\Ln z}$ is multiple-valued (with infinitely many branches if $\displaystyle b$ is irrational or non-real). Each branch is analytic in the same cut plane, and \[\left(z^b\right)'=bz^{b-1}.\]</p></div></li></ol></div></li></ol></li></ol></div></section>
+<li><span class="mk paren">2)</span><div><p>$\displaystyle z^{\frac{1}{n}}=e^{\frac{1}{n}\Ln z}$ is multiple-valued with $\displaystyle n$ branches. Its principal branch is $\displaystyle e^{\frac{1}{n}\ln z}$. Each branch is analytic in the plane with the origin and the negative real axis removed, and \[\left(z^{\frac{1}{n}}\right)'=\left(e^{\frac{1}{n}\Ln z}\right)'=\frac{1}{n}z^{\frac{1}{n}-1}.\]</p></div></li>
+<li><span class="mk paren">3)</span><div><p>For other exponents $\displaystyle b$, $\displaystyle z^b=e^{b\Ln z}$ is multiple-valued (with infinitely many branches if $\displaystyle b$ is irrational or non-real). Its principal branch is $\displaystyle e^{b\ln z}$. Each branch is analytic in the same cut plane, and \[\left(z^b\right)'=bz^{b-1}.\]</p></div></li></ol></div></li></ol></li></ol></div></section>
 
 <section class="slide" data-section="3 Elementary Functions"><div class="body"><ol class="lst"><li><span class="mk">4</span><div><p><b>Trigonometric and Hyperbolic Functions</b></p>
 <ol class="lst"><li><span class="mk">1</span><div><p>Definition of Trigonometric Functions<br> For real $\displaystyle y$, $\displaystyle e^{iy}=\cos y+i\sin y$ and $\displaystyle e^{-iy}=\cos y-i\sin y$. Adding and subtracting gives \[\cos y=\frac{e^{iy}+e^{-iy}}{2},\qquad\sin y=\frac{e^{iy}-e^{-iy}}{2i}.\] Replacing the real number $\displaystyle y$ by a complex number $\displaystyle z$ extends cosine and sine to the complex plane.</p></div></li></ol></div></li></ol></div></section>
@@ -333,13 +320,14 @@ so the tangent is vertical.</p>
 						                  \sin(x+iy)=\sin x\cos iy+\cos x\sin iy.
 					                  \end{cases}$</p></div></li></ol></li></ol></li></ol></div></section>
 
-<section class="slide" data-section="3 Elementary Functions"><div class="body"><ol class="lst"><li class="nomark"><ol class="lst"><li class="nomark"><ol class="lst"><li><span class="mk paren">(3)</span><div><p>For a purely imaginary number $\displaystyle iy$, \[\cos iy=\frac{e^{-y}+e^{y}}{2}=\cosh y,\qquad \sin iy=\frac{e^{-y}-e^{y}}{2i}=i\sinh y.\]</p></div></li>
+<section class="slide" data-section="3 Elementary Functions"><div class="body"><ol class="lst"><li class="nomark"><ol class="lst"><li class="nomark"><ol class="lst"><li><span class="mk paren">(3)</span><div><p>For a purely imaginary number $\displaystyle iy$, \[\cos iy=\frac{e^{-y}+e^{y}}{2}=\cosh y,\qquad \sin iy=\frac{e^{-y}-e^{y}}{2i}=i\sinh y.\] Here $\displaystyle \cosh$ and $\displaystyle \sinh$ denote the hyperbolic cosine（双曲余弦） and hyperbolic sine（双曲正弦）, respectively.</p></div></li>
 <li><span class="mk paren">(4)</span><div><p>Hence \[\begin{cases}
 						                  \cos(x+iy)=\cos x\cosh y-i\sin x\sinh y, \\
 						                  \sin(x+iy)=\sin x\cosh y+i\cos x\sinh y.
 					                  \end{cases}\] As $\displaystyle y\to\infty$, $\displaystyle \abs{\sin iy}\to\infty$ and $\displaystyle \abs{\cos iy}\to\infty$. Unlike the real case, $\displaystyle \sin z$ and $\displaystyle \cos z$ are unbounded.</p></div></li></ol></li></ol></li></ol></div><button class="demo-btn corner" type="button" data-demo="demos/07-sine.html#embed&amp;fn=sin" data-title="交互演示：|sin z| 无界"><span class="ic">▶</span>交互演示：|sin z| 无界</button></section>
 
-<section class="slide" data-section="3 Elementary Functions"><div class="body"><ol class="lst"><li class="nomark"><ol class="lst"><li class="nomark"><p>The other trigonometric functions are defined by \[\tan z=\frac{\sin z}{\cos z},\quad \cot z=\frac{\cos z}{\sin z},\quad \sec z=\frac{1}{\cos z},\quad \csc z=\frac{1}{\sin z}.\] Their periodicity, parity, and analyticity can be studied in the same way as for $\displaystyle \sin z$ and $\displaystyle \cos z$.</p></li></ol></li></ol></div></section>
+<section class="slide" data-section="3 Elementary Functions"><div class="body"><ol class="lst"><li class="nomark"><ol class="lst"><li class="nomark"><p>The other trigonometric functions are defined by \[\tan z=\frac{\sin z}{\cos z},\quad \cot z=\frac{\cos z}{\sin z},\quad \sec z=\frac{1}{\cos z},\quad \csc z=\frac{1}{\sin z}.\] Their periodicity, parity, and analyticity can be studied in the same way as for $\displaystyle \sin z$ and $\displaystyle \cos z$.</p>
+<p>All four functions are unbounded on their domains. The absolute values of $\displaystyle \tan z$ and $\displaystyle \sec z$ can become arbitrarily large as $\displaystyle z$ approaches $\displaystyle \frac{\pi}{2}+k\pi$; the same is true of $\displaystyle \cot z$ and $\displaystyle \csc z$ as $\displaystyle z$ approaches $\displaystyle k\pi$.</p></li></ol></li></ol></div></section>
 
 <section class="slide" data-section="3 Elementary Functions"><div class="body"><div class="blk ex"><div class="t">Example 3.11</div><div class="c"><p>Find the real and imaginary parts of $\displaystyle \tan z$.</p></div></div>
 <div class="sol step"><span class="t">Solution.</span><p>Let $\displaystyle z=x+iy$. Then \[\tan z=\frac{\sin(x+iy)}{\cos(x+iy)}=\frac{\sin x\cosh y+i\cos x\sinh y}{\cos x\cosh y-i\sin x\sinh y}.\]</p></div></div></section>
@@ -350,10 +338,7 @@ so the tangent is vertical.</p>
 		\end{aligned}\] using $\displaystyle \cos^2x\cosh^2y+\sin^2x\sinh^2y=\cos^2x+\sinh^2y=\frac{\cos 2x+\cosh 2y}{2}$. Hence \[\operatorname{Re}(\tan z)=\frac{\sin 2x}{\cos 2x+\cosh 2y},\qquad\operatorname{Im}(\tan z)=\frac{\sinh 2y}{\cos 2x+\cosh 2y}.\]</p></div></div></section>
 
 <section class="slide" data-section="3 Elementary Functions"><div class="body"><div class="blk ex"><div class="t">Example 3.12</div><div class="c"><p>Solve the equation $\displaystyle \sin z=i\sinh 1$.</p></div></div>
-<div class="sol step"><span class="t">Solution.</span><p>Let $\displaystyle z=x+iy$. Then $\displaystyle \sin x\cosh y+i\cos x\sinh y=i\sinh 1$, so \[\sin x\cosh y=0,\qquad \cos x\sinh y=\sinh 1.\] Since $\displaystyle \cosh y\geq1$, $\displaystyle \sin x=0$ and $\displaystyle x=k\pi$. Then $\displaystyle \sinh y=(-1)^k\sinh 1$, so $\displaystyle y=(-1)^k$. Therefore, \[z=\begin{cases}
-				2n\pi+i, \\
-				(2n+1)\pi-i,
-			\end{cases}\qquad n\in\mathbb{Z}.\]</p></div></div><button class="demo-btn corner" type="button" data-demo="demos/07-sine.html#embed&amp;fn=sin" data-title="交互演示：解在热图上的位置"><span class="ic">▶</span>交互演示：解在热图上的位置</button></section>
+<div class="sol step"><span class="t">Solution.</span><p>Let $\displaystyle z=x+iy$. Then $\displaystyle \sin x\cosh y+i\cos x\sinh y=i\sinh 1$, so \[\sin x\cosh y=0,\qquad \cos x\sinh y=\sinh 1.\] Since $\displaystyle \cosh y&gt;0$, $\displaystyle \sin x=0$ and $\displaystyle x=k\pi$. Then $\displaystyle \sinh y=(-1)^k\sinh 1$, so $\displaystyle y=(-1)^k$. Therefore, \[z=k\pi+i(-1)^k,\qquad k\in\mathbb{Z}.\]</p></div></div></section>
 
 <section class="slide" data-section="3 Elementary Functions"><div class="body"><div class="blk ex"><div class="t">Example 3.13</div><div class="c"><p>Find the values of $\displaystyle \cos(1+i)$ and $\displaystyle \tan(3-i)$.</p></div></div>
 <div class="sol step"><span class="t">Solution.</span><p>\[\begin{aligned}
@@ -373,7 +358,7 @@ so the tangent is vertical.</p>
 				            \end{cases}\]</p></li></ol></li></ol></div></section>
 
 <section class="slide" data-section="3 Elementary Functions"><div class="body"><div class="blk ex"><div class="t">Example 3.14</div><div class="c"><p>Solve the equation $\displaystyle \abs{\tanh z}=1$.</p></div></div>
-<div class="sol step"><span class="t">Solution.</span><p>$\displaystyle \tanh z=\frac{e^{2 z}-1}{e^{2 z}+1}$, so $\displaystyle \abs{\tanh z}=1$ means $\displaystyle \abs{e^{2 z}-1}=\abs{e^{2 z}+1}$. Let $\displaystyle e^{2z}=u+iv$. Squaring gives \[(u-1)^{2}+v^{2}=(u+1)^{2}+v^{2}\iff u=0.\] Since $\displaystyle u=\operatorname{Re}(e^{2z})=e^{2x}\cos 2y$, \[u=0 \iff \cos 2y=0 \iff y=\frac{\pi}{4}+\frac{k \pi}{2}\quad(k\in\mathbb{Z}).\] Hence the solutions are all $\displaystyle z$ with $\displaystyle \operatorname{Im}z=\frac{\pi}{4}+\frac{k \pi}{2}$ $\displaystyle (k\in\mathbb{Z})$: a family of horizontal lines.</p></div></div><button class="demo-btn corner" type="button" data-demo="demos/07-sine.html#embed&amp;fn=tanh" data-title="交互演示：|tanh z| = 1 的水平线"><span class="ic">▶</span>交互演示：|tanh z| = 1 的水平线</button></section>
+<div class="sol step"><span class="t">Solution.</span><p>$\displaystyle \tanh z=\frac{e^{2 z}-1}{e^{2 z}+1}$, so $\displaystyle \abs{\tanh z}=1$ means $\displaystyle \abs{e^{2 z}-1}=\abs{e^{2 z}+1}$. Let $\displaystyle e^{2z}=u+iv$. Squaring gives \[(u-1)^{2}+v^{2}=(u+1)^{2}+v^{2}\iff u=0.\] Since $\displaystyle u=\operatorname{Re}(e^{2z})=e^{2x}\cos 2y$, \[u=0 \iff \cos 2y=0 \iff y=\frac{\pi}{4}+\frac{k \pi}{2}\quad(k\in\mathbb{Z}).\] Hence the solutions are all $\displaystyle z$ with $\displaystyle \operatorname{Im}z=\frac{\pi}{4}+\frac{k \pi}{2}$ $\displaystyle (k\in\mathbb{Z})$: a family of horizontal lines.</p></div></div></section>
 
 <section class="slide" data-section="3 Elementary Functions"><div class="body"><ol class="lst"><li><span class="mk">5</span><div><p><b>Summary</b><br> The complex elementary functions extend the real elementary functions. They keep many basic properties, but some new features appear:</p>
 <ol class="lst"><li><span class="mk paren">1.</span><div><p>The exponential function is periodic, with period $\displaystyle 2\pi i$;</p></div></li>

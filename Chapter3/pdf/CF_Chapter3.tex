@@ -81,7 +81,7 @@
 		      \end{enumerate}
 	\end{enumerate}
 	\begin{definition}
-		Let $C$ be a smooth (or piecewise smooth（分段光滑）) curve in the plane. If one of the two directions along $C$ is chosen as the positive direction（正方向）, $C$ is called a directed curve（有向曲线）.
+		Let $C$ be a smooth curve（光滑曲线） or a piecewise smooth curve（分段光滑曲线） in the plane. If one of the two directions along $C$ is chosen as the positive direction（正方向）, $C$ is called a directed curve（有向曲线）.
 	\end{definition}
 	\begin{minipage}[c]{0.58\linewidth}
 		If the positive direction of $C$ is from $A$ to $B$, then the direction from $B$ to $A$ is the negative direction of $C$; the curve with this direction is denoted by $C^-$.
@@ -121,15 +121,15 @@
 	\begin{definition}
 		Let $f(z)$ be defined in a domain $D$, and let $C$ be a smooth directed curve in $D$ from $A$ to $B$. Divide $C$ arbitrarily into $n$ arcs by the points
 		\[A=z_0,z_1,z_2,\cdots,z_{k-1},z_k,\cdots,z_n=B.\]
-		Choose an arbitrary point $\zeta_k$ on each arc $\wideparen{z_{k-1}z_k}$ $(k=1,2,\cdots,n)$ (see the figure on the next slide) and form the sum
+		Choose an arbitrary point $\zeta_k$ (zeta) on each arc $\wideparen{z_{k-1}z_k}$ $(k=1,2,\cdots,n)$ and set $\Delta z_k=z_k-z_{k-1}$. Then form the sum
 		\[S_n=\sum_{k=1}^{n}f(\zeta_k)(z_k-z_{k-1})=\sum_{k=1}^{n}f(\zeta_k)\Delta z_k,\]
-		where $\Delta z_k=z_k-z_{k-1}$.
+		as illustrated on the next slide.
 	\end{definition}
 \end{frame}
 
 \begin{frame}
 	\begin{definition}[Cont.]
-		Let $\Delta s_k$ be the length of the arc $\wideparen{z_{k-1}z_k}$ and $\delta=\max_{1\leq k\leq n}\Delta s_k$. If, as $n\to\infty$ and $\delta\to 0$, $S_n$ has a unique limit no matter how $C$ is divided and how the points $\zeta_k$ are chosen, this limit is called the integral（积分） of $f(z)$ along $C$ and is denoted by
+		Let $\Delta s_k$ be the length of the arc $\wideparen{z_{k-1}z_k}$ and $\delta=\max_{1\leq k\leq n}\Delta s_k$. If, as $\delta\to 0$, $S_n$ has a unique limit no matter how $C$ is divided and how the points $\zeta_k$ are chosen, this limit is called the integral（积分） of $f(z)$ along $C$ and is denoted by
 		\[\int_C f(z)\dif z=\lim_{\delta\to 0}\sum_{k=1}^n f(\zeta_k)\Delta z_k.\]
 	\end{definition}
 	\begin{figure}
@@ -142,7 +142,7 @@
 		\item []
 		      Remarks on the definition:
 		      \begin{enumerate}[i)]
-			      \item Each term $f(\zeta_k)\Delta z_k$ is a small step $\Delta z_k$ along $C$, rotated and stretched by the complex number $f(\zeta_k)$; $S_n$ adds these steps head to tail. For $f(z)\equiv1$ the steps simply add up to $B-A$, so $\int_C \dif z=B-A$.
+			      \item In each term $f(\zeta_k)\Delta z_k$, multiplication by $f(\zeta_k)$ changes the length of the small step $\Delta z_k$ by the factor $\abs{f(\zeta_k)}$ and rotates it through an argument of $f(\zeta_k)$. The sum $S_n$ then adds these transformed steps head to tail. For $f(z)\equiv1$, the steps simply add up to $B-A$, so $\int_C \dif z=B-A$.
 			      \item If $C$ is a closed curve, the integral along $C$ is written as $\oint_C f(z)\dif z$.
 			      \item If $C$ is the interval $a\leq x\leq b$ of the real axis and $f(z)=u(x)$ is real-valued, the definition reduces to the definite integral $\int_a^b u(x)\dif x$ of a real function of one variable.
 		      \end{enumerate}
@@ -155,8 +155,8 @@
 		\item \textbf{Existence and Computation of Complex Integrals}
 	\end{enumerate}
 	\begin{theorem}
-		If $f(z)=u(x,y)+iv(x,y)$ is continuous on a smooth curve $C$, then $\int_C f(z)\dif z$ exists, and
-		\[\int_C f(z)\dif z=\int_C u\dif x-v\dif y+i\int_C v\dif x+u\dif y.\]
+		If $f(z)=u(x,y)+iv(x,y)$ is continuous on a piecewise smooth curve $C$, then $\int_C f(z)\dif z$ exists, and
+		\[\int_C f(z)\dif z=\int_C (u\dif x-v\dif y)+i\int_C (v\dif x+u\dif y).\]
 		The right-hand side consists of two line integrals of the second kind（第二类曲线积分）.
 	\end{theorem}
 	\begin{proofs}<2->
@@ -178,11 +178,11 @@
 
 \begin{frame}
 	\begin{proof}[\proofname\ (Cont.)]
-		Since $u$ and $v$ are continuous, the existence theorem for line integrals shows that, as $n\to\infty$ and the maximum arc length tends to zero, both sums on the right have limits, regardless of how $C$ is divided and how the points $(\xi_k,\eta_k)$ are chosen. So the left-hand side has a limit as well:
+		Since $u$ and $v$ are continuous, the existence theorem for line integrals shows that, as the mesh size tends to zero, both sums on the right have limits, regardless of how $C$ is divided and how the points $(\xi_k,\eta_k)$ are chosen. So the left-hand side has a limit as well:
 		\begin{align*}
 			\boxed{\sum_{k=1}^n f(\zeta_k)\Delta z_k} & =\boxed{\sum_{k=1}^n \big[u\Delta x_k-v\Delta y_k\big]}+i\boxed{\sum_{k=1}^n \big[v\Delta x_k+u\Delta y_k\big]} \\
 			\downarrow\quad                            & \qquad\qquad\quad\downarrow\qquad\qquad\qquad\qquad\quad\downarrow                                              \\
-			\boxed{\int_C f(z)\dif z}                  & =\boxed{\int_C u\dif x-v\dif y}+i\boxed{\int_C v\dif x+u\dif y}.
+			\boxed{\int_C f(z)\dif z}                  & =\boxed{\int_C (u\dif x-v\dif y)}+i\boxed{\int_C (v\dif x+u\dif y)}.
 		\end{align*}
 	\end{proof}
 \end{frame}
@@ -251,7 +251,7 @@
 	\begin{solution}[Solution\ (Cont.)]
 		Moreover,
 		\[\int_C z\dif z=\int_C (x+iy)(\dif x+i\dif y)=\int_C x\dif x-y\dif y+i\int_C y\dif x+x\dif y.\]
-		Both line integrals are independent of the path, because the integrands are exact differentials:
+		Both line integrals are independent of the path, because the integrands are exact differentials（全微分）:
 		\[x\dif x-y\dif y=\dif\Big(\frac{x^2-y^2}{2}\Big),\qquad y\dif x+x\dif y=\dif(xy).\]
 		Therefore, for every path $C$ from the origin to $3+4i$,
 		\[\int_C z\dif z=\frac{(3+4i)^2}{2}.\]
@@ -379,9 +379,10 @@
 			      \item $\int_C kf(z)\dif z=k\int_C f(z)\dif z$ ($k$ is a complex constant);
 			      \item $\int_C \big[f(z)\pm g(z)\big]\dif z=\int_C f(z)\dif z\pm\int_C g(z)\dif z$;
 			      \item If $C$ has length $L$ and $\abs{f(z)}\leq M$ on $C$, then
-			            \[\abs{\int_C f(z)\dif z}\leq\int_C \abs{f(z)}\dif s\leq ML. \tag*{(integral estimation inequality)}\]
+			            \[\abs{\int_C f(z)\dif z}\leq\int_C \abs{f(z)}\dif s\leq ML.\]
 		      \end{enumerate}
-		      Property 4) is the integral estimation inequality（积分估值不等式）: $\abs{\sum f(\zeta_k)\Delta z_k}\leq\sum\abs{f(\zeta_k)}\abs{\Delta z_k}$ and $\abs{\Delta z_k}\leq\Delta s_k$.
+		      Property 4) is the ML inequality（积分估值不等式）. It follows from
+		      \[\abs{\sum f(\zeta_k)\Delta z_k}\leq\sum\abs{f(\zeta_k)}\abs{\Delta z_k},\qquad \abs{\Delta z_k}\leq\Delta s_k.\]
 	\end{enumerate}
 \end{frame}
 
@@ -401,7 +402,7 @@
 	\begin{enumerate}
 		\setcounter{enumi}{3}
 		\item \textbf{Summary and Thinking}\\
-		      In this part we learned the definition, the existence condition, the computation, and the properties of complex integrals. \textcolor{blue}{A complex integral is essentially a pair of line integrals, so it has exactly the same properties as the line integrals of calculus.} The key skill is the general method of computing a complex integral by parametrizing the path:
+		      In this part we learned the definition, the existence condition, the computation, and the properties of complex integrals. \textcolor{blue}{A complex integral is equivalent to a pair of real line integrals, so it inherits their basic linearity and estimation properties.} The key skill is the general method of computing a complex integral by parametrizing the path:
 		      \[\int_C f(z)\dif z=\int_\alpha^\beta f\big[z(t)\big]z'(t)\dif t.\]
 	\end{enumerate}
 \end{frame}
@@ -445,7 +446,7 @@
 	\begin{theorem}
 		If $f(z)$ is analytic in a simply connected domain $B$, then
 		\[\oint_C f(z)\dif z=0\]
-		for every closed curve $C$ lying in $B$.
+		for every piecewise smooth closed curve $C$ lying in $B$.
 	\end{theorem}
 	\begin{minipage}[c]{0.5\linewidth}
 		The curve $C$ in the theorem need not be simple: it may cross itself.
@@ -476,15 +477,15 @@
 		\item []
 		      Remarks on the theorem:
 		      \begin{enumerate}[i)]
-			      \item If $C$ is the boundary of a domain $B$ and $f(z)$ is analytic on the closed domain $\overline{B}=B+C$ (that is, analytic in some larger domain $B'$ containing $\overline{B}$), then $\oint_C f(z)\dif z=0$.
-			      \item If $C$ is the boundary of $B$, $f(z)$ is analytic in $B$ and continuous on $\overline{B}=B+C$, the theorem is still valid.
+			      \item If $C$ is the piecewise smooth boundary of a domain $B$ and $f(z)$ is analytic on the closed region $\overline{B}=B\cup C$ (that is, analytic in some larger domain $B'$ containing $\overline{B}$), then $\oint_C f(z)\dif z=0$.
+			      \item If $C$ is the piecewise smooth boundary of $B$, $f(z)$ is analytic in $B$ and continuous on $\overline{B}=B\cup C$, the theorem is still valid.
 		      \end{enumerate}
 	\end{enumerate}
 	\begin{figure}
 		\includegraphics[width=0.3\linewidth]{Figure_3_2_2.jpg}\hfill
 		\includegraphics[width=0.3\linewidth]{Figure_3_2_3.jpg}\hfill
 		\includegraphics[width=0.3\linewidth]{Figure_3_2_4.jpg}
-		\caption{Left: the theorem ($C$ lies in $B$). Middle: remark i) ($f$ analytic in $B'\supset\overline{B}$). Right: remark ii) ($f$ analytic in $B$, continuous on $B+C$).}
+		\caption{Left: the theorem ($C$ lies in $B$). Middle: remark i) ($f$ analytic in $B'\supset\overline{B}$). Right: remark ii) ($f$ analytic in $B$, continuous on $B\cup C$).}
 	\end{figure}
 \end{frame}
 
@@ -531,7 +532,7 @@
 		      In this part we focused on Cauchy's theorem for simply connected domains:\\
 		      \textcolor{blue}{If $f(z)$ is analytic in a simply connected domain $B$, then}
 		      \[\textcolor{blue}{\oint_C f(z)\dif z=0}\]
-		      \textcolor{blue}{for every closed curve $C$ lying in $B$.}\\
+		      \textcolor{blue}{for every piecewise smooth closed curve $C$ lying in $B$.}\\
 		      Pay attention to the conditions under which the theorem holds.
 	\end{enumerate}
 \end{frame}
@@ -545,7 +546,7 @@
 			\item The condition ``simply connected domain'' cannot be dropped.\\
 			      Counterexample: $f(z)=\frac{1}{z}$ is analytic in the annulus $\frac{1}{2}<\abs{z}<\frac{3}{2}$, but $\oint_{\abs{z}=1}\frac{1}{z}\dif z=2\pi i\neq 0$.
 			\item The converse of the theorem is false.\\
-			      \textcolor{red}{From $\oint_C f(z)\dif z=0$ we cannot conclude that $f(z)$ is analytic inside $C$.}\\
+			      \textcolor{red}{From the vanishing of the integral around one closed curve $C$, we cannot conclude that $f(z)$ is analytic inside $C$.}\\
 			      Counterexample: $\oint_{\abs{z}=1}\frac{1}{z^2}\dif z=0$ (Example 1.4 with $n=1$), but $\frac{1}{z^2}$ is not analytic at $z=0$.
 		\end{enumerate}
 	\end{solution}
@@ -577,7 +578,7 @@
 		\setcounter{enumi}{1}
 		\item \textbf{Cauchy's Theorem for Multiply Connected Domains}
 		      \begin{enumerate}[1)]
-			      \item Principle of Deformation of Paths\\
+			      \item Principle of Deformation of Closed Contours\\
 			            Let $f(z)$ be analytic in a multiply connected domain $D$, and let $C$ and $C_1$ be two counterclockwise simple closed curves in $D$ such that $C_1$ lies inside $C$ and the region $D_1$ between $C$ and $C_1$ lies in $D$.\\
 			            Draw two non-intersecting cuts $\wideparen{AA'}$ and $\wideparen{BB'}$ joining $C$ to $C_1$.
 			            \begin{figure}
@@ -629,7 +630,7 @@
 		\item []
 		      Let $\Gamma=C+C_1^-$ be the composite closed curve（复合闭路） formed by $C$ (counterclockwise) and $C_1$ (clockwise); $\Gamma$ is the positively oriented boundary of $D_1$. Then
 		      \[\oint_{\Gamma}f(z)\dif z=0 \iff \oint_{C}f(z)\dif z=\oint_{C_1}f(z)\dif z.\]
-		      \textcolor{blue}{Principle of deformation of paths（闭路变形原理）}: the integral of an analytic function along a closed curve does not change when the curve is deformed continuously in the domain, as long as the curve never passes through a point where $f(z)$ is not analytic.
+		      \textcolor{blue}{Principle of deformation of closed contours（闭路变形原理）}: the integral of an analytic function along a closed curve does not change when the curve is deformed continuously in the domain, as long as the curve never passes through a point where $f(z)$ is not analytic.
 		      \begin{figure}
 			      \includegraphics[height=0.3\textheight]{Figure_3_3_2.jpg}
 		      \end{figure}
@@ -645,7 +646,7 @@
 		      \end{enumerate}
 	\end{enumerate}
 	\begin{theorem}
-		Let $C$ be a simple closed curve in a domain $D$, and let $C_1, C_2, \cdots, C_n$ be simple closed curves inside $C$, none of which intersects or contains another. Suppose the region inside $C$ and outside all the $C_k$, together with its boundary, lies in $D$. If $f(z)$ is analytic in $D$, then
+		Let $C$ be a piecewise smooth simple closed curve in a domain $D$, and let $C_1, C_2, \cdots, C_n$ be piecewise smooth simple closed curves inside $C$, none of which intersects or contains another. Suppose the region inside $C$ and outside all the $C_k$, together with its boundary, lies in $D$. If $f(z)$ is analytic in $D$, then
 		\begin{enumerate}
 			\item \begin{minipage}[t]{0.52\linewidth}
 				      $\oint_{C}f(z)\dif z=\sum_{k=1}^{n}\oint_{C_k}f(z)\dif z$,\\
@@ -842,7 +843,7 @@
 		      \end{enumerate}
 	\end{enumerate}
 	\begin{theorem}
-		If $f(z)$ is analytic in a simply connected domain $B$, then the integral $\int_C f(z)\dif z$ along a curve $C$ in $B$ depends only on the initial point and the terminal point of $C$, not on the path.
+		If $f(z)$ is analytic in a simply connected domain $B$, then the integral $\int_C f(z)\dif z$ along a piecewise smooth curve $C$ in $B$ depends only on the initial point and the terminal point of $C$, not on the path.
 	\end{theorem}
 	\begin{proof}<2->
 		Let $C_1$ and $C_2$ be two paths in $B$ from $z_0$ to $z_1$. Then $C_1+C_2^-$ is a closed curve in $B$, so by Cauchy's theorem
@@ -912,7 +913,7 @@
 	\begin{proofs}[\proofname\ (Cont.)]
 		Since $f(z)$ is analytic in $B$, it is continuous at $z$: for every $\varepsilon>0$ there is $\delta>0$ (with the disk $\abs{\zeta-z}<\delta$ inside $K$) such that $\abs{f(\zeta)-f(z)}<\varepsilon$ whenever $\abs{\zeta-z}<\delta$.
 
-		If $\abs{\Delta z}<\delta$, every point $\zeta$ of the segment from $z$ to $z+\Delta z$ satisfies $\abs{\zeta-z}<\delta$, and the segment has length $\abs{\Delta z}$. By the integral estimation inequality,
+		If $\abs{\Delta z}<\delta$, every point $\zeta$ of the segment from $z$ to $z+\Delta z$ satisfies $\abs{\zeta-z}<\delta$, and the segment has length $\abs{\Delta z}$. By the ML inequality,
 		\begin{align*}
 			\abs{\frac{F(z+\Delta z)-F(z)}{\Delta z}-f(z)} & =\frac{1}{\abs{\Delta z}}\abs{\int_{z}^{z+\Delta z}\big[f(\zeta)-f(z)\big]\dif\zeta} \\
 			                                               & \leq\frac{1}{\abs{\Delta z}}\cdot\varepsilon\cdot\abs{\Delta z}=\varepsilon.
@@ -963,19 +964,22 @@
 		      \end{enumerate}
 	\end{enumerate}
 	\begin{theorem}[Analogue of the Newton--Leibniz formula（牛顿--莱布尼茨公式）]
-		If $f(z)$ is analytic in a simply connected domain $B$ and $F(z)$ is an antiderivative of $f(z)$, then for any $z_0,z_1\in B$,
+		Let $F(z)$ be an antiderivative of $f(z)$ in a domain $B$. Then, for every piecewise smooth curve in $B$ from $z_0$ to $z_1$,
 		\[\int_{z_0}^{z_1}f(z)\dif z=F(z_1)-F(z_0).\]
 	\end{theorem}
 \end{frame}
 
 \begin{frame}
 	\begin{proof}
-		By Theorem 4.2, $\int_{z_0}^{z}f(\zeta)\dif\zeta$ is an antiderivative of $f(z)$, so
-		\[\int_{z_0}^{z}f(\zeta)\dif\zeta=F(z)+c.\]
-		Setting $z=z_0$, the left-hand side is $0$, so $c=-F(z_0)$. Hence $\int_{z_0}^{z}f(\zeta)\dif\zeta=F(z)-F(z_0)$, and with $z=z_1$,
-		\[\int_{z_0}^{z_1}f(z)\dif z=F(z_1)-F(z_0).\qedhere\]
+		Let the curve be parametrized by $z=z(t)$, $\alpha\leq t\leq\beta$, with $z(\alpha)=z_0$ and $z(\beta)=z_1$. By the chain rule,
+		\[\frac{\dif}{\dif t}F\big(z(t)\big)=F'\big(z(t)\big)z'(t)=f\big(z(t)\big)z'(t).\]
+		Therefore,
+		\begin{align*}
+			\int_{z_0}^{z_1}f(z)\dif z & =\int_\alpha^\beta f\big(z(t)\big)z'(t)\dif t \\
+			                              & =F\big(z(\beta)\big)-F\big(z(\alpha)\big)=F(z_1)-F(z_0).\qedhere
+		\end{align*}
 	\end{proof}
-	With this theorem, integrals of analytic functions can be computed exactly as in calculus: find an antiderivative and substitute the endpoints.
+	Whenever an antiderivative is known, a complex line integral can be computed exactly as in calculus: substitute the endpoints.
 \end{frame}
 
 \begin{frame}
@@ -1048,16 +1052,17 @@
 
 \begin{frame}
 	\begin{example}[Question]
-		What are the similarities and differences between the Newton--Leibniz formula for analytic functions in a simply connected domain and the Newton--Leibniz formula for definite integrals of real functions?
+		What are the similarities and differences between the complex and real versions of the Newton--Leibniz formula?
 	\end{example}
 	\begin{solution}<2->
+		\small
 		\textcolor{red}{The statements and the results are similar.}
 
-		In complex integration, $f(z)$ must be analytic in a simply connected domain; the endpoints $z_0$, $z_1$ are complex numbers, and the path is a curve $C$ in the domain.
+		In complex integration, the formula requires an antiderivative on a domain containing the path. Analyticity in a simply connected domain is a standard sufficient condition: it guarantees an antiderivative and path independence. The endpoints $z_0,z_1$ are complex, and the path is a curve $C$.
 
-		In real integration, $f(x)$ need only be continuous on the interval $[a,b]$; the endpoints $a$, $b$ are real numbers.
+		In real integration, continuity on $[a,b]$ guarantees an antiderivative; the endpoints $a,b$ are real, and the path is the interval $[a,b]$.
 
-		\textcolor{red}{The requirements on the function differ greatly: analytic versus continuous.}
+		\textcolor{red}{Key distinction: continuity suffices on a real interval; in the complex setting, analyticity on a simply connected domain guarantees an antiderivative.}
 	\end{solution}
 \end{frame}
 
@@ -1074,7 +1079,7 @@
 		\item \textbf{Motivation}\\
 		      Let $B$ be a simply connected domain, $z_0\in B$, and let $f(z)$ be analytic in $B$. Then $\frac{f(z)}{z-z_0}$ is in general not analytic at $z_0$, so $\oint_C \frac{f(z)}{z-z_0}\dif z$ is in general not zero, where $C$ is a closed curve in $B$ around $z_0$.
 
-		      By the principle of deformation of paths, the value does not change when $C$ is deformed. So take $C$ to be the small circle $\abs{z-z_0}=\delta$.
+		      By the principle of deformation of closed contours, the value does not change when $C$ is deformed. So take $C$ to be the small circle $\abs{z-z_0}=\delta$.
 
 		      Since $f(z)$ is continuous, its values on $C$ approach $f(z_0)$ as $\delta\to0$, so we expect
 		      \[\oint_C \frac{f(z)}{z-z_0}\dif z=\oint_C \frac{f(z_0)}{z-z_0}\dif z=f(z_0)\oint_C \frac{1}{z-z_0}\dif z=2\pi if(z_0).\]
@@ -1087,7 +1092,7 @@
 		\item \textbf{Cauchy's Integral Formula}
 	\end{enumerate}
 	\begin{theorem}
-		Let $f(z)$ be analytic in a domain $D$, and let $C$ be a positively oriented simple closed curve in $D$ whose interior lies entirely in $D$. Then for every point $z_0$ inside $C$,
+		Let $f(z)$ be analytic in a domain $D$, and let $C$ be a positively oriented piecewise smooth simple closed curve in $D$ whose interior lies entirely in $D$. Then for every point $z_0$ inside $C$,
 
 		\begin{minipage}[c]{0.55\linewidth}
 			\[f(z_0)=\frac{1}{2\pi i}\oint_C \frac{f(z)}{z-z_0}\dif z.\]
@@ -1106,7 +1111,7 @@
 		Since $f(z)$ is continuous at $z_0$, for every $\varepsilon>0$ there is $\delta>0$ such that $\abs{f(z)-f(z_0)}<\varepsilon$ whenever $\abs{z-z_0}<\delta$.
 
 		\begin{minipage}[c]{0.64\linewidth}
-			Let $K:\abs{z-z_0}=R$ be a positively oriented circle with $R<\delta$, lying inside $C$. By the principle of deformation of paths and Example 1.4,
+			Let $K:\abs{z-z_0}=R$ be a positively oriented circle with $R<\delta$, lying inside $C$. By the principle of deformation of closed contours and Example 1.4,
 		\end{minipage}\hfill
 		\begin{minipage}[c]{0.3\linewidth}
 			\begin{figure}
@@ -1248,7 +1253,7 @@
 		\item \textbf{Summary and Thinking}\\
 		      \textcolor{blue}{Cauchy's integral formula}:
 		      \[f(z_0)=\frac{1}{2\pi i}\oint_C \frac{f(z)}{z-z_0}\dif z,\quad\text{i.e.}\quad \oint_C \frac{f(z)}{z-z_0}\dif z=2\pi if(z_0).\]
-		      The second form is the one used to compute integrals: split off the factor $\frac{1}{z-z_0}$ whose zero of the denominator lies inside $C$, and check that the remaining factor $f(z)$ is analytic on and inside $C$.
+		      The second form is the one used to compute integrals: identify the singular factor $\frac{1}{z-z_0}$, verify that $z_0$ lies inside $C$, and check that the remaining factor $f(z)$ is analytic on and inside $C$.
 	\end{enumerate}
 \end{frame}
 
@@ -1267,7 +1272,7 @@
 	\begin{theorem}
 		The derivative of an analytic function is again analytic. Its $n$th-order derivative is given by the higher-order derivative formula（高阶导数公式）
 		\[f^{(n)}(z_0)=\frac{n!}{2\pi i}\oint_C \frac{f(z)}{(z-z_0)^{n+1}}\dif z,\quad n=1,2,\cdots,\]
-		where $C$ is any positively oriented simple closed curve which, together with its interior, lies in the domain $D$ where $f(z)$ is analytic, and $z_0$ is any point inside $C$.
+		where $C$ is any positively oriented piecewise smooth simple closed curve which, together with its interior, lies in the domain $D$ where $f(z)$ is analytic, and $z_0$ is any point inside $C$.
 	\end{theorem}
 	Formally, it is obtained by differentiating Cauchy's integral formula $n$ times with respect to $z_0$ under the integral sign.
 \end{frame}
@@ -1320,7 +1325,7 @@
 
 \begin{frame}
 	\begin{proofs}[\proofname\ (Cont.)]
-		By the integral estimation inequality,
+		By the ML inequality,
 		\[\abs{I}\leq\frac{1}{2\pi}\oint_C \frac{\abs{\Delta z}\,\abs{f(z)}}{\abs{z-z_0}^2\,\abs{z-z_0-\Delta z}}\dif s<\frac{1}{2\pi}\cdot\frac{2M}{d^3}\abs{\Delta z}\cdot L=\abs{\Delta z}\frac{ML}{\pi d^3},\]
 		where $L$ is the length of $C$. So $I\to0$ as $\Delta z\to 0$, and
 		\[f'(z_0)=\lim_{\Delta z\to 0}\frac{f(z_0+\Delta z)-f(z_0)}{\Delta z}=\frac{1}{2\pi i}\oint_C \frac{f(z)}{(z-z_0)^2}\dif z.\]
@@ -1436,10 +1441,10 @@
 
 \begin{frame}
 	\begin{example}[Morera's Theorem（莫雷拉定理）]
-		Let $f(z)$ be continuous in a simply connected domain $B$, and suppose that the integral of $f(z)$ along every closed curve in $B$ is zero. Prove that $f(z)$ is analytic in $B$.
+		Let $f(z)$ be continuous in a simply connected domain $B$, and suppose that the integral of $f(z)$ along every piecewise smooth closed curve in $B$ is zero. Prove that $f(z)$ is analytic in $B$.
 	\end{example}
 	\begin{proofs}<2->
-		Fix $z_0\in B$. Since the integral along every closed curve in $B$ is zero, $\int_{z_0}^{z}f(\zeta)\dif\zeta$ does not depend on the path, so
+		Fix $z_0\in B$. Since the integral along every piecewise smooth closed curve in $B$ is zero, $\int_{z_0}^{z}f(\zeta)\dif\zeta$ does not depend on the path, so
 		\[F(z)=\int_{z_0}^{z}f(\zeta)\dif\zeta\]
 		is a single-valued function in $B$.
 	\end{proofs}
@@ -1481,7 +1486,7 @@
 	\end{example}
 	\begin{solution}<2->
 		\begin{enumerate}
-			\item $f(z)$ not analytic (contains $\overline{z}$, $\abs{z}$, $\operatorname{Re}z$, \dots): parametrize $C$, $\oint_C f\dif z=\int_\alpha^\beta f[z(t)]z'(t)\dif t$.
+			\item If the direct analyticity tools do not apply (for example, the integrand contains $\overline{z}$, $\abs{z}$, or $\operatorname{Re}z$), parametrize $C$: $\oint_C f\dif z=\int_\alpha^\beta f[z(t)]z'(t)\dif t$.
 			\item $f(z)$ analytic on and inside $C$: the integral is $0$ (Cauchy's theorem).
 		\end{enumerate}
 	\end{solution}
@@ -1564,7 +1569,7 @@
 		\item []
 		      \begin{enumerate}[1)]
 			      \setcounter{enumii}{2}
-			      \item Partial Integration Method（偏积分法）\\
+			      \item Integration of Partial Derivatives（偏积分法）\\
 			            If a harmonic function $u(x,y)$ is given, we can use the Cauchy--Riemann equations to find its conjugate harmonic function $v(x,y)$ by integrating partial derivatives, and thus form the analytic function $u+iv$.
 		      \end{enumerate}
 	\end{enumerate}
